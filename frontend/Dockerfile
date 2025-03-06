@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 3000
 
 # Comando para ejecutar Nuxt en desarrollo
-CMD ["npm", "run", "dev"]
+CMD ["npm", "run", "dev", "--", "--host"]
