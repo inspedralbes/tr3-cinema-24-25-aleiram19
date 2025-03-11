@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('auditorium', function (Blueprint $table) {
             $table->id();
+            $table->string('name');
+            $table->integer('capacity');
+            $table->string('type'); // 2D, 3D, IMAX
             $table->timestamps();
         });
     }

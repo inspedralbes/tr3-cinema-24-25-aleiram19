@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('movies', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->text('description');
+            $table->integer('duration'); // minutos
+            $table->string('movie_genre');
+            $table->date('release_date');
+            $table->string('image')->nullable(); // URL del póster
             $table->timestamps();
         });
     }
