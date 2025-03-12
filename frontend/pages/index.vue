@@ -1,7 +1,15 @@
 <template>
-    <div class="bg-white min-h-screen flex flex-col">
-    <LandingPageImagenCarrusel /> 
+  <div class="min-h-screen flex flex-col bg-[#051D40]">
+    <LandingPageNavBar />
+    <LandingPageImagenCarrusel />
     <LandingPageHeroSection />
-    <LandingPageFooter class="mt-auto" />
+    <LandingPagePromociones />
+    <LandingPageFooter />
   </div>
 </template>
+
+<script>
+export default {
+  name: 'IndexPage'
+}
+</script>
