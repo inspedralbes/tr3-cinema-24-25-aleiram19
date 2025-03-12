@@ -1,192 +1,147 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container">
+  <nav :class="[
+    'fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out',
+    'py-5 md:py-5 border-b border-transparent',
+    isScrolled ? 'bg-navy-900/95 shadow-md py-3 md:py-3' : 'bg-blue-900/80 backdrop-blur-sm'
+  ]">
+    <div class="container mx-auto px-4 flex items-center justify-between">
       <!-- Logo y Nombre del Cine -->
-      <a class="navbar-brand d-flex align-items-center" href="#">
-        <span class="cinema-logo">CineXeperience</span>
-      </a>
+      <NuxtLink to="/" class="text-2xl font-bold">
+        <span class="bg-gradient-to-r from-white to-blue-400 bg-clip-text text-transparent font-extrabold tracking-wider">
+          CineXeperience
+        </span>
+      </NuxtLink>
       
       <!-- Botón hamburguesa para móviles -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
+      <button 
+        class="lg:hidden text-white focus:outline-none" 
+        @click="toggleMobileMenu"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
       </button>
       
-      <!-- Botones del Navbar -->
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto align-items-center">
-          <!-- Cartelera -->
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i class="fas fa-film me-1"></i> Cartelera
-            </a>
-          </li>
-          <!-- Promociones -->
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i class="fas fa-tags me-1"></i> Promociones
-            </a>
-          </li>
-          <!-- Estrenos -->
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i class="fas fa-star me-1"></i> Estrenos
-            </a>
-          </li>
-          <!-- Experiencias -->
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i class="fas fa-glasses me-1"></i> Experiencias
-            </a>
-          </li>
-          <!-- Ubicaciones -->
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              <i class="fas fa-map-marker-alt me-1"></i> Cines
-            </a>
-          </li>
-          <!-- Registro/Login -->
-          <li class="nav-item">
-            <a class="nav-link btn-login" href="#">
-              <i class="fas fa-user me-1"></i> Iniciar sesión
-            </a>
-          </li>
-          <!-- Botón Comprar -->
-          <li class="nav-item ms-2">
-            <a class="btn btn-primary btn-comprar rounded-pill" href="#">
-              COMPRAR ENTRADAS
-            </a>
-          </li>
-        </ul>
+      <!-- Links de navegación para escritorio -->
+      <div class="hidden lg:flex lg:items-center space-x-6">
+        <NuxtLink 
+          to="/cartelera"
+          class="text-white font-medium px-4 py-2 relative group transition-all duration-300 ease-in-out hover:text-blue-400"
+        >
+          <i class="fas fa-film mr-1"></i> Cartelera
+          <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-blue-400 transform -translate-x-1/2 transition-all duration-300 group-hover:w-full"></span>
+        </NuxtLink>
+        
+        <NuxtLink 
+          to="/promociones"
+          class="text-white font-medium px-4 py-2 relative group transition-all duration-300 ease-in-out hover:text-blue-400"
+        >
+          <i class="fas fa-tags mr-1"></i> Promociones
+          <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-blue-400 transform -translate-x-1/2 transition-all duration-300 group-hover:w-full"></span>
+        </NuxtLink>
+        
+        <a 
+          href="#"
+          class="text-white font-medium px-4 py-2 relative group transition-all duration-300 ease-in-out hover:text-blue-400"
+        >
+          <i class="fas fa-map-marker-alt mr-1"></i> Cines
+          <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-blue-400 transform -translate-x-1/2 transition-all duration-300 group-hover:w-full"></span>
+        </a>
+        
+        <NuxtLink 
+          to="/login"
+          class="text-white font-medium px-6 py-2 rounded-full border border-white/30 backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-white/10 hover:border-white/50"
+        >
+          <i class="fas fa-user mr-1"></i> Iniciar sesión
+        </NuxtLink>
+        
+        <NuxtLink 
+          to="/cartelera"
+          class="ml-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-full transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-0.5"
+        >
+          COMPRAR ENTRADAS
+        </NuxtLink>
+      </div>
+    </div>
+    
+    <!-- Menú móvil -->
+    <div 
+      v-if="mobileMenuOpen" 
+      class="lg:hidden absolute top-full left-0 w-full bg-navy-900/95 backdrop-blur-sm py-4 shadow-lg transform transition-transform duration-300 ease-in-out"
+    >
+      <div class="container mx-auto px-4 flex flex-col space-y-4">
+        <NuxtLink 
+          to="/cartelera"
+          class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+        >
+          <i class="fas fa-film mr-2"></i> Cartelera
+        </NuxtLink>
+        
+        <NuxtLink 
+          to="/promociones"
+          class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+        >
+          <i class="fas fa-tags mr-2"></i> Promociones
+        </NuxtLink>
+        
+        <a 
+          href="#"
+          class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+        >
+          <i class="fas fa-map-marker-alt mr-2"></i> Cines
+        </a>
+        
+        <NuxtLink 
+          to="/login"
+          class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+        >
+          <i class="fas fa-user mr-2"></i> Iniciar sesión
+        </NuxtLink>
+        
+        <NuxtLink 
+          to="/cartelera"
+          class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors"
+        >
+          COMPRAR ENTRADAS
+        </NuxtLink>
+      </div>
+    </div>
+
+    <!-- Barra de compra rápida (móvil) -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 bg-navy-900/95 backdrop-blur-sm border-t border-white/10 p-3 transform transition-transform duration-300 ease-in-out" :class="isScrolled ? 'translate-y-0' : 'translate-y-full'">
+      <div class="flex items-center justify-between gap-2">
+        <select class="flex-1 bg-white/10 text-white text-sm rounded-lg px-3 py-2 border border-white/20 focus:border-blue-500 focus:outline-none">
+          <option value="">Seleccionar película</option>
+          <option>Dune: Parte Dos</option>
+          <option>Godzilla vs Kong</option>
+        </select>
+        <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-500 transition-colors">
+          Comprar
+        </button>
       </div>
     </div>
   </nav>
 </template>
 
-<script>
-export default {
-  mounted() {
-    window.addEventListener('scroll', this.handleScroll);
-  },
-  beforeDestroy() {
-    window.removeEventListener('scroll', this.handleScroll);
-  },
-  methods: {
-    handleScroll() {
-      const navbar = document.querySelector('.navbar');
-      if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-      } else {
-        navbar.classList.remove('scrolled');
-      }
-    }
-  }
-}
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+
+const isScrolled = ref(false);
+const mobileMenuOpen = ref(false);
+
+const handleScroll = () => {
+  isScrolled.value = window.scrollY > 50;
+};
+
+const toggleMobileMenu = () => {
+  mobileMenuOpen.value = !mobileMenuOpen.value;
+};
+
+onMounted(() => {
+  window.addEventListener('scroll', handleScroll);
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', handleScroll);
+});
 </script>
-
-<style scoped>
-.navbar {
-  background: rgba(5, 29, 64, 0.1);
-  backdrop-filter: blur(5px);
-  box-shadow: none;
-  padding: 20px 0;
-  transition: all 0.3s ease;
-  position: relative;
-  z-index: 1000;
-  border-bottom: none;
-}
-
-.navbar.scrolled {
-  background-color: rgba(5, 29, 64, 0.95);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  padding: 12px 0;
-}
-
-.navbar-brand {
-  font-weight: bold;
-  font-size: 1.8rem;
-  transition: all 0.3s ease;
-  color: white;
-}
-
-.cinema-logo {
-  background: linear-gradient(90deg, #ffffff, #00A0E4);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  font-weight: 800;
-  letter-spacing: 0.5px;
-}
-
-.nav-link {
-  padding: 8px 15px;
-  font-weight: 500;
-  color: white !important;
-  position: relative;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-}
-
-.nav-link:hover {
-  color: #00A0E4 !important;
-  transform: translateY(-2px);
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  width: 0;
-  height: 2px;
-  bottom: 0;
-  left: 50%;
-  background-color: #00A0E4;
-  transition: all 0.3s ease;
-}
-
-.nav-link:hover::after {
-  width: 80%;
-  left: 10%;
-}
-
-.btn-login {
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.btn-login:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-.btn-comprar {
-  background-color: #0078C8;
-  border: none;
-  font-weight: bold;
-  padding: 8px 20px;
-  transition: all 0.3s ease;
-  font-size: 0.9rem;
-}
-
-.btn-comprar:hover {
-  background-color: #00A0E4;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 160, 228, 0.3);
-}
-
-@media (max-width: 992px) {
-  .navbar-nav {
-    padding: 1rem 0;
-  }
-  
-  .nav-item {
-    margin-bottom: 0.5rem;
-  }
-  
-  .btn-comprar {
-    margin-top: 0.5rem;
-    display: inline-block;
-  }
-  
-  .navbar {
-    background-color: rgba(5, 29, 64, 0.95);
-  }
-}
-</style>

@@ -48,7 +48,6 @@
   
   <script setup>
   import { ref } from 'vue';
-  import { format } from 'date-fns';
   
   // Generar fechas disponibles (próximos 7 días)
   const availableDates = [...Array(7)].map((_, i) => {
@@ -64,14 +63,31 @@
       id: 1,
       title: "Dune: Parte Dos",
       genre: "Ciencia Ficción",
-      image: "/img/img1.jpg",
+      image: "/img/movies/dune2.jpg",
       times: ["14:30", "17:00", "19:30", "22:00"]
     },
-    // Añade más películas aquí
+    {
+      id: 2,
+      title: "Godzilla y Kong: El Nuevo Imperio",
+      genre: "Acción",
+      image: "/img/movies/godzilla-kong.jpg",
+      times: ["15:30", "18:00", "20:30", "23:00"]
+    },
+    {
+      id: 3,
+      title: "Kung Fu Panda 4",
+      genre: "Animación",
+      image: "/img/movies/kungfu-panda4.jpg",
+      times: ["16:00", "18:30", "21:00"]
+    }
   ]);
   
+  // Función simple para formatear fechas sin dependencias externas
   const formatDate = (dateString) => {
-    return format(new Date(dateString), 'dd/MM');
+    const date = new Date(dateString);
+    const day = date.getDate().toString().padStart(2, '0');
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    return `${day}/${month}`;
   };
   
   const selectShowtime = (movie, time) => {

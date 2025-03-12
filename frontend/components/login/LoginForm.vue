@@ -1,0 +1,266 @@
+<template>
+  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-blue-900 bg-opacity-90">
+    <div class="w-full max-w-md space-y-8 bg-blue-900 bg-opacity-80 rounded-xl shadow-xl p-8 sm:p-10 text-white">
+      <!-- Header -->
+      <div class="text-center">
+        <h2 class="text-3xl font-bold mb-2">
+          {{ isLogin ? 'Iniciar Sesión' : 'Crear una cuenta' }}
+        </h2>
+        <p class="text-gray-400 text-sm">
+          {{ isLogin ? 'Ingresa a tu cuenta para disfrutar de beneficios exclusivos' : 'Regístrate para obtener acceso a beneficios exclusivos' }}
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form @submit.prevent="submitForm" class="mt-8 space-y-6">
+        <!-- Nombre (solo en registro) -->
+        <div v-if="!isLogin" class="space-y-2">
+          <label for="name" class="block text-sm font-medium text-gray-300">Nombre completo</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-user text-gray-500"></i>
+            </div>
+            <input 
+              id="name" 
+              v-model="form.name" 
+              type="text" 
+              class="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-lg bg-blue-800 bg-opacity-50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Ingresa tu nombre completo" 
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="space-y-2">
+          <label for="email" class="block text-sm font-medium text-gray-300">Correo electrónico</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-envelope text-gray-500"></i>
+            </div>
+            <input 
+              id="email" 
+              v-model="form.email" 
+              type="email" 
+              class="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-lg bg-blue-800 bg-opacity-50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Ingresa tu correo electrónico" 
+              required
+            >
+          </div>
+        </div>
+
+        <!-- Contraseña -->
+        <div class="space-y-2">
+          <label for="password" class="block text-sm font-medium text-gray-300">Contraseña</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-lock text-gray-500"></i>
+            </div>
+            <input 
+              id="password" 
+              v-model="form.password" 
+              :type="showPassword ? 'text' : 'password'" 
+              class="block w-full pl-10 pr-10 py-3 border border-gray-700 rounded-lg bg-blue-800 bg-opacity-50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Ingresa tu contraseña" 
+              required
+            >
+            <button 
+              type="button" 
+              @click="togglePassword" 
+              class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-blue-500 transition-colors"
+            >
+              <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Confirmar Contraseña (solo en registro) -->
+        <div v-if="!isLogin" class="space-y-2">
+          <label for="confirmPassword" class="block text-sm font-medium text-gray-300">Confirmar contraseña</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-lock text-gray-500"></i>
+            </div>
+            <input 
+              id="confirmPassword" 
+              v-model="form.confirmPassword" 
+              :type="showPassword ? 'text' : 'password'" 
+              class="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-lg bg-blue-800 bg-opacity-50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Confirma tu contraseña" 
+              required
+            >
+          </div>
+          <div v-if="!passwordsMatch && form.confirmPassword" class="text-red-500 text-xs mt-1">
+            Las contraseñas no coinciden
+          </div>
+        </div>
+
+        <!-- Opciones adicionales -->
+        <div v-if="isLogin" class="flex items-center justify-between">
+          <div class="flex items-center">
+            <input 
+              id="remember" 
+              v-model="form.remember" 
+              type="checkbox"
+              class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-700 rounded bg-gray-800"
+            >
+            <label for="remember" class="ml-2 block text-sm text-gray-300">
+              Recordarme
+            </label>
+          </div>
+          <div class="text-sm">
+            <a href="#" class="font-medium text-blue-500 hover:text-blue-400 transition-colors">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+        </div>
+
+        <!-- Términos y condiciones (solo en registro) -->
+        <div v-if="!isLogin" class="space-y-2">
+          <div class="flex items-start">
+            <div class="flex items-center h-5">
+              <input 
+                id="terms" 
+                v-model="form.acceptTerms" 
+                type="checkbox" 
+                required
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-700 rounded bg-gray-800"
+              >
+            </div>
+            <div class="ml-3 text-sm">
+              <label for="terms" class="text-gray-300">
+                Acepto los <a href="#" class="text-blue-500 hover:text-blue-400 transition-colors">Términos y Condiciones</a> y la <a href="#" class="text-blue-500 hover:text-blue-400 transition-colors">Política de Privacidad</a>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botón de envío -->
+        <div>
+          <button 
+            type="submit" 
+            class="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-white font-medium bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:bg-gray-600 disabled:cursor-not-allowed"
+            :disabled="!isFormValid"
+          >
+            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <i class="fas fa-sign-in-alt group-hover:text-blue-400 text-blue-500 transition-colors"></i>
+            </span>
+            {{ isLogin ? 'Iniciar Sesión' : 'Registrarse' }}
+          </button>
+        </div>
+
+        <!-- Cambiar entre login y registro -->
+        <div class="text-center text-sm text-gray-300">
+          {{ isLogin ? '¿No tienes una cuenta?' : '¿Ya tienes una cuenta?' }}
+          <a href="#" @click.prevent="toggleForm" class="font-medium text-blue-500 hover:text-blue-400 transition-colors">
+            {{ isLogin ? 'Regístrate' : 'Inicia sesión' }}
+          </a>
+        </div>
+
+        <!-- Separador -->
+        <div class="relative">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-gray-700"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-blue-900 text-gray-500">o</span>
+          </div>
+        </div>
+
+        <!-- Iniciar sesión con redes sociales -->
+        <div class="space-y-3">
+          <button 
+            type="button"
+            class="w-full flex items-center justify-center gap-3 px-4 py-2 border border-gray-700 rounded-lg shadow-sm text-gray-900 bg-white hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+          >
+            <i class="fab fa-google text-red-500"></i>
+            <span>Continuar con Google</span>
+          </button>
+          <button 
+            type="button"
+            class="w-full flex items-center justify-center gap-3 px-4 py-2 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            <i class="fab fa-facebook-f"></i>
+            <span>Continuar con Facebook</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: 'LoginForm',
+  data() {
+    return {
+      isLogin: true,
+      showPassword: false,
+      form: {
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        remember: false,
+        acceptTerms: false
+      }
+    };
+  },
+  computed: {
+    passwordsMatch() {
+      return this.form.password === this.form.confirmPassword;
+    },
+    isFormValid() {
+      if (this.isLogin) {
+        return this.form.email && this.form.password;
+      } else {
+        return this.form.name && 
+               this.form.email && 
+               this.form.password && 
+               this.passwordsMatch && 
+               this.form.acceptTerms;
+      }
+    }
+  },
+  methods: {
+    toggleForm() {
+      this.isLogin = !this.isLogin;
+      // Limpiar formulario al cambiar
+      this.form = {
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        remember: false,
+        acceptTerms: false
+      };
+    },
+    togglePassword() {
+      this.showPassword = !this.showPassword;
+    },
+    submitForm() {
+      if (!this.isFormValid) return;
+      
+      if (this.isLogin) {
+        // Lógica de inicio de sesión
+        console.log('Iniciando sesión con:', {
+          email: this.form.email,
+          password: this.form.password,
+          remember: this.form.remember
+        });
+        // Aquí iría la llamada a la API para autenticar
+        this.$router.push('/');
+      } else {
+        // Lógica de registro
+        console.log('Registrando usuario:', {
+          name: this.form.name,
+          email: this.form.email,
+          password: this.form.password
+        });
+        // Aquí iría la llamada a la API para registrar
+        this.isLogin = true;
+      }
+    }
+  }
+}
+</script>

@@ -1,361 +1,175 @@
 <template>
   <div>
-    <div id="mainCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
-      <div class="carousel-indicators">
-        <button v-for="(movie, index) in moviesList" 
-                :key="`indicator-${movie.id}`"
-                type="button" 
-                data-bs-target="#mainCarousel" 
-                :data-bs-slide-to="index" 
-                :class="{ 'active': index === 0 }"
-                :aria-current="index === 0 ? 'true' : 'false'"
-                :aria-label="`Slide ${index + 1}`"></button>
+    <div id="mainCarousel" class="relative h-screen w-full overflow-hidden">
+      <!-- Indicadores -->
+      <div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 flex space-x-2">
+        <button 
+          v-for="(movie, index) in moviesList" 
+          :key="`indicator-${movie.id}`"
+          class="w-3 h-3 rounded-full transition-all duration-300 focus:outline-none"
+          :class="{ 'bg-blue-600 scale-110': currentSlide === index, 'bg-white opacity-50': currentSlide !== index }"
+          @click="setSlide(index)"
+          :aria-label="`Slide ${index + 1}`"
+        ></button>
       </div>
       
-      <div class="carousel-inner">
+      <!-- Slides -->
+      <div class="h-full w-full">
         <div 
           v-for="(movie, index) in moviesList" 
           :key="movie.id" 
-          :class="['carousel-item', { 'active': index === 0 }]"
+          class="absolute inset-0 transition-opacity duration-1000"
+          :class="{ 'opacity-100': currentSlide === index, 'opacity-0': currentSlide !== index }"
         >
-          <div class="carousel-image-container">
+          <!-- Contenedor de imagen -->
+          <div class="relative h-full w-full overflow-hidden">
             <img 
               :src="movie.image" 
-              class="d-block w-100" 
+              class="w-full h-full object-cover transition-transform duration-10000 ease-in-out"
+              :class="{ 'scale-100': currentSlide === index, 'scale-105': currentSlide !== index }"
               :alt="movie.title"
             >
-            <div class="overlay-gradient"></div>
+            <!-- Gradiente para mejorar legibilidad -->
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 via-blue-900/60 to-transparent"></div>
           </div>
-          <div class="carousel-caption d-flex flex-column align-items-start justify-content-center text-start">
-            <div class="content-wrapper">
-              <span class="badge-featured mb-3">{{ movie.badge }}</span>
-              <h1 class="movie-title">{{ movie.title }}</h1>
-              <p class="movie-genre">{{ movie.genre }}</p>
-              <div class="movie-details">
-                <span><i class="fas fa-clock"></i> {{ movie.duration }}</span>
-                <span><i class="fas fa-star"></i> {{ movie.rating }}</span>
-              </div>
-              <div class="action-buttons">
-                <button class="btn btn-play me-3">
-                  <i class="fas fa-play-circle"></i> Ver Trailer
-                </button>
-                <button class="btn btn-buy-tickets">
-                  <i class="fas fa-ticket-alt"></i> Comprar Entradas
-                </button>
+          
+          <!-- Contenido -->
+          <div class="absolute inset-0 flex items-center">
+            <div class="container mx-auto px-4">
+              <div class="max-w-3xl ml-10 md:ml-16 pt-20 md:pt-0">
+                <span class="inline-block bg-blue-600 text-white text-xs font-bold uppercase tracking-wider py-2 px-4 rounded mb-5">{{ movie.badge }}</span>
+                <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-2 leading-tight tracking-tight drop-shadow-lg">{{ movie.title }}</h1>
+                <p class="text-xl text-gray-200 mb-4">{{ movie.genre }}</p>
+                <div class="flex space-x-6 mb-8">
+                  <span class="flex items-center text-gray-300"><i class="fas fa-clock mr-2"></i> {{ movie.duration }}</span>
+                  <span class="flex items-center text-gray-300"><i class="fas fa-star mr-2 text-yellow-500"></i> {{ movie.rating }}</span>
+                </div>
+                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                  <button class="px-6 py-3 border-2 border-white text-white font-semibold rounded-full flex items-center justify-center hover:bg-white/20 transition duration-300 hover:-translate-y-1">
+                    <i class="fas fa-play-circle mr-2"></i> Ver Trailer
+                  </button>
+                  <button class="px-6 py-3 bg-blue-600 text-white font-semibold rounded-full flex items-center justify-center hover:bg-blue-500 transition duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-600/30">
+                    <i class="fas fa-ticket-alt mr-2"></i> Comprar Entradas
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
       
-      <button class="carousel-control-prev" type="button" data-bs-target="#mainCarousel" data-bs-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Anterior</span>
+      <!-- Controles -->
+      <button 
+        class="absolute left-4 top-1/2 transform -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full bg-black/30 text-white hover:bg-black/50 transition duration-300 focus:outline-none"
+        @click="prevSlide"
+      >
+        <i class="fas fa-chevron-left"></i>
+        <span class="sr-only">Anterior</span>
       </button>
-      <button class="carousel-control-next" type="button" data-bs-target="#mainCarousel" data-bs-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="visually-hidden">Siguiente</span>
+      <button 
+        class="absolute right-4 top-1/2 transform -translate-y-1/2 w-12 h-12 flex items-center justify-center rounded-full bg-black/30 text-white hover:bg-black/50 transition duration-300 focus:outline-none"
+        @click="nextSlide"
+      >
+        <i class="fas fa-chevron-right"></i>
+        <span class="sr-only">Siguiente</span>
       </button>
     </div>
   </div>
 </template>
 
 <script>
+import { ref, onMounted, onBeforeUnmount } from 'vue';
+
 export default {
-  data() {
+  setup() {
+    const currentSlide = ref(0);
+    const autoplayInterval = ref(null);
+    
+    const moviesList = [
+      { 
+        id: 1, 
+        title: "Bridget Jones: Loca por él", 
+        genre: "Comedia/Romance", 
+        image: "/img/img1.jpg", 
+        badge: "¡YA EN TU CINE!",
+        duration: "105 min",
+        rating: "8.2/10"
+      },
+      { 
+        id: 2, 
+        title: "Mickey 17", 
+        genre: "Ciencia Ficción/Aventura", 
+        image: "/img/img2.jpg",
+        badge: "ESTRENO EXCLUSIVO",
+        duration: "142 min",
+        rating: "8.7/10"
+      },
+      { 
+        id: 3, 
+        title: "Anora", 
+        genre: "Drama", 
+        image: "/img/img3.jpg",
+        badge: "PREMIO DE CANNES",
+        duration: "116 min",
+        rating: "9.0/10"
+      },
+      { 
+        id: 4, 
+        title: "Paddington: Aventura en la Selva", 
+        genre: "Familiar/Aventura", 
+        image: "/img/img4.jpeg",
+        badge: "PRÓXIMAMENTE",
+        duration: "98 min",
+        rating: "7.9/10"
+      }
+    ];
+    
+    const nextSlide = () => {
+      currentSlide.value = (currentSlide.value + 1) % moviesList.length;
+      resetAutoplayTimer();
+    };
+    
+    const prevSlide = () => {
+      currentSlide.value = (currentSlide.value - 1 + moviesList.length) % moviesList.length;
+      resetAutoplayTimer();
+    };
+    
+    const setSlide = (index) => {
+      currentSlide.value = index;
+      resetAutoplayTimer();
+    };
+    
+    const startAutoplay = () => {
+      autoplayInterval.value = setInterval(() => {
+        nextSlide();
+      }, 5000);
+    };
+    
+    const resetAutoplayTimer = () => {
+      if (autoplayInterval.value) {
+        clearInterval(autoplayInterval.value);
+        startAutoplay();
+      }
+    };
+    
+    onMounted(() => {
+      startAutoplay();
+    });
+    
+    onBeforeUnmount(() => {
+      if (autoplayInterval.value) {
+        clearInterval(autoplayInterval.value);
+      }
+    });
+    
     return {
-      moviesList: [
-        { 
-          id: 1, 
-          title: "Bridget Jones: Loca por él", 
-          genre: "Comedia/Romance", 
-          image: "/img/img1.jpg", 
-          badge: "¡YA EN TU CINE!",
-          duration: "105 min",
-          rating: "8.2/10"
-        },
-        { 
-          id: 2, 
-          title: "Mickey 17", 
-          genre: "Ciencia Ficción/Aventura", 
-          image: "/img/img2.jpg",
-          badge: "ESTRENO EXCLUSIVO",
-          duration: "142 min",
-          rating: "8.7/10"
-        },
-        { 
-          id: 3, 
-          title: "Anora", 
-          genre: "Drama", 
-          image: "/img/img3.jpg",
-          badge: "PREMIO DE CANNES",
-          duration: "116 min",
-          rating: "9.0/10"
-        },
-        { 
-          id: 4, 
-          title: "Paddington: Aventura en la Selva", 
-          genre: "Familiar/Aventura", 
-          image: "/img/img4.jpeg",
-          badge: "PRÓXIMAMENTE",
-          duration: "98 min",
-          rating: "7.9/10"
-        }
-      ]
-    }
+      currentSlide,
+      moviesList,
+      nextSlide,
+      prevSlide,
+      setSlide
+    };
   }
-}
+};
 </script>
 
-<style scoped>
-/* Carousel Container */
-.carousel {
-  height: 90vh;
-  overflow: hidden;
-  position: relative;
-}
-
-/* Image Container */
-.carousel-image-container {
-  width: 100%;
-  height: 90vh;
-  overflow: hidden;
-  position: relative;
-}
-
-.carousel-image-container img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center;
-  transform: scale(1.05);
-  transition: transform 10s ease-in-out;
-}
-
-.carousel-item.active .carousel-image-container img {
-  transform: scale(1);
-}
-
-/* Gradient overlay para que el texto sea más legible */
-.overlay-gradient {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    to right,
-    rgba(0, 5, 35, 0.9) 0%,
-    rgba(0, 5, 35, 0.7) 30%,
-    rgba(0, 5, 35, 0.4) 60%,
-    rgba(0, 5, 35, 0.2) 80%,
-    rgba(0, 5, 35, 0) 100%
-  );
-}
-
-/* Caption styles */
-.carousel-caption {
-  left: 10%;
-  right: auto;
-  bottom: 0;
-  top: 0;
-  transform: none;
-  width: 60%;
-  max-width: 800px;
-  text-align: left;
-  padding: 0;
-}
-
-.content-wrapper {
-  position: absolute;
-  bottom: 25%;
-  width: 80%;
-}
-
-.badge-featured {
-  display: inline-block;
-  background-color: #0078C8;
-  padding: 8px 15px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.movie-title {
-  font-size: 4rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  color: white;
-}
-
-.movie-genre {
-  font-size: 1.3rem;
-  margin-bottom: 1rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-  color: #f0f0f0;
-}
-
-.movie-details {
-  display: flex;
-  gap: 20px;
-  margin-bottom: 20px;
-  font-size: 1.1rem;
-}
-
-.movie-details span {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.action-buttons {
-  display: flex;
-  margin-top: 20px;
-}
-
-.btn-play {
-  background-color: transparent;
-  border: 2px solid white;
-  color: white;
-  padding: 12px 22px;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-play:hover {
-  background-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-3px);
-}
-
-.btn-buy-tickets {
-  background-color: #0078C8;
-  border: none;
-  color: white;
-  padding: 14px 28px;
-  border-radius: 50px;
-  font-weight: 600;
-  transition: all 0.3s ease;
-}
-
-.btn-buy-tickets:hover {
-  background-color: #00A0E4;
-  transform: translateY(-3px);
-  box-shadow: 0 4px 15px rgba(0, 160, 228, 0.3);
-}
-
-/* Indicadores de carrusel personalizados */
-.carousel-indicators {
-  bottom: 20px;
-  margin-bottom: 2rem;
-}
-
-.carousel-indicators button {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: white;
-  opacity: 0.5;
-  transition: all 0.3s ease;
-  margin: 0 5px;
-}
-
-.carousel-indicators button.active {
-  opacity: 1;
-  transform: scale(1.2);
-  background-color: #0078C8;
-}
-
-/* Controles de carrusel */
-.carousel-control-prev,
-.carousel-control-next {
-  width: 5%;
-  opacity: 0.7;
-  transition: all 0.3s ease;
-}
-
-.carousel-control-prev:hover,
-.carousel-control-next:hover {
-  opacity: 1;
-  background-color: rgba(0, 0, 0, 0.2);
-}
-
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-  width: 40px;
-  height: 40px;
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-  .movie-title {
-    font-size: 3.5rem;
-  }
-}
-
-@media (max-width: 992px) {
-  .carousel-caption {
-    width: 80%;
-  }
-  
-  .movie-title {
-    font-size: 3rem;
-  }
-}
-
-@media (max-width: 768px) {
-  .carousel {
-    height: 80vh;
-  }
-  
-  .carousel-image-container {
-    height: 80vh;
-  }
-
-  .carousel-caption {
-    width: 90%;
-  }
-  
-  .movie-title {
-    font-size: 2.5rem;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
-  .btn-play {
-    margin-right: 0;
-  }
-}
-
-@media (max-width: 576px) {
-  .carousel {
-    height: 70vh;
-  }
-  
-  .carousel-image-container {
-    height: 70vh;
-  }
-  
-  .content-wrapper {
-    bottom: 20%;
-  }
-  
-  .movie-title {
-    font-size: 2rem;
-  }
-  
-  .movie-genre {
-    font-size: 1rem;
-  }
-  
-  .movie-details {
-    font-size: 0.9rem;
-  }
-}
-</style>
