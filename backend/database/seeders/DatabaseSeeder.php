@@ -2,8 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,17 +11,15 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
-        User::factory()->create([
-            'name' => 'Test',
-            'last_name' => 'User',
-            'email' => 'test@example.com',
-        ]);
-
-        // Ejecutar el seeder de películas
         $this->call([
+            RoleSeeder::class,
+            UserSeeder::class,
             MovieSeeder::class,
+            AuditoriumSeeder::class,
+            SeatSeeder::class,
+            ScreeningSeeder::class,
+            SnackSeeder::class,
+            // BookingSeeder y TicketSeeder no se incluyen aquí porque dependen de la interacción del usuario
         ]);
     }
 }

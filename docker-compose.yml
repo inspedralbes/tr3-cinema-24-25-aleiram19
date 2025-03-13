@@ -33,11 +33,13 @@ services:
       MYSQL_PASSWORD: user
     networks:
       - app-network
+    volumes:
+      - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      timeout: 10s
-      retries: 5
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "-puser"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -66,3 +68,6 @@ services:
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  mysql-data:

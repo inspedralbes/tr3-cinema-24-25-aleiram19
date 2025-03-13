@@ -13,6 +13,10 @@ return new class extends Migration
     {
         Schema::create('screening', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('movie_id')->constrained('movies')->onDelete('cascade');
+            $table->foreignId('auditorium_id')->constrained('auditorium')->onDelete('cascade');
+            $table->dateTime('date_time');
+            $table->decimal('price', 8, 2);
             $table->timestamps();
         });
     }

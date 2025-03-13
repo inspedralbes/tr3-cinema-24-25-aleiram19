@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tickets', function (Blueprint $table) {
+        Schema::create('seat', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('auditorium_id')->constrained('auditorium')->onDelete('cascade');
+            $table->string('number'); // A1, A2, B1...
+            $table->enum('status', ['available', 'busy'])->default('available');
             $table->timestamps();
         });
     }
@@ -22,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('tickets');
+        Schema::dropIfExists('seat');
     }
 };
