@@ -12,10 +12,10 @@ class SeatSeeder extends Seeder
      */
     public function run(): void
     {
-        // Crear asientos para la Sala 1 (auditorium_id = 1)
-        for ($row = 'A'; $row <= 'H'; $row++) {
+        // Crear asientos para la Sala 1 (auditorium_id = 1) - 12 filas (A-L) × 10 sillones
+        for ($row = 'A'; $row <= 'L'; $row++) {
             for ($column = 1; $column <= 10; $column++) {
-                DB::table('seat')->insert([
+                DB::table('seats')->insert([
                     'auditorium_id' => 1,
                     'number' => $row . $column,
                     'status' => 'available',
@@ -25,10 +25,10 @@ class SeatSeeder extends Seeder
             }
         }
 
-        // Crear asientos para la Sala 2 (auditorium_id = 2)
-        for ($row = 'A'; $row <= 'H'; $row++) {
+        // Crear asientos para la Sala 2 (auditorium_id = 2) - 12 filas (A-L) × 10 sillones
+        for ($row = 'A'; $row <= 'L'; $row++) {
             for ($column = 1; $column <= 10; $column++) {
-                DB::table('seat')->insert([
+                DB::table('seats')->insert([
                     'auditorium_id' => 2,
                     'number' => $row . $column,
                     'status' => 'available',
@@ -38,11 +38,37 @@ class SeatSeeder extends Seeder
             }
         }
 
-        // Crear asientos para la Sala VIP (auditorium_id = 3)
-        for ($row = 'A'; $row <= 'D'; $row++) {
+        // Crear asientos para la Sala 3 (auditorium_id = 3) - 12 filas (A-L) × 10 sillones
+        for ($row = 'A'; $row <= 'L'; $row++) {
             for ($column = 1; $column <= 10; $column++) {
-                DB::table('seat')->insert([
+                DB::table('seats')->insert([
                     'auditorium_id' => 3,
+                    'number' => $row . $column,
+                    'status' => 'available',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+        
+        // Crear asientos para la Sala 4 (auditorium_id = 4) - 12 filas (A-L) × 10 sillones
+        for ($row = 'A'; $row <= 'L'; $row++) {
+            for ($column = 1; $column <= 10; $column++) {
+                DB::table('seats')->insert([
+                    'auditorium_id' => 4,
+                    'number' => $row . $column,
+                    'status' => 'available',
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        }
+
+        // Crear asientos para la Sala VIP (auditorium_id = 5) - con menos filas pero también con fila F para VIP
+        for ($row = 'A'; $row <= 'F'; $row++) {
+            for ($column = 1; $column <= 10; $column++) {
+                DB::table('seats')->insert([
+                    'auditorium_id' => 5,
                     'number' => $row . $column,
                     'status' => 'available',
                     'created_at' => now(),

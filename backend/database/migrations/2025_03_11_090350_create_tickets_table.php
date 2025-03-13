@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('screening_id')->constrained('screening')->onDelete('cascade');
+            $table->foreignId('screening_id')->constrained('screenings')->onDelete('cascade');
             $table->integer('quantity');
             $table->decimal('total_pay', 8, 2);
             $table->timestamp('purchase_date')->useCurrent();

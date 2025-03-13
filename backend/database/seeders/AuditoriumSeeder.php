@@ -12,7 +12,7 @@ class AuditoriumSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('auditorium')->insert([
+        DB::table('auditoriums')->insert([
             [
                 'name' => 'Sala 1',
                 'capacity' => 80,
@@ -29,6 +29,13 @@ class AuditoriumSeeder extends Seeder
             ],
             [
                 'name' => 'Sala 3',
+                'capacity' => 80,
+                'type' => '2D',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+            [
+                'name' => 'Sala 4',
                 'capacity' => 80,
                 'type' => '2D',
                 'created_at' => now(),

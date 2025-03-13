@@ -6,6 +6,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use App\Models\Role;
+use App\Models\Booking;
+use App\Models\Ticket;
 
 class User extends Authenticatable
 {
@@ -22,6 +25,7 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'role_id',
     ];
 
     /**
@@ -45,5 +49,37 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    
+    /**
+     * Relación con rol
+     */
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+    
+    /**
+     * Relación con reservas
+     */
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
+    
+    /**
+     * Relación con tickets
+     */
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
+    }
+    
+    /**
+     * Verifica si el usuario tiene un rol específico
+     */
+    public function hasRole(string $roleName): bool
+    {
+        return $this->role && $this->role->name === $roleName;
     }
 }

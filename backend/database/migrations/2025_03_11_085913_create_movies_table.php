@@ -17,12 +17,13 @@ return new class extends Migration
             $table->string('director');
             $table->string('actors');
             $table->text('description');
+            $table->string('trailer')->nullable(); // URL del tráiler
             $table->integer('duration'); // minutos
             $table->string('movie_genre');
             $table->date('release_date');
-            $table->string('image')->nullable(); // URL del póster
+            $table->string('image')->nullable(); // URL del póster o imagen
             $table->timestamps();
-        });
+        }); 
     }
 
     /**

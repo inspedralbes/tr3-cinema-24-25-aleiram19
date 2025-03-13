@@ -37,6 +37,7 @@ export default defineNuxtConfig({
       host: '0.0.0.0',
       strictPort: false,
       hmr: {
+        host: '0.0.0.0',
         clientPort: 24678,
         port: 24678
       }
