@@ -21,26 +21,19 @@ export default defineNuxtConfig({
     baseURL: '/',
     buildAssetsDir: '/_nuxt/'
   },
-  nitro: {
-    devProxy: {
-      '/img': {
-        target: 'http://localhost:3000/img',
-        changeOrigin: true
-      }
-    }
-  },
+  // Desactivar SSR para ejecutar solo en modo cliente (SPA)
+  ssr: false,
+  // Configuración de vite simplificada para resolver el problema de conexión
   vite: {
+    define: {
+      global: 'globalThis'
+    },
     server: {
       watch: {
         usePolling: true
-      },
-      host: '0.0.0.0',
-      strictPort: false,
-      hmr: {
-        host: '0.0.0.0',
-        clientPort: 24678,
-        port: 24678
       }
+      // Se elimina la configuración de host para que Docker la maneje
     }
   }
+  // Se eliminó completamente la configuración de nitro
 })

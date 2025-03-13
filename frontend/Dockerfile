@@ -13,10 +13,7 @@ RUN npm install
 # Copia el resto del código de la aplicación
 COPY . .
 
-# Asegurarse de que se copian correctamente las imágenes
-COPY public/img /app/public/img
-
-# Expone el puerto de Nuxt.js (3000 por defecto)
+# Expone el puerto de Nuxt.js
 EXPOSE 3000
 
 # Comando para ejecutar Nuxt en desarrollo
