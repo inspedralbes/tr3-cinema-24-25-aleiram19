@@ -1,7 +1,10 @@
 <template>
   <div class="min-h-screen flex flex-col bg-[#051D40]">
     <LandingPageNavBar />
-    <div class="pt-20"><CarteleraPeliculasGrid /></div>
+    <!-- Ajustado el padding top para el navbar fijo -->
+    <div class="pt-24">
+      <CarteleraPeliculasGrid />
+    </div>
     <LandingPageFooter />
   </div>
 </template>
