@@ -6,8 +6,8 @@
   ]">
     <div class="container mx-auto px-4 flex items-center justify-between">
       <!-- Logo e Imagen del Cine -->
-      <NuxtLink to="/" class="text-2xl font-bold">
-        <img src="/img/icono_cine.png" alt="CineXeperience" class="object-contain h-32 md:h-40" />
+      <NuxtLink to="/" class="text-xl font-bold">
+        <img src="/img/logo_cine.png" alt="CineXeperience" class="object-contain h-16 md:h-20" />
       </NuxtLink>
       
       <!-- Botón hamburguesa para móviles -->

@@ -90,7 +90,7 @@ export default {
         id: 1, 
         title: "Bridget Jones: Loca por él", 
         genre: "Comedia/Romance", 
-        image: "/img/img1.jpg", 
+        image: "/img/portada1.jpg", 
         badge: "¡YA EN TU CINE!",
         duration: "105 min",
         rating: "8.2/10"
@@ -99,7 +99,7 @@ export default {
         id: 2, 
         title: "Mickey 17", 
         genre: "Ciencia Ficción/Aventura", 
-        image: "/img/img2.jpg",
+        image: "/img/portada2.jpg",
         badge: "ESTRENO EXCLUSIVO",
         duration: "142 min",
         rating: "8.7/10"
@@ -108,7 +108,7 @@ export default {
         id: 3, 
         title: "Anora", 
         genre: "Drama", 
-        image: "/img/img3.jpg",
+        image: "/img/portada3.jpg",
         badge: "PREMIO DE CANNES",
         duration: "116 min",
         rating: "9.0/10"
@@ -117,7 +117,7 @@ export default {
         id: 4, 
         title: "Paddington: Aventura en la Selva", 
         genre: "Familiar/Aventura", 
-        image: "/img/img4.jpeg",
+        image: "/img/portada4.jpg",
         badge: "PRÓXIMAMENTE",
         duration: "98 min",
         rating: "7.9/10"
