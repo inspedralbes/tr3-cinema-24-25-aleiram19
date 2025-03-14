@@ -108,7 +108,7 @@ export default {
         id: 3, 
         title: "Anora", 
         genre: "Drama", 
-        image: "/img/portada3.jpg",
+        image: "/img/portada3.jpeg",
         badge: "PREMIO DE CANNES",
         duration: "116 min",
         rating: "9.0/10"
