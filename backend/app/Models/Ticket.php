@@ -14,6 +14,8 @@ class Ticket extends Model
     protected $fillable = [
         'user_id',
         'screening_id',
+        'seat_id',
+        'status',
         'quantity',
         'total_pay',
         'purchase_date'
@@ -29,5 +31,11 @@ class Ticket extends Model
     public function screening()
     {
         return $this->belongsTo(Screening::class);
+    }
+
+    // Relación con asiento
+    public function seat()
+    {
+        return $this->belongsTo(Seat::class);
     }
 }

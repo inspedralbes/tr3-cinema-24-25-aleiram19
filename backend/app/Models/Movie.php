@@ -18,7 +18,7 @@ class Movie extends Model
         'description',
         'trailer',
         'duration',
-        'movie_genre',
+        'movie_genre_id',
         'release_date',
         'image'
     ];
@@ -27,5 +27,11 @@ class Movie extends Model
     public function screenings()
     {
         return $this->hasMany(Screening::class);
+    }
+
+    // Relación con el género de película
+    public function movieGenre()
+    {
+        return $this->belongsTo(MovieGenre::class, 'movie_genre_id');
     }
 }

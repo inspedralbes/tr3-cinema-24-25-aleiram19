@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('screening_id')->constrained('screenings')->onDelete('cascade');
+            $table->foreignId('seat_id')->constrained('seats')->onDelete('cascade');
             $table->integer('quantity');
             $table->decimal('total_pay', 8, 2);
             $table->timestamp('purchase_date')->useCurrent();

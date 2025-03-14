@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\TicketController;
 use App\Http\Controllers\Api\ScreeningController;
 use App\Http\Controllers\Api\UserTicketsController;
 
@@ -31,17 +31,16 @@ Route::middleware('auth:sanctum')->group(function() {
         return $request->user();
     });
     
-    // Rutas para gestión de reservas
-    Route::prefix('bookings')->group(function() {
-        Route::post('/reserve', [BookingController::class, 'reserveSeats']);
-        Route::post('/confirm', [BookingController::class, 'confirmBooking']);
-        Route::post('/cancel', [BookingController::class, 'cancelBooking']);
-    });
-    
-    // Rutas para consultar tickets del usuario
+    // Rutas para gestión de tickets y asientos
     Route::prefix('tickets')->group(function() {
-        Route::get('/', [UserTicketsController::class, 'index']);
-        Route::get('/{id}', [UserTicketsController::class, 'show']);
+        // Reserva y gestión de tickets
+        Route::post('/reserve', [TicketController::class, 'reserveSeats']);
+        Route::post('/confirm', [TicketController::class, 'confirmTickets']);
+        Route::post('/cancel', [TicketController::class, 'cancelTickets']);
+        
+        // Consulta de tickets del usuario
+        Route::get('/', [TicketController::class, 'getUserTickets']);
+        Route::get('/{id}', [TicketController::class, 'getTicketDetails']);
         Route::get('/screening/{id}/can-buy', [UserTicketsController::class, 'canBuyTickets']);
     });
     
