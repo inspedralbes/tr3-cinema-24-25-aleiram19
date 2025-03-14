@@ -1,15 +1,13 @@
 <template>
   <nav :class="[
     'fixed top-0 left-0 w-full z-50 transition-all duration-300 ease-in-out',
-    'py-5 md:py-5 border-b border-transparent',
-    isScrolled ? 'bg-navy-900/95 shadow-md py-3 md:py-3' : 'bg-blue-900/80 backdrop-blur-sm'
+    'py-0 md:py-0 border-b border-transparent',
+    isScrolled ? 'bg-navy-900/95 shadow-md py-0 md:py-0' : 'bg-blue-900/80 backdrop-blur-sm'
   ]">
     <div class="container mx-auto px-4 flex items-center justify-between">
-      <!-- Logo y Nombre del Cine -->
+      <!-- Logo e Imagen del Cine -->
       <NuxtLink to="/" class="text-2xl font-bold">
-        <span class="bg-gradient-to-r from-white to-blue-400 bg-clip-text text-transparent font-extrabold tracking-wider">
-          CineXeperience
-        </span>
+        <img src="/img/icono_cine.png" alt="CineXeperience" class="object-contain h-32 md:h-40" />
       </NuxtLink>
       
       <!-- Botón hamburguesa para móviles -->
