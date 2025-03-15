@@ -148,7 +148,7 @@
 
 <script>
 import { useMoviesStore } from '~/stores/movies';
-import apiService from '~/services/api';
+import { useScreeningsStore } from '~/stores/screenings';
 
 export default {
   name: 'ScreeningsPage',
@@ -244,8 +244,9 @@ export default {
         this.loadMockData();
         
         // En una implementación real:
-        // this.screenings = await apiService.screenings.getAll();
-        // this.auditoriums = await apiService.auditoriums.getAll();
+        // const screeningsStore = useScreeningsStore();
+        // this.screenings = await screeningsStore.fetchScreenings();
+        // this.auditoriums = await screeningsStore.fetchAuditoriums();
       } catch (error) {
         console.error('Error al cargar datos:', error);
         this.error = 'Error al cargar las funciones. Por favor, intenta de nuevo.';

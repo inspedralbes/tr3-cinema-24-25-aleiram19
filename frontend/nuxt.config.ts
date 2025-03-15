@@ -5,7 +5,8 @@ export default defineNuxtConfig({
     '~/assets/css/main.css'
   ],
   plugins: [
-    { src: '~/plugins/bootstrap.client.js', mode: 'client' }
+    { src: '~/plugins/bootstrap.client.js', mode: 'client' },
+    { src: '~/plugins/router.js', mode: 'client' }
   ],
   modules: [
     '@nuxtjs/tailwindcss',
@@ -43,6 +44,13 @@ export default defineNuxtConfig({
         usePolling: true
       }
       // Se elimina la configuración de host para que Docker la maneje
+    }
+  },
+  // Configuración para asegurar que la página inicial se cargue correctamente
+  pages: true,
+  router: {
+    options: {
+      strict: false
     }
   },
   // Configuración de runtimeConfig para variables de entorno
