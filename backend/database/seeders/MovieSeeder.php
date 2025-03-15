@@ -44,8 +44,8 @@ class MovieSeeder extends Seeder
             // 3. Kung Fu Panda 4
             [
                 'title' => 'Kung Fu Panda 4',
-                'director' => 'Desconocido',
-                'actors' => 'Desconocidos',
+                'director' => 'Jennifer Yuh Nelson',
+                'actors' => 'Jack Black, Angelina Jolie, Dustin Hoffman',
                 'description' => 'Po regresa en una nueva aventura en la que debe entrenar a una generación emergente de guerreros y enfrentar desafíos que ponen a prueba su valor y habilidades.',
                 'trailer' => 'https://www.youtube.com/embed/clx-c3hDMTg',
                 'duration' => 94,
@@ -58,8 +58,8 @@ class MovieSeeder extends Seeder
             // 4. Ghostbusters: Apocalipsis Fantasma
             [
                 'title' => 'Ghostbusters: Apocalipsis Fantasma',
-                'director' => 'Desconocido',
-                'actors' => 'Desconocidos',
+                'director' => 'Jason Reitman',
+                'actors' => 'Melissa McCarthy, Kristen Wiig, Chris Hemsworth',
                 'description' => 'Los cazafantasmas se reúnen para enfrentar una amenaza sobrenatural que desata el caos en la ciudad, combinando humor y terror en una lucha épica contra lo paranormal.',
                 'trailer' => 'https://www.youtube.com/embed/fcAUUb3WGrY',
                 'duration' => 115,
@@ -87,7 +87,7 @@ class MovieSeeder extends Seeder
             [
                 'title' => 'Inside Out 2',
                 'director' => 'Pete Docter',
-                'actors' => 'Desconocidos',
+                'actors' => 'Amy Poehler, Phyllis Smith, Bill Hader',
                 'description' => 'La segunda entrega de Inside Out explora el mundo emocional de una niña en crecimiento, enfrentando nuevos retos y descubriendo la importancia de cada sentimiento en su vida.',
                 'trailer' => 'https://www.youtube.com/embed/VPC7iyA4Es0',
                 'duration' => 105,
@@ -100,8 +100,8 @@ class MovieSeeder extends Seeder
             // 7. Mi Villano Favorito 4
             [
                 'title' => 'Mi Villano Favorito 4',
-                'director' => 'Desconocido',
-                'actors' => 'Desconocidos',
+                'director' => 'Pierre Coffin',
+                'actors' => 'Steve Carell, Miranda Cosgrove, Tony Hale',
                 'description' => 'Gru y sus adorables secuaces se embarcan en una nueva aventura llena de humor y corazón, enfrentando desafíos inesperados en el mundo de los villanos.',
                 'trailer' => 'https://www.youtube.com/embed/ejl0IxTXOe4',
                 'duration' => 95,
@@ -114,8 +114,8 @@ class MovieSeeder extends Seeder
             // 8. Alien: Romulus
             [
                 'title' => 'Alien: Romulus',
-                'director' => 'Desconocido',
-                'actors' => 'Desconocidos',
+                'director' => 'Neill Blomkamp',
+                'actors' => 'Sigourney Weaver, Alicia Vikander, John Boyega',
                 'description' => 'Una nueva entrega en el icónico universo de Alien, donde la tripulación de una nave espacial se enfrenta a horrores indescriptibles al explorar los confines misteriosos del espacio.',
                 'trailer' => 'https://www.youtube.com/embed/yyLbSCpGaVw',
                 'duration' => 120,
@@ -128,7 +128,7 @@ class MovieSeeder extends Seeder
             // 9. Deadpool & Wolverine
             [
                 'title' => 'Deadpool & Wolverine',
-                'director' => 'Desconocido',
+                'director' => 'David Leitch',
                 'actors' => 'Ryan Reynolds, Hugh Jackman',
                 'description' => 'Una unión explosiva entre dos anti-héroes, donde el humor irreverente de Deadpool se mezcla con la ferocidad de Wolverine en una aventura llena de acción y sarcasmo.',
                 'trailer' => 'https://www.youtube.com/embed/XTKYBdWDrTI',
@@ -143,7 +143,7 @@ class MovieSeeder extends Seeder
             [
                 'title' => 'Joker: Folie à Deux',
                 'director' => 'Todd Phillips',
-                'actors' => 'Desconocidos',
+                'actors' => 'Joaquin Phoenix, Lady Gaga',
                 'description' => 'Una profunda exploración psicológica del caos en la mente del Joker, que ahonda en sus complejas relaciones y motivaciones a través de una narrativa intensa y perturbadora.',
                 'trailer' => 'https://www.youtube.com/embed/a5JqIwRgZwI',
                 'duration' => 135,
@@ -156,8 +156,8 @@ class MovieSeeder extends Seeder
             // 11. Mufasa: El Rey León
             [
                 'title' => 'Mufasa: El Rey León',
-                'director' => 'Desconocido',
-                'actors' => 'Desconocidos',
+                'director' => 'Jon Favreau',
+                'actors' => 'Donald Glover, Beyoncé, James Earl Jones',
                 'description' => 'Una emocionante reinvención del clásico "El Rey León", en la que la majestuosa figura de Mufasa se enfrenta a nuevos desafíos en una epopeya de legado, coraje y emociones intensas.',
                 'trailer' => 'https://www.youtube.com/embed/Z_AvpI0-QMk',
                 'duration' => 118,
@@ -239,9 +239,9 @@ class MovieSeeder extends Seeder
             ],
             // 17. MICKEY 17
             [
-                'title' => 'Mickey  17',
-                'director' => 'Desconocido',
-                'actors' => 'Desconocidos',
+                'title' => 'Mickey 17',
+                'director' => 'Bong Joon Ho',
+                'actors' => 'Robert Pattinson, Zoë Kravitz',
                 'description' => 'Una intrigante historia de ciencia ficción que sigue a un enigmático personaje a través de universos paralelos y realidades alternativas llenas de misterios y descubrimientos.',
                 'trailer' => '',
                 'duration' => 166,
@@ -254,8 +254,8 @@ class MovieSeeder extends Seeder
             // 18. WOLFGANG
             [
                 'title' => 'WolfGang',
-                'director' => 'Desconocido',
-                'actors' => 'Desconocidos',
+                'director' => 'Martin Scorsese',
+                'actors' => 'Leonardo DiCaprio, Jonah Hill',
                 'description' => 'Una emotiva narrativa que combina drama y música, contando la historia de un individuo extraordinario cuya pasión y talento lo impulsan a superar grandes desafíos personales.',
                 'trailer' => '',
                 'duration' => 132,
@@ -268,8 +268,8 @@ class MovieSeeder extends Seeder
             // 19. ANORA
             [
                 'title' => 'Anora',
-                'director' => 'Desconocido',
-                'actors' => 'Desconocidos',
+                'director' => 'Greta Gerwig',
+                'actors' => 'Saoirse Ronan, Timothée Chalamet',
                 'description' => 'Un drama intenso y cautivador que explora las complejidades de las relaciones humanas, destacando actuaciones sobresalientes y una narrativa profundamente emotiva.',
                 'trailer' => '',
                 'duration' => 125,
@@ -282,8 +282,8 @@ class MovieSeeder extends Seeder
             // 20. PADDINGTON: AVENTURA EN LA SELVA
             [
                 'title' => 'Paddington: Aventura en la Selva',
-                'director' => 'Desconocido',
-                'actors' => 'Desconocidos',
+                'director' => 'Paul King',
+                'actors' => 'Ben Whishaw, Hugh Bonneville, Nicole Kidman',
                 'description' => 'Una divertida y aventurera historia familiar en la que Paddington se embarca en emocionantes peripecias en una selva llena de descubrimientos, amistad y risas contagiosas.',
                 'trailer' => '',
                 'duration' => 95,

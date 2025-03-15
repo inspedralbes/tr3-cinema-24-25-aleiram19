@@ -2,8 +2,8 @@
   <section class="py-20">
     <div class="container mx-auto px-4">
       <div class="text-center mb-14">
-        <h1 class="text-4xl font-extrabold text-white uppercase tracking-wide">CARTELERA</h1>
-        <div class="h-1 w-24 bg-blue-600 mx-auto mt-4 rounded"></div>
+        <h1 class="text-4xl font-extrabold text-white uppercase tracking-wide animate-fade-in">CARTELERA</h1>
+        <div class="h-1 w-24 bg-gradient-to-r from-blue-600 to-blue-400 mx-auto mt-4 rounded shadow-md"></div>
         <p class="text-gray-300 mt-4">Disfruta de los mejores estrenos en CineXeperience</p>
       </div>
       
@@ -23,10 +23,10 @@
           <button 
             @click="$emit('filtrar', null)"
             :class="[
-              'px-4 py-2 rounded-full text-sm font-medium transition-all',
+              'px-4 py-2 rounded-full text-sm font-medium transition-all shadow-md',
               !filtroActivo 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' 
+                : 'bg-gradient-to-r from-gray-800 to-gray-700 text-gray-300 hover:from-gray-700 hover:to-gray-600'
             ]"
           >
             Todos
@@ -36,10 +36,10 @@
             :key="genero.id"
             @click="$emit('filtrar', genero.id)"
             :class="[
-              'px-4 py-2 rounded-full text-sm font-medium transition-all',
+              'px-4 py-2 rounded-full text-sm font-medium transition-all shadow-md',
               filtroActivo === genero.id 
-                ? 'bg-blue-500 text-white' 
-                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                ? 'bg-gradient-to-r from-blue-600 to-blue-500 text-white' 
+                : 'bg-gradient-to-r from-gray-800 to-gray-700 text-gray-300 hover:from-gray-700 hover:to-gray-600'
             ]"
           >
             {{ genero.name }}
@@ -52,7 +52,7 @@
         <div 
           v-for="pelicula in peliculas" 
           :key="pelicula.id"
-          class="rounded-lg overflow-hidden bg-blue-900/50 shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-2"
+          class="rounded-lg overflow-hidden bg-gradient-to-br from-blue-900/50 to-blue-800/60 shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-2"
         >
           <div class="relative overflow-hidden h-[360px] md:h-[320px]">
             <!-- Fondo como respaldo -->
@@ -69,13 +69,13 @@
               />
             </div>
             <div class="absolute inset-0 bg-gradient-to-b from-blue-900/10 to-blue-900/90 flex flex-col justify-end items-center p-6 opacity-0 hover:opacity-100 transition-opacity duration-300">
-              <div class="absolute top-2 right-2 bg-blue-900/80 text-white rounded-full px-3 py-1 font-bold flex items-center gap-1">
+              <div class="absolute top-2 right-2 bg-gradient-to-r from-blue-900/80 to-blue-800/80 text-white rounded-full px-3 py-1 font-bold flex items-center gap-1 shadow-md">
                 <i class="fas fa-star text-yellow-400"></i>
                 <span>{{ Math.floor(Math.random() * 3) + 7 }}.{{ Math.floor(Math.random() * 10) }}</span>
               </div>
               <NuxtLink 
-                :to="'/cartelera/select-movie?id=' + pelicula.id" 
-                class="bg-blue-600 text-white uppercase font-bold py-2 px-6 rounded-full mb-2 hover:bg-blue-500 hover:scale-105 transition-all"
+                :to="'/select-movie?id=' + pelicula.id" 
+                class="bg-gradient-to-r from-blue-600 to-blue-500 text-white uppercase font-bold py-2 px-6 rounded-full mb-2 hover:from-blue-500 hover:to-blue-400 hover:scale-105 transition-all shadow-md"
               >
                 COMPRAR
               </NuxtLink>
@@ -91,8 +91,8 @@
           <div class="p-4">
             <h3 class="font-bold text-white text-lg mb-1">{{ pelicula.title }}</h3>
             <div class="flex justify-between items-center">
-              <span class="text-gray-400 text-sm">{{ pelicula.duration }} min</span>
-              <span class="bg-blue-600 text-white rounded-full px-3 py-0.5 text-xs font-medium">{{ getGeneroNombre(pelicula.movie_genre_id) }}</span>
+              <span class="text-gray-400 text-sm flex items-center"><i class="fas fa-clock mr-1 text-blue-400"></i>{{ pelicula.duration }} min</span>
+              <span class="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-full px-3 py-0.5 text-xs font-medium shadow-sm">{{ getGeneroNombre(pelicula.movie_genre_id) }}</span>
             </div>
           </div>
         </div>
@@ -105,18 +105,23 @@
     </div>
     
     <!-- Modal para trailer -->
-    <div v-if="trailerActivo" class="fixed inset-0 bg-black/90 flex justify-center items-center z-50" @click="$emit('cerrarTrailer')">
-      <div class="relative w-[90%] max-w-4xl" style="aspect-ratio: 16/9;">
-        <button class="absolute -top-10 right-0 text-white text-2xl bg-transparent border-none cursor-pointer" @click.stop="$emit('cerrarTrailer')">
+    <div v-if="trailerActivo" class="fixed inset-0 bg-black/90 flex justify-center items-center z-50 backdrop-blur-sm" @click="$emit('cerrarTrailer')">
+      <div class="relative w-[90%] max-w-4xl transform transition-all duration-300 scale-100" style="aspect-ratio: 16/9;">
+        <button 
+          class="absolute -top-12 right-0 text-white text-2xl bg-gradient-to-r from-red-600/30 to-red-700/30 rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-500/50 transition-all duration-300 cursor-pointer shadow-lg" 
+          @click.stop="$emit('cerrarTrailer')"
+        >
           <i class="fas fa-times"></i>
         </button>
-        <iframe 
-          :src="trailerUrl + '?autoplay=1'" 
-          frameborder="0" 
-          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
-          allowfullscreen
-          class="w-full h-full"
-        ></iframe>
+        <div class="w-full h-full shadow-2xl rounded-lg overflow-hidden">
+          <iframe 
+            :src="trailerUrl + '?autoplay=1'" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen
+            class="w-full h-full"
+          ></iframe>
+        </div>
       </div>
     </div>
   </section>

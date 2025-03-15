@@ -1,30 +1,38 @@
 <template>
-  <div class="min-h-screen bg-[#051D40] py-8">
+  <div class="min-h-screen bg-gradient-to-b from-[#051D40] to-[#03152E] py-8">
     <LandingPageNavBar />
     <div class="container mx-auto px-4 pt-24">
       <h1 class="text-3xl font-bold text-white mb-8">Seleccionar Función</h1>
       
       <!-- Mensaje de carga -->
-      <div v-if="loading" class="flex justify-center items-center py-12">
-        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-        <p class="ml-4 text-white">Cargando información de la película...</p>
+      <div v-if="loading" class="flex flex-col justify-center items-center py-16">
+        <div class="relative w-16 h-16 mb-4">
+          <div class="animate-spin rounded-full h-16 w-16 border-4 border-blue-600/30 border-t-blue-600"></div>
+          <div class="absolute inset-0 flex items-center justify-center">
+            <i class="fas fa-film text-blue-400 text-xl animate-pulse"></i>
+          </div>
+        </div>
+        <p class="text-white text-lg">Cargando información de la película...</p>
       </div>
       
       <!-- Mensaje de error -->
-      <div v-else-if="error" class="bg-red-500/20 border border-red-500 text-white p-4 rounded-lg mb-8">
-        <p class="font-medium">{{ error }}</p>
+      <div v-else-if="error" class="bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/50 text-white p-6 rounded-lg mb-8 shadow-md">
+        <div class="flex items-center mb-4">
+          <i class="fas fa-exclamation-circle text-red-400 text-2xl mr-3"></i>
+          <p class="font-medium text-lg">{{ error }}</p>
+        </div>
         <button 
           @click="loadMovieData" 
-          class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
-          Reintentar
+          class="mt-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-lg hover:from-blue-500 hover:to-blue-400 transition-all duration-300 shadow-md flex items-center">
+          <i class="fas fa-sync-alt mr-2"></i> Reintentar
         </button>
       </div>
       
       <!-- Contenido principal (solo se muestra si no hay error y no está cargando) -->
       <div v-if="!loading && !error">
         <!-- Selector de fecha -->
-        <div class="bg-blue-900/50 backdrop-blur-sm rounded-xl p-6 mb-8">
-        <div class="flex flex-wrap gap-4">
+        <div class="bg-gradient-to-br from-blue-900/50 to-blue-800/60 backdrop-blur-sm rounded-xl p-6 mb-8 shadow-xl">
+        <div class="flex flex-wrap gap-4 justify-center">
           <button 
             v-for="date in availableDates" 
             :key="date.value"
@@ -44,19 +52,23 @@
       </div>
 
       <!-- Película seleccionada -->
-      <div v-if="selectedMovie" class="bg-blue-900/50 backdrop-blur-sm rounded-xl overflow-hidden mb-8">
+      <div v-if="selectedMovie" class="bg-gradient-to-br from-blue-900/50 to-blue-800/60 backdrop-blur-sm rounded-xl overflow-hidden mb-8 shadow-xl">
         <div class="flex flex-col md:flex-row">
           <!-- Imagen de la película -->
-          <div class="md:w-1/3 relative">
-            <div v-if="currentMovie && currentMovie.image" class="aspect-[2/3] bg-gradient-to-r from-blue-800 to-blue-600 relative overflow-hidden">
+          <div class="md:w-2/5 relative">
+            <div v-if="currentMovie && currentMovie.image" class="h-full bg-gradient-to-r from-blue-800 to-blue-600 relative overflow-hidden">
               <img 
                 :src="currentMovie.image.startsWith('/') ? currentMovie.image : `/storage/movies/${currentMovie.image}`" 
                 :alt="selectedMovie.title" 
                 class="absolute inset-0 w-full h-full object-cover"
                 @error="handleImageError"
               />
+              <!-- Badge del género -->
+              <div class="absolute top-2 right-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs px-3 py-1 rounded-full shadow-md backdrop-blur-sm">
+                {{ selectedMovie.genre }}
+              </div>
             </div>
-            <div v-else class="aspect-[2/3] bg-gradient-to-r from-blue-800 to-blue-600">
+            <div v-else class="h-full bg-gradient-to-r from-blue-800 to-blue-600">
               <span class="absolute inset-0 flex items-center justify-center text-white font-bold text-xl">
                 {{ selectedMovie.title }}
               </span>
@@ -64,15 +76,19 @@
           </div>
           
           <!-- Detalles de la película -->
-          <div class="md:w-2/3 p-6">
+          <div class="md:w-3/5 p-6">
             <div class="flex justify-between items-start">
               <div>
-                <h2 class="text-2xl font-bold text-white mb-2">{{ selectedMovie.title }}</h2>
-                <p class="text-gray-300 mb-4">{{ selectedMovie.genre }}</p>
+                <h2 class="text-3xl font-bold text-white mb-2 animate-fade-in">{{ selectedMovie.title }}</h2>
+                <div class="flex items-center gap-3 mb-4">
+                  <span class="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs px-3 py-1 rounded-full shadow-md">{{ selectedMovie.genre }}</span>
+                  <span class="text-yellow-400 flex items-center"><i class="fas fa-star mr-1"></i>{{ selectedMovie.rating }}</span>
+                  <span class="text-gray-300 text-sm flex items-center"><i class="fas fa-clock mr-1"></i>{{ selectedMovie.duration }}</span>
+                </div>
               </div>
               <button 
                 v-if="currentMovie && currentMovie.trailer" 
-                class="bg-blue-700 text-white px-4 py-2 rounded flex items-center gap-2 hover:bg-blue-600 transition-colors"
+                class="bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:from-red-500 hover:to-red-600 transition-all duration-300 shadow-lg transform hover:scale-105"
                 @click="openTrailer(currentMovie.trailer)"
               >
                 <i class="fas fa-play-circle"></i> Ver Trailer
@@ -80,32 +96,53 @@
             </div>
             
             <!-- Descripción -->
-            <div class="mb-6 bg-blue-900/40 p-4 rounded-lg">
-              <h3 class="text-lg font-semibold text-white mb-2">Sinopsis</h3>
+            <div class="mb-6 bg-gradient-to-b from-blue-900/40 to-blue-800/40 p-5 rounded-lg shadow-inner">
+              <h3 class="text-lg font-semibold text-white mb-2 flex items-center"><i class="fas fa-file-alt mr-2 text-blue-400"></i>Sinopsis</h3>
               <p class="text-gray-300 text-sm leading-relaxed">
-                {{ currentMovie?.description || 'No hay descripción disponible para esta película.' }}
+                {{ selectedMovie?.description || currentMovie?.description || 'No hay descripción disponible para esta película.' }}
+              </p>
+            </div>
+            
+            <!-- Director y Actores -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div class="bg-gradient-to-b from-blue-900/40 to-blue-800/40 p-5 rounded-lg shadow-inner">
+                <h3 class="text-lg font-semibold text-white mb-2 flex items-center"><i class="fas fa-video mr-2 text-blue-400"></i>Director</h3>
+                <p class="text-gray-300 text-sm">{{ selectedMovie?.director || currentMovie?.director || 'No disponible' }}</p>
+              </div>
+              <div class="bg-gradient-to-b from-blue-900/40 to-blue-800/40 p-5 rounded-lg shadow-inner">
+                <h3 class="text-lg font-semibold text-white mb-2 flex items-center"><i class="fas fa-users mr-2 text-blue-400"></i>Reparto</h3>
+                <p class="text-gray-300 text-sm">{{ selectedMovie?.actors || currentMovie?.actors || 'No disponible' }}</p>
+              </div>
+            </div>
+            
+            <!-- Fecha de estreno -->
+            <div class="mb-6 bg-gradient-to-b from-blue-900/40 to-blue-800/40 p-5 rounded-lg shadow-inner">
+              <h3 class="text-lg font-semibold text-white mb-2 flex items-center"><i class="fas fa-calendar-day mr-2 text-blue-400"></i>Fecha de estreno</h3>
+              <p class="text-gray-300 text-sm">
+                {{ (selectedMovie?.release_date || currentMovie?.release_date) ? new Date(selectedMovie?.release_date || currentMovie?.release_date).toLocaleDateString('es-ES', {day: 'numeric', month: 'long', year: 'numeric'}) : 'No disponible' }}
               </p>
             </div>
             
             <div class="mb-6">
-              <h3 class="text-lg font-semibold text-white mb-3">Horarios Disponibles</h3>
-              <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                <button 
-                  v-for="time in selectedMovie.times" 
-                  :key="time"
-                  @click="selectShowtime(selectedMovie, time)"
-                  class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"
-                >
-                  <i class="fas fa-clock"></i>
-                  {{ time }}
-                </button>
-              </div>
+            <h3 class="text-lg font-semibold text-white mb-3 flex items-center"><i class="fas fa-ticket-alt mr-2 text-blue-400"></i>Horarios Disponibles</h3>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+            <button 
+              v-for="time in selectedMovie.times" 
+              :key="time"
+              @click="selectShowtime(selectedMovie, time)"
+              class="px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-500 hover:to-blue-600 transition-all duration-300 transform hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+            >
+            <i class="fas fa-clock"></i>
+            {{ time }}
+            </button>
+            </div>
             </div>
 
-            <div class="flex items-center gap-4 text-gray-300 text-sm">
-              <span><i class="fas fa-film mr-2"></i>{{ selectedMovie.duration }}</span>
-              <span><i class="fas fa-star text-yellow-500 mr-2"></i>{{ selectedMovie.rating }}</span>
-              <span><i class="fas fa-closed-captioning mr-2"></i>{{ selectedMovie.language }}</span>
+            <div class="flex flex-wrap items-center gap-4 text-gray-300 text-sm bg-gradient-to-r from-blue-900/30 to-blue-800/30 p-4 rounded-lg shadow-inner">
+              <span class="flex items-center"><i class="fas fa-film mr-2 text-blue-400"></i>{{ selectedMovie.duration }}</span>
+              <span class="flex items-center"><i class="fas fa-star text-yellow-500 mr-2"></i>{{ selectedMovie.rating }}</span>
+              <span class="flex items-center"><i class="fas fa-closed-captioning mr-2 text-blue-400"></i>{{ selectedMovie.language }}</span>
+              <span class="flex items-center"><i class="fas fa-calendar-alt mr-2 text-blue-400"></i>{{ selectedDate }}</span>
             </div>
           </div>
         </div>
@@ -113,23 +150,40 @@
 
       <!-- Lista de películas si no hay una seleccionada -->
       <div v-else-if="!selectedMovie && moviesForSelectedDate.length" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <h2 class="text-2xl font-bold text-white mb-6 col-span-full flex items-center">
+          <i class="fas fa-calendar-day text-blue-400 mr-3"></i>
+          Películas disponibles para {{ new Date(selectedDate).toLocaleDateString('es-ES', {weekday: 'long', day: 'numeric', month: 'long'}) }}
+        </h2>
         <div 
           v-for="movie in moviesForSelectedDate" 
           :key="movie.id" 
           @click="selectMovie(movie)"
-          class="bg-blue-900/50 backdrop-blur-sm rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
+          class="bg-gradient-to-br from-blue-900/50 to-blue-800/60 backdrop-blur-sm rounded-xl overflow-hidden cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-xl"
         >
-          <div class="aspect-[16/9] bg-gradient-to-r from-blue-800 to-blue-600 relative">
-            <span class="absolute inset-0 flex items-center justify-center text-white font-bold text-xl">
-              {{ movie.title }}
-            </span>
+          <div class="aspect-[16/9] bg-gradient-to-r from-blue-800 to-blue-600 relative overflow-hidden">
+            <!-- Badge del género -->
+            <div class="absolute top-2 right-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-xs px-3 py-1 rounded-full z-10 shadow-md backdrop-blur-sm">
+              {{ movie.genre }}
+            </div>
+            <div v-if="getMovieById(movie.id) && getMovieById(movie.id).image" class="absolute inset-0 w-full h-full">
+              <img 
+                :src="getMovieById(movie.id).image.startsWith('/') ? getMovieById(movie.id).image : `/storage/movies/${getMovieById(movie.id).image}`" 
+                :alt="movie.title" 
+                class="w-full h-full object-cover opacity-70 hover:opacity-100 transition-opacity"
+                @error="handleImageError"
+              />
+            </div>
+            <!-- Solo mostrar el título como texto si no hay imagen o hay error -->
+            <div v-if="!getMovieById(movie.id) || !getMovieById(movie.id).image" class="absolute inset-0 flex items-center justify-center">
+              <span class="text-white font-bold text-xl">{{ movie.title }}</span>
+            </div>
           </div>
-          <div class="p-4">
-            <h3 class="text-xl font-bold text-white mb-2">{{ movie.title }}</h3>
-            <p class="text-gray-300 mb-4">{{ movie.genre }}</p>
-            <div class="flex items-center gap-4 text-gray-400 text-sm">
-              <span><i class="fas fa-clock mr-1"></i>{{ movie.duration }}</span>
-              <span><i class="fas fa-star text-yellow-500 mr-1"></i>{{ movie.rating }}</span>
+          <div class="p-5 relative">
+            <h3 class="text-xl font-bold text-white mb-3">{{ movie.title }}</h3>
+            <div class="flex items-center gap-4 text-gray-300 text-sm">
+              <span class="flex items-center"><i class="fas fa-clock text-blue-400 mr-1"></i>{{ movie.duration }}</span>
+              <span class="flex items-center"><i class="fas fa-star text-yellow-500 mr-1"></i>{{ movie.rating }}</span>
+              <span class="flex items-center"><i class="fas fa-language text-blue-400 mr-1"></i>{{ movie.language || 'ESP' }}</span>
             </div>
           </div>
         </div>
@@ -138,21 +192,23 @@
     </div>
     
     <!-- Modal para mostrar el trailer -->
-    <div v-if="showTrailer" class="fixed inset-0 bg-black/90 flex justify-center items-center z-50" @click="closeTrailer">
-      <div class="relative w-[90%] max-w-4xl" style="aspect-ratio: 16/9;">
+    <div v-if="showTrailer" class="fixed inset-0 bg-black/90 flex justify-center items-center z-50 backdrop-blur-sm" @click="closeTrailer">
+      <div class="relative w-[90%] max-w-4xl transform transition-all duration-300 scale-100" style="aspect-ratio: 16/9;">
         <button 
-          class="absolute -top-10 right-0 text-white text-2xl bg-transparent border-none cursor-pointer" 
+          class="absolute -top-12 right-0 text-white text-2xl bg-gradient-to-r from-red-600/30 to-red-700/30 rounded-full w-10 h-10 flex items-center justify-center hover:bg-red-500/50 transition-all duration-300 cursor-pointer shadow-lg" 
           @click.stop="closeTrailer"
         >
           <i class="fas fa-times"></i>
         </button>
-        <iframe 
-          :src="trailerUrl + '?autoplay=1'" 
-          frameborder="0" 
-          allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
-          allowfullscreen
-          class="w-full h-full"
-        ></iframe>
+        <div class="w-full h-full shadow-2xl rounded-lg overflow-hidden">
+          <iframe 
+            :src="trailerUrl + '?autoplay=1'" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
+            allowfullscreen
+            class="w-full h-full"
+          ></iframe>
+        </div>
       </div>
     </div>
   </div>
@@ -190,14 +246,56 @@ const genresStore = useGenresStore();
 // Películas disponibles
 const allMovies = computed(() => moviesStore.movies);
 
+// Películas filtradas para la fecha seleccionada
+const moviesForSelectedDate = computed(() => {
+  if (!allMovies.value.length) return [];
+  
+  // En un sistema real, filtrarías por fecha aquí
+  // Por ahora, devolvemos todas para demostración
+  return allMovies.value.map(movie => ({
+    id: movie.id,
+    title: movie.title,
+    genre: genresStore.genres.find(g => g.id === movie.movie_genre_id)?.name || 'Desconocido',
+    duration: `${movie.duration} min`,
+    rating: (Math.floor(Math.random() * 3) + 7) + '.' + (Math.floor(Math.random() * 10)),
+    language: movie.language || 'ESP',
+    times: ['14:30', '17:00', '19:30', '22:00'], // Horarios de ejemplo
+    director: movie.director,
+    actors: movie.actors,
+    description: movie.description,
+    release_date: movie.release_date
+  }));
+});
+
 // Película actual basada en el ID
 const currentMovie = computed(() => {
   if (!movieId.value || !allMovies.value.length) return null;
   return allMovies.value.find(movie => movie.id === parseInt(movieId.value));
 });
 
+// Función para obtener detalles de una película por ID
+const getMovieById = (id) => {
+  if (!allMovies.value.length) return null;
+  return allMovies.value.find(movie => movie.id === parseInt(id));
+};
+
 const selectMovie = (movie) => {
-  selectedMovie.value = movie;
+  const fullMovie = getMovieById(movie.id);
+  if (fullMovie) {
+    // Establece el ID de la película para que currentMovie se actualice
+    movieId.value = movie.id;
+    
+    // Construir el objeto selectedMovie con todos los datos
+    selectedMovie.value = {
+      ...movie,
+      director: fullMovie.director,
+      actors: fullMovie.actors,
+      description: fullMovie.description,
+      release_date: fullMovie.release_date
+    };
+  } else {
+    selectedMovie.value = movie;
+  }
 };
 
 // Cargar datos de películas
@@ -235,7 +333,11 @@ const loadMovieData = async () => {
           duration: `${foundMovie.duration} min`,
           rating: (Math.floor(Math.random() * 3) + 7) + '.' + (Math.floor(Math.random() * 10)), // Simulamos un rating
           language: foundMovie.language || 'ESP',
-          times: ['14:30', '17:00', '19:30', '22:00'] // Horarios de ejemplo
+          times: ['14:30', '17:00', '19:30', '22:00'], // Horarios de ejemplo
+          director: foundMovie.director,
+          actors: foundMovie.actors,
+          description: foundMovie.description,
+          release_date: foundMovie.release_date
         };
       } else {
         error.value = 'Película no encontrada';
