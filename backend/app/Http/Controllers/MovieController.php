@@ -135,9 +135,8 @@ class MovieController extends Controller
      */
     public function getCurrentMovies()
     {
-        $movies = Movie::whereHas('screenings', function($query) {
-            $query->where('date_time', '>', now());
-        })->with('movieGenre')->get();
+        // Obtener todas las películas sin filtro de proyecciones
+        $movies = Movie::with('movieGenre')->get();
         
         return response()->json($movies);
     }

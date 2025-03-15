@@ -74,7 +74,7 @@
                 <span>{{ Math.floor(Math.random() * 3) + 7 }}.{{ Math.floor(Math.random() * 10) }}</span>
               </div>
               <NuxtLink 
-                :to="'/select-movie?id=' + pelicula.id" 
+                :to="'/cartelera/select-movie?id=' + pelicula.id" 
                 class="bg-blue-600 text-white uppercase font-bold py-2 px-6 rounded-full mb-2 hover:bg-blue-500 hover:scale-105 transition-all"
               >
                 COMPRAR

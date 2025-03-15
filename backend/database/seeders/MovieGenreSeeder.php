@@ -20,10 +20,6 @@ class MovieGenreSeeder extends Seeder
             'Comedia',
             'Terror',
             'Drama',
-            'Acción/Historia',
-            'Fantasía/Romance',
-            'Drama/Música',
-            'Familiar/Aventura'
         ];
 
         // Insertar géneros únicos

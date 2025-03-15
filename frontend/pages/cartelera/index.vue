@@ -24,8 +24,8 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useMoviesStore } from '~/stores/movies';
-import { useGenresStore } from '~/stores/genres';
+import { useMoviesStore } from "@/stores/movies";
+import { useGenresStore } from '@/stores/genres';
 
 definePageMeta({
   title: 'Cartelera - CineXeperience',
@@ -33,7 +33,7 @@ definePageMeta({
 });
 
 // Importamos el componente de películas
-import PeliculasGridCartelera from '~/components/cartelera/PeliculasGrid.vue';
+import PeliculasGridCartelera from '@/components/cartelera/PeliculasGrid.vue';
 
 // Stores
 const moviesStore = useMoviesStore();

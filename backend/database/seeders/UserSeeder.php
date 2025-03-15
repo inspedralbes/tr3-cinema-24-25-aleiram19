@@ -23,26 +23,5 @@ class UserSeeder extends Seeder
             'created_at' => now(),
             'updated_at' => now(),
         ]);
-
-        // Sample customers
-        DB::table('users')->insert([
-            'name' => 'Customer 1',
-            'last_name' => '1',
-            'email' => 'customer1@example.com',
-            'password' => Hash::make('password'),
-            'role_id' => 2, // customer
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        DB::table('users')->insert([
-            'name' => 'Customer 2',
-            'last_name' => '2',
-            'email' => 'customer2@example.com',
-            'password' => Hash::make('password'),
-            'role_id' => 2, // customer
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
     }
 }

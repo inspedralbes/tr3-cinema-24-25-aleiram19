@@ -217,7 +217,7 @@ class MovieSeeder extends Seeder
                 'description' => 'Una epopeya histórica que narra la lucha de un general romano caído en desgracia, convertido en gladiador, en su camino hacia la venganza y la redención en el Coliseo.',
                 'trailer' => '',
                 'duration' => 155,
-                'movie_genre_id' => 7, // Acción/Historia
+                'movie_genre_id' => 2, // Acción
                 'release_date' => '2000-05-05',
                 'image' => '/img/img8.jpg',
                 'created_at' => now(),
@@ -231,7 +231,7 @@ class MovieSeeder extends Seeder
                 'description' => 'Una encantadora adaptación del clásico cuento, donde la belleza y la bestia descubren que el amor y la comprensión pueden transformar incluso las almas más endurecidas.',
                 'trailer' => '',
                 'duration' => 129,
-                'movie_genre_id' => 8, // Fantasía/Romance
+                'movie_genre_id' => 6, // Drama
                 'release_date' => '2023-11-01',
                 'image' => '/img/img9.jpeg',
                 'created_at' => now(),
@@ -259,7 +259,7 @@ class MovieSeeder extends Seeder
                 'description' => 'Una emotiva narrativa que combina drama y música, contando la historia de un individuo extraordinario cuya pasión y talento lo impulsan a superar grandes desafíos personales.',
                 'trailer' => '',
                 'duration' => 132,
-                'movie_genre_id' => 9, // Drama/Música
+                'movie_genre_id' => 6, // Drama
                 'release_date' => '2023-07-15',
                 'image' => '/img/img10.jpg',
                 'created_at' => now(),
@@ -287,7 +287,7 @@ class MovieSeeder extends Seeder
                 'description' => 'Una divertida y aventurera historia familiar en la que Paddington se embarca en emocionantes peripecias en una selva llena de descubrimientos, amistad y risas contagiosas.',
                 'trailer' => '',
                 'duration' => 95,
-                'movie_genre_id' => 10, // Familiar/Aventura
+                'movie_genre_id' => 4, // Comedia
                 'release_date' => '2023-08-01',
                 'image' => '/img/img12.jpg',
                 'created_at' => now(),
