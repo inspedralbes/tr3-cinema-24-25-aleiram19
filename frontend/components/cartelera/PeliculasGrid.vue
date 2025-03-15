@@ -1,76 +1,113 @@
 <template>
-  <section class="peliculas-section py-20">
+  <section class="py-20">
     <div class="container mx-auto px-4">
-      <div class="section-header text-center mb-14">
-        <h1 class="section-title">CARTELERA</h1>
-        <div class="divider mx-auto"></div>
+      <div class="text-center mb-14">
+        <h1 class="text-4xl font-extrabold text-white uppercase tracking-wide">CARTELERA</h1>
+        <div class="h-1 w-24 bg-blue-600 mx-auto mt-4 rounded"></div>
         <p class="text-gray-300 mt-4">Disfruta de los mejores estrenos en CineXeperience</p>
       </div>
       
       <!-- Filtros -->
-      <div class="filtros mb-10">
-        <div class="flex flex-wrap justify-center gap-4">
+      <div class="mb-10">
+        <div v-if="loading" class="text-center mb-8">
+          <div class="border-4 border-blue-600/30 border-t-blue-600 rounded-full w-10 h-10 animate-spin mx-auto"></div>
+          <p class="text-white mt-4">Cargando...</p>
+        </div>
+        <div v-else-if="error" class="text-center text-red-500 mb-8">
+          <p>{{ error }}</p>
+          <button @click="$emit('recargar')" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">
+            Reintentar
+          </button>
+        </div>
+        <div v-else class="flex flex-wrap justify-center gap-4">
           <button 
-            v-for="genero in generos" 
-            :key="genero"
-            @click="filtrarPorGenero(genero)"
+            @click="$emit('filtrar', null)"
             :class="[
               'px-4 py-2 rounded-full text-sm font-medium transition-all',
-              filtroGenero === genero 
+              !filtroActivo 
                 ? 'bg-blue-500 text-white' 
                 : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
             ]"
           >
-            {{ genero }}
+            Todos
+          </button>
+          <button 
+            v-for="genero in generos" 
+            :key="genero.id"
+            @click="$emit('filtrar', genero.id)"
+            :class="[
+              'px-4 py-2 rounded-full text-sm font-medium transition-all',
+              filtroActivo === genero.id 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+            ]"
+          >
+            {{ genero.name }}
           </button>
         </div>
       </div>
       
       <!-- Grid de películas -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div v-if="!loading && !error && peliculas" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         <div 
-          v-for="pelicula in peliculasFiltradas" 
+          v-for="pelicula in peliculas" 
           :key="pelicula.id"
-          class="pelicula-card"
+          class="rounded-lg overflow-hidden bg-blue-900/50 shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-2"
         >
-          <div class="pelicula-poster relative overflow-hidden">
-            <!-- Usamos un color de fondo como respaldo en caso de que la imagen no cargue -->
+          <div class="relative overflow-hidden h-[360px] md:h-[320px]">
+            <!-- Fondo como respaldo -->
             <div class="w-full h-full bg-gradient-to-b from-blue-900 to-gray-900">
-              <div class="pelicula-poster-placeholder flex items-center justify-center h-full">
-                <span class="text-white text-lg font-bold">{{ pelicula.titulo }}</span>
+              <div v-if="!pelicula.image || pelicula.image === ''" class="flex items-center justify-center h-full p-5 text-center">
+                <span class="text-white text-lg font-bold">{{ pelicula.title }}</span>
               </div>
+              <img 
+                v-else 
+                :src="pelicula.image.startsWith('/') ? pelicula.image : `/storage/movies/${pelicula.image}`" 
+                :alt="pelicula.title"
+                class="w-full h-full object-cover"
+                @error="$emit('imageError', $event)"
+              />
             </div>
-            <div class="pelicula-overlay">
-              <div class="rating">
+            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/10 to-blue-900/90 flex flex-col justify-end items-center p-6 opacity-0 hover:opacity-100 transition-opacity duration-300">
+              <div class="absolute top-2 right-2 bg-blue-900/80 text-white rounded-full px-3 py-1 font-bold flex items-center gap-1">
                 <i class="fas fa-star text-yellow-400"></i>
-                <span>{{ pelicula.calificacion }}</span>
+                <span>{{ Math.floor(Math.random() * 3) + 7 }}.{{ Math.floor(Math.random() * 10) }}</span>
               </div>
               <NuxtLink 
                 :to="'/select-movie?id=' + pelicula.id" 
-                class="btn-comprar"
+                class="bg-blue-600 text-white uppercase font-bold py-2 px-6 rounded-full mb-2 hover:bg-blue-500 hover:scale-105 transition-all"
               >
                 COMPRAR
               </NuxtLink>
-              <button class="btn-trailer" @click="verTrailer(pelicula.trailer)">
+              <button 
+                v-if="pelicula.trailer" 
+                class="text-white font-medium flex items-center gap-1 hover:text-blue-400 transition-colors" 
+                @click="$emit('verTrailer', pelicula.trailer)"
+              >
                 <i class="fas fa-play-circle"></i> Ver Trailer
               </button>
             </div>
           </div>
-          <div class="pelicula-info p-4">
-            <h3 class="pelicula-titulo font-bold text-white text-lg mb-1">{{ pelicula.titulo }}</h3>
+          <div class="p-4">
+            <h3 class="font-bold text-white text-lg mb-1">{{ pelicula.title }}</h3>
             <div class="flex justify-between items-center">
-              <span class="text-gray-400 text-sm">{{ pelicula.duracion }} min</span>
-              <span class="genero-badge">{{ pelicula.genero }}</span>
+              <span class="text-gray-400 text-sm">{{ pelicula.duration }} min</span>
+              <span class="bg-blue-600 text-white rounded-full px-3 py-0.5 text-xs font-medium">{{ getGeneroNombre(pelicula.movie_genre_id) }}</span>
             </div>
           </div>
         </div>
       </div>
+      
+      <!-- Mensaje si no hay películas -->
+      <div v-if="!loading && !error && peliculas && peliculas.length === 0" class="text-center text-white p-10">
+        <p class="text-xl">No se encontraron películas para el género seleccionado.</p>
+      </div>
     </div>
     
     <!-- Modal para trailer -->
-    <div v-if="trailerActivo" class="trailer-modal" @click="cerrarTrailer">
-      <div class="trailer-container">
-        <button class="cerrar-trailer" @click.stop="cerrarTrailer">
+    <div v-if="trailerActivo" class="fixed inset-0 bg-black/90 flex justify-center items-center z-50" @click="$emit('cerrarTrailer')">
+      <div class="relative w-[90%] max-w-4xl" style="aspect-ratio: 16/9;">
+        <button class="absolute -top-10 right-0 text-white text-2xl bg-transparent border-none cursor-pointer" @click.stop="$emit('cerrarTrailer')">
           <i class="fas fa-times"></i>
         </button>
         <iframe 
@@ -78,297 +115,53 @@
           frameborder="0" 
           allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" 
           allowfullscreen
+          class="w-full h-full"
         ></iframe>
       </div>
     </div>
   </section>
 </template>
 
-<script>
-export default {
-  name: "PeliculasGrid",
-  data() {
-    return {
-      filtroGenero: 'Todos',
-      trailerActivo: false,
-      trailerUrl: '',
-      generos: ['Todos', 'Acción', 'Aventura', 'Comedia', 'Drama', 'Ciencia Ficción', 'Terror'],
-      peliculas: [
-        {
-          id: 1,
-          titulo: 'Dune: Parte Dos',
-          genero: 'Ciencia Ficción',
-          duracion: 166,
-          calificacion: 8.7,
-          trailer: 'https://www.youtube.com/embed/aSgOPHG8d5g'
-        },
-        {
-          id: 2,
-          titulo: 'Godzilla y Kong: El Nuevo Imperio',
-          genero: 'Acción',
-          duracion: 115,
-          calificacion: 7.5,
-          trailer: 'https://www.youtube.com/embed/odM92ap8_c0'
-        },
-        {
-          id: 3,
-          titulo: 'Kung Fu Panda 4',
-          genero: 'Aventura',
-          duracion: 94,
-          calificacion: 7.2,
-          trailer: 'https://www.youtube.com/embed/clx-c3hDMTg'
-        },
-        {
-          id: 4,
-          titulo: 'Ghostbusters: Apocalipsis Fantasma',
-          genero: 'Comedia',
-          duracion: 115,
-          calificacion: 7.0,
-          trailer: 'https://www.youtube.com/embed/fcAUUb3WGrY'
-        },
-        {
-          id: 5,
-          titulo: 'Furiosa: De la Saga Mad Max',
-          genero: 'Acción',
-          duracion: 150,
-          calificacion: 8.2,
-          trailer: 'https://www.youtube.com/embed/GYyTdpR6HnQ'
-        },
-        {
-          id: 6,
-          titulo: 'Inside Out 2',
-          genero: 'Aventura',
-          duracion: 105,
-          calificacion: 8.5,
-          trailer: 'https://www.youtube.com/embed/VPC7iyA4Es0'
-        },
-        {
-          id: 7,
-          titulo: 'Mi Villano Favorito 4',
-          genero: 'Comedia',
-          duracion: 95,
-          calificacion: 7.8,
-          trailer: 'https://www.youtube.com/embed/ejl0IxTXOe4'
-        },
-        {
-          id: 8,
-          titulo: 'Alien: Romulus',
-          genero: 'Terror',
-          duracion: 120,
-          calificacion: 7.9,
-          trailer: 'https://www.youtube.com/embed/yyLbSCpGaVw'
-        },
-        {
-          id: 9,
-          titulo: 'Deadpool & Wolverine',
-          genero: 'Acción',
-          duracion: 128,
-          calificacion: 8.8,
-          trailer: 'https://www.youtube.com/embed/XTKYBdWDrTI'
-        },
-        {
-          id: 10,
-          titulo: 'Joker: Folie à Deux',
-          genero: 'Drama',
-          duracion: 135,
-          calificacion: 8.4,
-          trailer: 'https://www.youtube.com/embed/a5JqIwRgZwI'
-        },
-        {
-          id: 11,
-          titulo: 'Mufasa: El Rey León',
-          genero: 'Aventura',
-          duracion: 118,
-          calificacion: 7.7,
-          trailer: 'https://www.youtube.com/embed/Z_AvpI0-QMk'
-        },
-        {
-          id: 12,
-          titulo: 'Oppenheimer',
-          genero: 'Drama',
-          duracion: 180,
-          calificacion: 9.0,
-          trailer: 'https://www.youtube.com/embed/uYPbbksJxIg'
-        }
-      ]
-    };
+<script setup>
+// Props para recibir datos desde la página
+const props = defineProps({
+  peliculas: {
+    type: Array,
+    default: () => []
   },
-  computed: {
-    peliculasFiltradas() {
-      if (this.filtroGenero === 'Todos') {
-        return this.peliculas;
-      }
-      return this.peliculas.filter(pelicula => pelicula.genero === this.filtroGenero);
-    }
+  generos: {
+    type: Array,
+    default: () => []
   },
-  methods: {
-    filtrarPorGenero(genero) {
-      this.filtroGenero = genero;
-    },
-    verTrailer(url) {
-      this.trailerUrl = url;
-      this.trailerActivo = true;
-      document.body.style.overflow = 'hidden';
-    },
-    cerrarTrailer() {
-      this.trailerActivo = false;
-      this.trailerUrl = '';
-      document.body.style.overflow = 'auto';
-    }
+  loading: {
+    type: Boolean,
+    default: false
+  },
+  error: {
+    type: String,
+    default: ''
+  },
+  filtroActivo: {
+    type: [Number, null],
+    default: null
+  },
+  trailerActivo: {
+    type: Boolean,
+    default: false
+  },
+  trailerUrl: {
+    type: String,
+    default: ''
   }
+});
+
+// Emitir eventos para que la página los maneje
+defineEmits(['filtrar', 'verTrailer', 'cerrarTrailer', 'recargar', 'imageError']);
+
+// Métodos auxiliares que no requieren estado
+const getGeneroNombre = (generoId) => {
+  if (!generoId) return 'Sin clasificar';
+  const genero = props.generos.find(g => g.id === generoId);
+  return genero ? genero.name : 'Desconocido';
 };
 </script>
-
-<style scoped>
-.section-title {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: white;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.divider {
-  height: 4px;
-  width: 100px;
-  background: #0078C8;
-  margin-top: 15px;
-  border-radius: 2px;
-}
-
-.pelicula-card {
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: rgba(10, 40, 80, 0.5);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-}
-
-.pelicula-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0, 120, 200, 0.3);
-}
-
-.pelicula-poster {
-  height: 360px;
-}
-
-.pelicula-poster-placeholder {
-  text-align: center;
-  padding: 20px;
-}
-
-.pelicula-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(to bottom, rgba(5, 29, 64, 0.1), rgba(5, 29, 64, 0.9));
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 1.5rem;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.pelicula-poster:hover .pelicula-overlay {
-  opacity: 1;
-}
-
-.rating {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background-color: rgba(5, 29, 64, 0.8);
-  color: white;
-  border-radius: 20px;
-  padding: 4px 10px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.genero-badge {
-  background-color: #0078C8;
-  color: white;
-  border-radius: 20px;
-  padding: 2px 10px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-.btn-comprar {
-  background-color: #0078C8;
-  color: white;
-  text-transform: uppercase;
-  font-weight: bold;
-  padding: 8px 25px;
-  border-radius: 30px;
-  margin-bottom: 10px;
-  transition: all 0.3s ease;
-}
-
-.btn-comprar:hover {
-  background-color: #00A0E4;
-  transform: scale(1.05);
-}
-
-.btn-trailer {
-  color: white;
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: all 0.3s ease;
-}
-
-.btn-trailer:hover {
-  color: #00A0E4;
-}
-
-.trailer-modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.trailer-container {
-  position: relative;
-  width: 90%;
-  max-width: 900px;
-  aspect-ratio: 16 / 9;
-}
-
-.trailer-container iframe {
-  width: 100%;
-  height: 100%;
-}
-
-.cerrar-trailer {
-  position: absolute;
-  top: -40px;
-  right: 0;
-  color: white;
-  font-size: 1.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
-
-@media (max-width: 768px) {
-  .pelicula-poster {
-    height: 280px;
-  }
-}
-</style>

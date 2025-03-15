@@ -8,8 +8,18 @@ export default defineNuxtConfig({
     { src: '~/plugins/bootstrap.client.js', mode: 'client' }
   ],
   modules: [
-    '@nuxtjs/tailwindcss'
+    '@nuxtjs/tailwindcss',
+    '@pinia/nuxt'
   ],
+  nitro: {
+    devProxy: {
+      '/api': {
+        target: 'http://localhost:8000',
+        changeOrigin: true,
+        prependPath: true
+      }
+    }
+  },
   tailwindcss: {
     cssPath: '~/assets/css/main.css',
     configPath: '~/tailwind.config.js',
@@ -34,6 +44,11 @@ export default defineNuxtConfig({
       }
       // Se elimina la configuración de host para que Docker la maneje
     }
+  },
+  // Configuración de runtimeConfig para variables de entorno
+  runtimeConfig: {
+    public: {
+      apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:8000/api'
+    }
   }
-  // Se eliminó completamente la configuración de nitro
 })

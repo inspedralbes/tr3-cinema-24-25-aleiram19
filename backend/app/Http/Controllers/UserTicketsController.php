@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Booking;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +15,7 @@ class UserTicketsController extends Controller
     {
         $userId = Auth::id();
         
-        $tickets = Ticket::with(['screening.movie', 'screening.auditorium'])
+        $tickets = Ticket::with(['screening.movie', 'screening.auditorium', 'seat'])
             ->where('user_id', $userId)
             ->orderBy('purchase_date', 'desc')
             ->get();
@@ -35,32 +33,14 @@ class UserTicketsController extends Controller
         $ticket = Ticket::with([
             'screening.movie', 
             'screening.auditorium',
+            'seat',
             'user'
         ])
         ->where('id', $id)
         ->where('user_id', $userId)
         ->firstOrFail();
         
-        // Obtener los asientos asociados a esta entrada
-        $bookings = Booking::with('seat')
-            ->where('user_id', $userId)
-            ->where('screening_id', $ticket->screening_id)
-            ->get();
-            
-        $seats = $bookings->map(function($booking) {
-            return [
-                'id' => $booking->seat->id,
-                'number' => $booking->seat->number,
-                'booking_id' => $booking->id,
-                'booking_status' => $booking->status,
-                'is_vip' => strtoupper(substr($booking->seat->number, 0, 1)) === 'F'
-            ];
-        });
-        
-        return response()->json([
-            'ticket' => $ticket,
-            'seats' => $seats
-        ]);
+        return response()->json($ticket);
     }
     
     /**
@@ -74,7 +54,7 @@ class UserTicketsController extends Controller
         $hasFutureTickets = $this->userHasFutureTicketsExcept($userId, $screeningId);
         
         // Contar cuántas entradas tiene el usuario para esta sesión
-        $currentTicketsCount = Booking::where('user_id', $userId)
+        $currentTicketsCount = Ticket::where('user_id', $userId)
             ->where('screening_id', $screeningId)
             ->count();
             
@@ -92,7 +72,7 @@ class UserTicketsController extends Controller
      */
     private function userHasFutureTicketsExcept($userId, $currentScreeningId)
     {
-        $futureTickets = Booking::where('user_id', $userId)
+        $futureTickets = Ticket::where('user_id', $userId)
             ->where('screening_id', '!=', $currentScreeningId)
             ->whereHas('screening', function($query) {
                 $query->where('date_time', '>', now());

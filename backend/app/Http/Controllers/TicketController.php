@@ -1,9 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Models\Booking;
 use App\Models\Screening;
 use App\Models\Seat;
 use App\Models\Ticket;
@@ -12,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
-class BookingController extends Controller
+class TicketController extends Controller
 {
     /**
      * Reserva asientos para una sesión
@@ -42,8 +40,8 @@ class BookingController extends Controller
             }
             
             // VALIDACIÓN 2: Verificar que el usuario no tenga entradas para otra sesión futura
-            $hasFutureBooking = $this->userHasFutureBookings($userId, $screeningId);
-            if ($hasFutureBooking) {
+            $hasFutureTickets = $this->userHasFutureTickets($userId, $screeningId);
+            if ($hasFutureTickets) {
                 return response()->json([
                     'message' => 'Ya tienes entradas para otra sesión futura. No puedes reservar entradas para múltiples sesiones futuras a la vez.'
                 ], 400);
@@ -64,9 +62,9 @@ class BookingController extends Controller
             DB::beginTransaction();
             
             $totalPrice = 0;
-            $bookings = [];
+            $tickets = [];
             
-            // Crear reservas para cada asiento y calcular el precio total
+            // Crear tickets para cada asiento y calcular el precio total
             foreach ($seatIds as $seatId) {
                 $seat = Seat::findOrFail($seatId);
                 
@@ -74,35 +72,27 @@ class BookingController extends Controller
                 $price = $screening->calculatePrice($seat->number);
                 $totalPrice += $price;
                 
-                // Crear reserva
-                $booking = Booking::create([
+                // Crear ticket individual para este asiento
+                $ticket = Ticket::create([
                     'user_id' => $userId,
                     'screening_id' => $screeningId,
                     'seat_id' => $seatId,
-                    'status' => 'reserved'
+                    'status' => 'reserved',
+                    'total_pay' => $price,
+                    'purchase_date' => now()
                 ]);
                 
                 // Actualizar estado del asiento
                 $seat->update(['status' => 'busy']);
                 
-                $bookings[] = $booking;
+                $tickets[] = $ticket;
             }
-            
-            // Crear ticket
-            $ticket = Ticket::create([
-                'user_id' => $userId,
-                'screening_id' => $screeningId,
-                'quantity' => count($seatIds),
-                'total_pay' => $totalPrice,
-                'purchase_date' => now()
-            ]);
             
             DB::commit();
             
             return response()->json([
                 'message' => 'Reserva realizada con éxito',
-                'ticket' => $ticket,
-                'bookings' => $bookings,
+                'tickets' => $tickets,
                 'total_price' => $totalPrice
             ], 201);
             
@@ -116,14 +106,14 @@ class BookingController extends Controller
     }
     
     /**
-     * Verifica si el usuario tiene reservas futuras para otras sesiones
+     * Verifica si el usuario tiene tickets futuros para otras sesiones
      */
-    private function userHasFutureBookings($userId, $currentScreeningId)
+    private function userHasFutureTickets($userId, $currentScreeningId)
     {
         $now = Carbon::now();
         
-        // Obtener las reservas futuras del usuario que no sean para la sesión actual
-        $futureBookings = Booking::where('user_id', $userId)
+        // Obtener los tickets futuros del usuario que no sean para la sesión actual
+        $futureTickets = Ticket::where('user_id', $userId)
             ->where('status', 'reserved')
             ->whereHas('screening', function($query) use ($now, $currentScreeningId) {
                 $query->where('date_time', '>', $now)
@@ -131,120 +121,140 @@ class BookingController extends Controller
             })
             ->count();
             
-        return $futureBookings > 0;
+        return $futureTickets > 0;
     }
     
     /**
      * Confirma el pago y finaliza la reserva
      */
-    public function confirmBooking(Request $request)
+    public function confirmTickets(Request $request)
     {
         try {
             $request->validate([
-                'booking_ids' => 'required|array',
-                'booking_ids.*' => 'exists:bookings,id'
+                'ticket_ids' => 'required|array',
+                'ticket_ids.*' => 'exists:tickets,id'
             ]);
             
             $userId = Auth::id();
-            $bookingIds = $request->booking_ids;
+            $ticketIds = $request->ticket_ids;
             
-            // Verificar que las reservas pertenecen al usuario
-            $bookings = Booking::whereIn('id', $bookingIds)
+            // Verificar que los tickets pertenecen al usuario
+            $tickets = Ticket::whereIn('id', $ticketIds)
                 ->where('user_id', $userId)
                 ->where('status', 'reserved')
                 ->get();
                 
-            if ($bookings->count() != count($bookingIds)) {
+            if ($tickets->count() != count($ticketIds)) {
                 return response()->json([
-                    'message' => 'Algunas reservas no pertenecen al usuario o ya han sido confirmadas'
+                    'message' => 'Algunos tickets no pertenecen al usuario o ya han sido confirmados'
                 ], 400);
             }
             
             DB::beginTransaction();
             
-            // Actualizar estado de las reservas
-            foreach ($bookings as $booking) {
-                $booking->update(['status' => 'purchased']);
+            // Actualizar estado de los tickets
+            foreach ($tickets as $ticket) {
+                $ticket->update(['status' => 'purchased']);
             }
             
             DB::commit();
             
             return response()->json([
-                'message' => 'Reserva confirmada con éxito',
-                'bookings' => $bookings
+                'message' => 'Compra confirmada con éxito',
+                'tickets' => $tickets
             ], 200);
             
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Error al confirmar la reserva',
+                'message' => 'Error al confirmar la compra',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
     
     /**
-     * Cancela una reserva
+     * Cancela tickets reservados
      */
-    public function cancelBooking(Request $request)
+    public function cancelTickets(Request $request)
     {
         try {
             $request->validate([
-                'booking_ids' => 'required|array',
-                'booking_ids.*' => 'exists:bookings,id'
+                'ticket_ids' => 'required|array',
+                'ticket_ids.*' => 'exists:tickets,id'
             ]);
             
             $userId = Auth::id();
-            $bookingIds = $request->booking_ids;
+            $ticketIds = $request->ticket_ids;
             
-            // Verificar que las reservas pertenecen al usuario
-            $bookings = Booking::whereIn('id', $bookingIds)
+            // Verificar que los tickets pertenecen al usuario
+            $tickets = Ticket::whereIn('id', $ticketIds)
                 ->where('user_id', $userId)
                 ->where('status', 'reserved')
                 ->get();
                 
-            if ($bookings->count() != count($bookingIds)) {
+            if ($tickets->count() != count($ticketIds)) {
                 return response()->json([
-                    'message' => 'Algunas reservas no pertenecen al usuario o no pueden ser canceladas'
+                    'message' => 'Algunos tickets no pertenecen al usuario o no pueden ser cancelados'
                 ], 400);
             }
             
             DB::beginTransaction();
             
-            // Liberar asientos y eliminar reservas
-            foreach ($bookings as $booking) {
+            // Liberar asientos y eliminar tickets
+            foreach ($tickets as $ticket) {
                 // Liberar asiento
-                $seat = $booking->seat;
-                $seat->update(['status' => 'available']);
+                $seat = $ticket->seat;
+                if ($seat) {
+                    $seat->update(['status' => 'available']);
+                }
                 
-                // Eliminar reserva
-                $booking->delete();
-            }
-            
-            // Buscar y eliminar el ticket relacionado si todas las reservas para esa sesión se cancelaron
-            $screening = $bookings->first()->screening;
-            $remainingBookings = Booking::where('user_id', $userId)
-                ->where('screening_id', $screening->id)
-                ->count();
-                
-            if ($remainingBookings == 0) {
-                Ticket::where('user_id', $userId)
-                    ->where('screening_id', $screening->id)
-                    ->delete();
+                // Eliminar ticket
+                $ticket->delete();
             }
             
             DB::commit();
             
             return response()->json([
-                'message' => 'Reserva cancelada con éxito'
+                'message' => 'Tickets cancelados con éxito'
             ], 200);
             
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json([
-                'message' => 'Error al cancelar la reserva',
+                'message' => 'Error al cancelar los tickets',
                 'error' => $e->getMessage()
             ], 500);
         }
+    }
+    
+    /**
+     * Obtiene los tickets del usuario actual
+     */
+    public function getUserTickets()
+    {
+        $userId = Auth::id();
+        
+        $tickets = Ticket::with(['screening.movie', 'screening.auditorium', 'seat'])
+            ->where('user_id', $userId)
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
+        return response()->json($tickets);
+    }
+    
+    /**
+     * Obtiene detalles de un ticket específico
+     */
+    public function getTicketDetails($id)
+    {
+        $userId = Auth::id();
+        
+        $ticket = Ticket::with(['screening.movie', 'screening.auditorium', 'seat', 'user'])
+            ->where('id', $id)
+            ->where('user_id', $userId)
+            ->firstOrFail();
+            
+        return response()->json($ticket);
     }
 }

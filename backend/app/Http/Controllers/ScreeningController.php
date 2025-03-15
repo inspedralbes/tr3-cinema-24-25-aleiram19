@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Screening;
 use App\Models\Seat;
 use App\Models\Auditorium;
@@ -136,9 +135,9 @@ class ScreeningController extends Controller
         ]);
         
         // Si se cambia la fecha/hora, verificar que no haya conflictos
-        if (($request->date || $request->time) && $screening->bookings()->count() > 0) {
+        if (($request->date || $request->time) && $screening->hasTickets()) {
             return response()->json([
-                'message' => 'No se puede cambiar la fecha/hora de una sesión que ya tiene reservas'
+                'message' => 'No se puede cambiar la fecha/hora de una sesión que ya tiene entradas vendidas'
             ], 400);
         }
         
@@ -201,10 +200,10 @@ class ScreeningController extends Controller
     {
         $screening = Screening::findOrFail($id);
         
-        // Verificar que no haya reservas para esta sesión
-        if ($screening->bookings()->count() > 0) {
+        // Verificar que no haya entradas para esta sesión
+        if ($screening->hasTickets()) {
             return response()->json([
-                'message' => 'No se puede eliminar una sesión que ya tiene reservas'
+                'message' => 'No se puede eliminar una sesión que ya tiene entradas vendidas'
             ], 400);
         }
         

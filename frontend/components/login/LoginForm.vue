@@ -11,6 +11,11 @@
         </p>
       </div>
 
+      <!-- Alerta de error -->
+      <div v-if="authStore.error" class="bg-red-600 bg-opacity-80 text-white p-3 rounded-lg text-sm">
+        {{ authStore.error }}
+      </div>
+
       <!-- Form -->
       <form @submit.prevent="submitForm" class="mt-8 space-y-6">
         <!-- Nombre (solo en registro) -->
@@ -140,9 +145,12 @@
           <button 
             type="submit" 
             class="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-white font-medium bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors disabled:opacity-50 disabled:bg-gray-600 disabled:cursor-not-allowed"
-            :disabled="!isFormValid"
+            :disabled="!isFormValid || authStore.loading"
           >
-            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+            <span v-if="authStore.loading" class="absolute left-0 inset-y-0 flex items-center pl-3">
+              <i class="fas fa-spinner fa-spin text-blue-400"></i>
+            </span>
+            <span v-else class="absolute left-0 inset-y-0 flex items-center pl-3">
               <i class="fas fa-sign-in-alt group-hover:text-blue-400 text-blue-500 transition-colors"></i>
             </span>
             {{ isLogin ? 'Iniciar Sesión' : 'Registrarse' }}
@@ -189,78 +197,84 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'LoginForm',
-  data() {
-    return {
-      isLogin: true,
-      showPassword: false,
-      form: {
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        remember: false,
-        acceptTerms: false
-      }
-    };
-  },
-  computed: {
-    passwordsMatch() {
-      return this.form.password === this.form.confirmPassword;
-    },
-    isFormValid() {
-      if (this.isLogin) {
-        return this.form.email && this.form.password;
-      } else {
-        return this.form.name && 
-               this.form.email && 
-               this.form.password && 
-               this.passwordsMatch && 
-               this.form.acceptTerms;
-      }
+<script setup>
+import { ref, computed } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '~/stores/auth';
+
+const router = useRouter();
+const authStore = useAuthStore();
+
+const isLogin = ref(true);
+const showPassword = ref(false);
+const form = ref({
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  remember: false,
+  acceptTerms: false
+});
+
+const passwordsMatch = computed(() => {
+  return form.value.password === form.value.confirmPassword;
+});
+
+const isFormValid = computed(() => {
+  if (isLogin.value) {
+    return form.value.email && form.value.password;
+  } else {
+    return form.value.name && 
+           form.value.email && 
+           form.value.password && 
+           passwordsMatch.value && 
+           form.value.acceptTerms;
+  }
+});
+
+const toggleForm = () => {
+  isLogin.value = !isLogin.value;
+  // Limpiar formulario al cambiar
+  form.value = {
+    name: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    remember: false,
+    acceptTerms: false
+  };
+};
+
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
+
+const submitForm = async () => {
+  if (!isFormValid.value) return;
+  
+  if (isLogin.value) {
+    // Lógica de inicio de sesión con Pinia
+    const success = await authStore.login({
+      email: form.value.email,
+      password: form.value.password,
+      remember: form.value.remember
+    });
+    
+    if (success) {
+      router.push('/');
     }
-  },
-  methods: {
-    toggleForm() {
-      this.isLogin = !this.isLogin;
-      // Limpiar formulario al cambiar
-      this.form = {
-        name: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        remember: false,
-        acceptTerms: false
-      };
-    },
-    togglePassword() {
-      this.showPassword = !this.showPassword;
-    },
-    submitForm() {
-      if (!this.isFormValid) return;
-      
-      if (this.isLogin) {
-        // Lógica de inicio de sesión
-        console.log('Iniciando sesión con:', {
-          email: this.form.email,
-          password: this.form.password,
-          remember: this.form.remember
-        });
-        // Aquí iría la llamada a la API para autenticar
-        this.$router.push('/');
-      } else {
-        // Lógica de registro
-        console.log('Registrando usuario:', {
-          name: this.form.name,
-          email: this.form.email,
-          password: this.form.password
-        });
-        // Aquí iría la llamada a la API para registrar
-        this.isLogin = true;
-      }
+  } else {
+    // Lógica de registro con Pinia
+    const success = await authStore.register({
+      name: form.value.name,
+      email: form.value.email,
+      password: form.value.password,
+      password_confirmation: form.value.confirmPassword
+    });
+    
+    if (success) {
+      router.push('/');
     }
   }
-}
+};
 </script>
