@@ -15,6 +15,8 @@ class Ticket extends Model
         'user_id',
         'screening_id',
         'seat_id',
+        'snack_id',
+        'snack_quantity',
         'status',
         'quantity',
         'total_pay',
@@ -37,5 +39,11 @@ class Ticket extends Model
     public function seat()
     {
         return $this->belongsTo(Seat::class);
+    }
+
+    // Relación con snack
+    public function snack()
+    {
+        return $this->belongsTo(Snack::class);
     }
 }

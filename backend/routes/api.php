@@ -9,6 +9,8 @@ use App\Http\Controllers\MovieController;
 use App\Http\Controllers\MovieGenreController;
 use App\Http\Controllers\AuditoriumController;
 use App\Http\Controllers\SeatController;
+use App\Http\Controllers\SnackController;
+use App\Http\Controllers\GuestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,6 +49,21 @@ Route::prefix('genre')->group(function() {
     Route::get('/{id}/movies', [MovieGenreController::class, 'getMovies']);
 });
 
+// Rutas públicas para snacks
+Route::prefix('snack')->group(function() {
+    Route::get('/', [SnackController::class, 'index']);
+    Route::get('/{id}', [SnackController::class, 'show']);
+});
+
+// Rutas para invitados
+Route::prefix('guest')->group(function() {
+    // Procesar compra como invitado
+    Route::post('/purchase', [GuestController::class, 'processGuestPurchase']);
+    
+    // Ver ticket comprado como invitado (usando un token temporal)
+    Route::get('/ticket/{id}/{token}', [TicketController::class, 'getGuestTicket']);
+});
+
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth:sanctum')->group(function() {
     // Perfil de usuario
@@ -61,8 +78,13 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::post('/confirm', [TicketController::class, 'confirmTickets']);
         Route::post('/cancel', [TicketController::class, 'cancelTickets']);
         
+        // Gestión de snack para tickets
+        Route::post('/add-snack', [SnackController::class, 'addSnackToTicket']);
+        Route::post('/remove-snack', [SnackController::class, 'removeSnackFromTicket']);
+        
         // Consulta de tickets del usuario
         Route::get('/', [TicketController::class, 'getUserTickets']);
+        Route::get('/{id}/generate-pdf', [TicketController::class, 'generateTicketPdf']);
         Route::get('/{id}', [TicketController::class, 'getTicketDetails']);
         Route::get('/screening/{id}/can-buy', [UserTicketsController::class, 'canBuyTickets']);
     });

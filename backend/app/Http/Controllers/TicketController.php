@@ -250,11 +250,127 @@ class TicketController extends Controller
     {
         $userId = Auth::id();
         
-        $ticket = Ticket::with(['screening.movie', 'screening.auditorium', 'seat', 'user'])
+        $ticket = Ticket::with(['screening.movie', 'screening.auditorium', 'seat', 'user', 'snack'])
             ->where('id', $id)
             ->where('user_id', $userId)
             ->firstOrFail();
             
         return response()->json($ticket);
+    }
+    
+    /**
+     * Genera un boleto imprimible con todos los detalles
+     */
+    public function generateTicketPdf($id)
+    {
+        $userId = Auth::id();
+        
+        $ticket = Ticket::with(['screening.movie', 'screening.auditorium', 'seat', 'user', 'snack'])
+            ->where('id', $id)
+            ->where(function($query) use ($userId) {
+                $query->where('user_id', $userId)
+                      ->orWhereHas('user', function($q) {
+                          $q->whereHas('role', function($r) {
+                              $r->where('name', 'guest');
+                          });
+                      });
+            })
+            ->firstOrFail();
+        
+        // En este punto se podría generar un PDF real, pero para este proyecto
+        // simplemente devolveremos los datos formateados para que el frontend
+        // pueda mostrarlos en formato de ticket
+        
+        $ticketData = [
+            'ticket_id' => $ticket->id,
+            'purchase_date' => $ticket->purchase_date,
+            'movie' => [
+                'title' => $ticket->screening->movie->title,
+                'duration' => $ticket->screening->movie->duration,
+                'classification' => $ticket->screening->movie->classification
+            ],
+            'screening' => [
+                'date_time' => $ticket->screening->date_time,
+                'auditorium' => $ticket->screening->auditorium->name
+            ],
+            'seat' => [
+                'number' => $ticket->seat->number,
+                'is_vip' => $ticket->seat->isVip()
+            ],
+            'user' => [
+                'name' => $ticket->user->name,
+                'email' => $ticket->user->email
+            ],
+            'snack' => $ticket->snack ? [
+                'name' => $ticket->snack->name,
+                'quantity' => $ticket->snack_quantity,
+                'price' => $ticket->snack->price * $ticket->snack_quantity
+            ] : null,
+            'total_price' => $ticket->total_pay
+        ];
+        
+        return response()->json([
+            'message' => 'Ticket generado con éxito',
+            'ticket_data' => $ticketData
+        ]);
+    }
+    
+    /**
+     * Permite a usuarios invitados acceder a sus tickets mediante un token temporal
+     */
+    public function getGuestTicket($id, $token)
+    {
+        // Buscar el ticket y su usuario asociado
+        $ticket = Ticket::with(['screening.movie', 'screening.auditorium', 'seat', 'user', 'snack'])
+            ->where('id', $id)
+            ->whereHas('user', function($query) {
+                $query->whereHas('role', function($q) {
+                    $q->where('name', 'guest');
+                });
+            })
+            ->firstOrFail();
+            
+        // Validar que el token sea válido
+        $expectedToken = md5($ticket->user->email . $ticket->id . config('app.key'));
+        
+        if ($token !== $expectedToken) {
+            return response()->json([
+                'message' => 'Token de acceso inválido'
+            ], 403);
+        }
+        
+        // Generar los mismos datos que en generateTicketPdf
+        $ticketData = [
+            'ticket_id' => $ticket->id,
+            'purchase_date' => $ticket->purchase_date,
+            'movie' => [
+                'title' => $ticket->screening->movie->title,
+                'duration' => $ticket->screening->movie->duration,
+                'classification' => $ticket->screening->movie->classification
+            ],
+            'screening' => [
+                'date_time' => $ticket->screening->date_time,
+                'auditorium' => $ticket->screening->auditorium->name
+            ],
+            'seat' => [
+                'number' => $ticket->seat->number,
+                'is_vip' => $ticket->seat->isVip()
+            ],
+            'user' => [
+                'name' => $ticket->user->name,
+                'email' => $ticket->user->email
+            ],
+            'snack' => $ticket->snack ? [
+                'name' => $ticket->snack->name,
+                'quantity' => $ticket->snack_quantity,
+                'price' => $ticket->snack->price * $ticket->snack_quantity
+            ] : null,
+            'total_price' => $ticket->total_pay
+        ];
+        
+        return response()->json([
+            'message' => 'Ticket encontrado',
+            'ticket_data' => $ticketData
+        ]);
     }
 }
