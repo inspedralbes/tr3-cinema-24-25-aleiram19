@@ -8,37 +8,50 @@ use App\Models\Auditorium;
 use App\Models\Movie;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ScreeningController extends Controller
 {
     /**
      * Obtiene todas las sesiones disponibles
      */
-    public function index()
+    public function index(Request $request)
     {
         $screenings = Screening::with(['movie', 'auditorium'])
             ->where('date_time', '>', Carbon::now())
             ->orderBy('date_time')
             ->get();
             
-        return response()->json($screenings);
+        // Si la solicitud es de API o comienza con /api/, devolver JSON
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json($screenings);
+        }
+        
+        // Si es una solicitud web, devolver vista
+        return view('screenings.index', compact('screenings'));
     }
     
     /**
      * Obtiene los detalles de una sesión
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $screening = Screening::with(['movie', 'auditorium'])
             ->findOrFail($id);
             
-        return response()->json($screening);
+        // Si la solicitud es de API o comienza con /api/, devolver JSON
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json($screening);
+        }
+        
+        // Si es una solicitud web, devolver vista
+        return view('screenings.show', compact('screening'));
     }
     
     /**
      * Obtiene los asientos disponibles para una sesión
      */
-    public function getAvailableSeats($screeningId)
+    public function getAvailableSeats(Request $request, $screeningId)
     {
         $screening = Screening::findOrFail($screeningId);
         $auditorium = $screening->auditorium;
@@ -70,12 +83,18 @@ class ScreeningController extends Controller
         // Agrupar por filas para facilitar el renderizado en el frontend
         $seatsByRow = collect($seatData)->groupBy('row')->toArray();
         
-        return response()->json([
-            'screening' => $screening,
-            'auditorium' => $auditorium,
-            'seats_by_row' => $seatsByRow,
-            'price_info' => $screening->getPriceMatrix()
-        ]);
+        // Si la solicitud es de API o comienza con /api/, devolver JSON
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json([
+                'screening' => $screening,
+                'auditorium' => $auditorium,
+                'seats_by_row' => $seatsByRow,
+                'price_info' => $screening->getPriceMatrix()
+            ]);
+        }
+        
+        // Si es una solicitud web, devolver vista
+        return view('screenings.seats', compact('screening', 'auditorium', 'seatsByRow'));
     }
     
     /**
@@ -84,13 +103,21 @@ class ScreeningController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'movie_id' => 'required|exists:movies,id',
             'auditorium_id' => 'required|exists:auditoriums,id',
             'date' => 'required|date|after:today',
             'time' => 'required|in:16:00,18:00,20:00', // Solo horarios permitidos
             'is_special' => 'boolean'
         ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            } else {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+        }
         
         // Construir fecha y hora completa
         $dateTime = Carbon::parse($request->date . ' ' . $request->time);
@@ -98,9 +125,14 @@ class ScreeningController extends Controller
         // Verificar que no haya otra sesión a la misma hora
         $existingScreening = Screening::where('date_time', $dateTime)->exists();
         if ($existingScreening) {
-            return response()->json([
-                'message' => 'Ya existe una sesión programada para esta fecha y hora'
-            ], 400);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Ya existe una sesión programada para esta fecha y hora'
+                ], 400);
+            } else {
+                return redirect()->back()
+                    ->with('error', 'Ya existe una sesión programada para esta fecha y hora');
+            }
         }
         
         // Crear la sesión
@@ -112,10 +144,15 @@ class ScreeningController extends Controller
             'is_special' => $request->is_special ?? false
         ]);
         
-        return response()->json([
-            'message' => 'Sesión creada correctamente',
-            'screening' => $screening
-        ], 201);
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json([
+                'message' => 'Sesión creada correctamente',
+                'screening' => $screening
+            ], 201);
+        } else {
+            return redirect()->route('screenings.index')
+                ->with('success', 'Sesión creada correctamente');
+        }
     }
     
     /**
@@ -126,19 +163,32 @@ class ScreeningController extends Controller
     {
         $screening = Screening::findOrFail($id);
         
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'movie_id' => 'exists:movies,id',
             'auditorium_id' => 'exists:auditoriums,id',
             'date' => 'date|after:today',
             'time' => 'in:16:00,18:00,20:00', // Solo horarios permitidos
             'is_special' => 'boolean'
         ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            } else {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
+        }
         
         // Si se cambia la fecha/hora, verificar que no haya conflictos
         if (($request->date || $request->time) && $screening->hasTickets()) {
-            return response()->json([
-                'message' => 'No se puede cambiar la fecha/hora de una sesión que ya tiene entradas vendidas'
-            ], 400);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'No se puede cambiar la fecha/hora de una sesión que ya tiene entradas vendidas'
+                ], 400);
+            } else {
+                return redirect()->back()
+                    ->with('error', 'No se puede cambiar la fecha/hora de una sesión que ya tiene entradas vendidas');
+            }
         }
         
         if ($request->date && $request->time) {
@@ -151,9 +201,14 @@ class ScreeningController extends Controller
                 ->exists();
                 
             if ($existingScreening) {
-                return response()->json([
-                    'message' => 'Ya existe una sesión programada para esta fecha y hora'
-                ], 400);
+                if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                    return response()->json([
+                        'message' => 'Ya existe una sesión programada para esta fecha y hora'
+                    ], 400);
+                } else {
+                    return redirect()->back()
+                        ->with('error', 'Ya existe una sesión programada para esta fecha y hora');
+                }
             }
             
             $screening->date_time = $dateTime;
@@ -186,31 +241,46 @@ class ScreeningController extends Controller
         
         $screening->save();
         
-        return response()->json([
-            'message' => 'Sesión actualizada correctamente',
-            'screening' => $screening
-        ]);
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json([
+                'message' => 'Sesión actualizada correctamente',
+                'screening' => $screening
+            ]);
+        } else {
+            return redirect()->route('screenings.index')
+                ->with('success', 'Sesión actualizada correctamente');
+        }
     }
     
     /**
      * Elimina una sesión
      * Este método solo estaría disponible para administradores
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $screening = Screening::findOrFail($id);
         
         // Verificar que no haya entradas para esta sesión
         if ($screening->hasTickets()) {
-            return response()->json([
-                'message' => 'No se puede eliminar una sesión que ya tiene entradas vendidas'
-            ], 400);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'No se puede eliminar una sesión que ya tiene entradas vendidas'
+                ], 400);
+            } else {
+                return redirect()->back()
+                    ->with('error', 'No se puede eliminar una sesión que ya tiene entradas vendidas');
+            }
         }
         
         $screening->delete();
         
-        return response()->json([
-            'message' => 'Sesión eliminada correctamente'
-        ]);
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json([
+                'message' => 'Sesión eliminada correctamente'
+            ]);
+        } else {
+            return redirect()->route('screenings.index')
+                ->with('success', 'Sesión eliminada correctamente');
+        }
     }
 }

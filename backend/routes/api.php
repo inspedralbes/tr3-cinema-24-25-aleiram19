@@ -25,7 +25,16 @@ use App\Http\Controllers\GuestController;
 
 // Ruta de prueba para verificar la conexión con el backend
 Route::get('/test', function() {
-    return response()->json(['message' => 'Backend API is working!']);
+    return response()->json(['message' => 'Backend API is working!', 'timestamp' => now()->toDateTimeString()]);
+});
+
+// Ruta de diagnóstico CORS
+Route::options('/test-cors', function() {
+    return response()->json(['message' => 'CORS preflight request successful']);
+});
+
+Route::get('/test-cors', function() {
+    return response()->json(['message' => 'CORS GET request successful', 'timestamp' => now()->toDateTimeString()]);
 });
 
 // Rutas públicas
@@ -42,6 +51,7 @@ Route::prefix('screening')->group(function() {
 Route::prefix('movie')->group(function() {
     Route::get('/', [MovieController::class, 'index']);
     Route::get('/current', [MovieController::class, 'getCurrentMovies']);
+    Route::get('/getMovies', [MovieController::class, 'getMovies']);
     Route::get('/{id}', [MovieController::class, 'show']);
 });
 
@@ -60,8 +70,26 @@ Route::prefix('snack')->group(function() {
 
 // Rutas públicas para asientos
 Route::prefix('seats')->group(function() {
+    Route::get('/', [SeatController::class, 'index']);
     Route::put('/{id}/status', [SeatController::class, 'updateStatus']);
     Route::post('/reset', [SeatController::class, 'resetSeats']);
+    Route::get('/{id}', [SeatController::class, 'show']);
+});
+
+// Rutas alternativas para asientos (singular)
+Route::prefix('seat')->group(function() {
+    Route::get('/', [SeatController::class, 'index']);
+    Route::put('/{id}/status', [SeatController::class, 'updateStatus']);
+    Route::post('/reset', [SeatController::class, 'resetSeats']);
+    Route::get('/{id}', [SeatController::class, 'show']);
+});
+
+// Ruta específica que garantiza JSON para los asientos
+Route::get('/seats-json', function() {
+    $seats = App\Models\Seat::with('auditorium')->get();
+    return response()->json($seats, 200, [
+        'Content-Type' => 'application/json'
+    ]);
 });
 
 // Rutas para invitados

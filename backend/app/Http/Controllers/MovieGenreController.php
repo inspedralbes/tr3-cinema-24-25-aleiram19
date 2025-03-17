@@ -13,8 +13,16 @@ class MovieGenreController extends Controller
      */
     public function index()
     {
-        $genres = MovieGenre::all();
-        return response()->json($genres);
+        try {
+            $genres = MovieGenre::all();
+            return response()->json($genres);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ], 500);
+        }
     }
 
     /**

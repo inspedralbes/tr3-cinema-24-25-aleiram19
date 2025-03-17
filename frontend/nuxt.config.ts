@@ -16,9 +16,10 @@ export default defineNuxtConfig({
   nitro: {
     devProxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8000/api',
         changeOrigin: true,
-        prependPath: true
+        prependPath: false,
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
   },

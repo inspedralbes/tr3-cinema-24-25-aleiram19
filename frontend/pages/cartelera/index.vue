@@ -86,14 +86,24 @@ const handleImageError = (e) => {
 // Cargar datos
 const cargarDatos = async () => {
   try {
-    const [peliculasResponse] = await Promise.all([
-      moviesStore.fetchCurrentMovies(),
-      genresStore.fetchGenres()
-    ]);
+    console.log('Iniciando carga de datos de cartelera...');
+    
+    // Primero cargar géneros para asegurar que estén disponibles
+    await genresStore.fetchGenres();
+    
+    // Luego cargar películas en cartelera
+    console.log('Cargando películas en cartelera...');
+    const peliculasResponse = await moviesStore.fetchCurrentMovies();
     
     // Registrar para depuración
     console.log('Películas cargadas:', peliculasResponse ? peliculasResponse.length : 0);
     console.log('Películas en store:', moviesStore.movies.length);
+    
+    // Verificar si se cargaron películas
+    if (!peliculasResponse || peliculasResponse.length === 0) {
+      console.warn('No se encontraron películas en cartelera');
+      return;
+    }
     
     // Verificar si todas las películas tienen imágenes
     const conImagenes = moviesStore.movies.filter(p => p.image).length;
@@ -105,7 +115,12 @@ const cargarDatos = async () => {
       console.log(`Película ${i+1}: ${p.title}, Imagen: ${p.image || 'Sin imagen'}`);
     });
   } catch (error) {
-    console.error('Error al cargar datos:', error);
+    console.error('Error al cargar datos de cartelera:', error);
+    // Intentar reintentar la carga una vez
+    if (!error.message.includes('reintentar')) {
+      console.log('Reintentando carga de datos...');
+      setTimeout(cargarDatos, 1000); // Esperar 1 segundo y reintentar
+    }
   }
 };
 

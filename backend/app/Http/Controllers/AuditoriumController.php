@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+
+
 use App\Models\Auditorium;
 use App\Models\Seat;
 use Illuminate\Http\Request;
@@ -13,16 +15,23 @@ class AuditoriumController extends Controller
     /**
      * Muestra un listado de todos los auditorios.
      */
-    public function index()
+    public function index(Request $request)
     {
         $auditoriums = Auditorium::withCount('seats')->get();
-        return response()->json($auditoriums);
+        
+        // Si la solicitud es de API o comienza con /api/, devolver JSON
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json($auditoriums);
+        }
+        
+        // Si es una solicitud web, devolver vista
+        return view('auditoriums.index', compact('auditoriums'));
     }
 
     /**
      * Muestra un auditorio específico con sus asientos.
      */
-    public function show($id)
+    public function show(Request $request, $id)
     {
         $auditorium = Auditorium::with('seats')->findOrFail($id);
         
@@ -31,10 +40,16 @@ class AuditoriumController extends Controller
             return substr($seat->number, 0, 1); // Primer carácter del número de asiento (la fila)
         });
         
-        return response()->json([
-            'auditorium' => $auditorium,
-            'seats_by_row' => $seatsByRow
-        ]);
+        // Si la solicitud es de API o comienza con /api/, devolver JSON
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json([
+                'auditorium' => $auditorium,
+                'seats_by_row' => $seatsByRow
+            ]);
+        }
+        
+        // Si es una solicitud web, devolver vista
+        return view('auditoriums.show', compact('auditorium', 'seatsByRow'));
     }
 
     /**
@@ -51,7 +66,11 @@ class AuditoriumController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            } else {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
         }
 
         DB::beginTransaction();
@@ -82,17 +101,28 @@ class AuditoriumController extends Controller
             
             DB::commit();
             
-            return response()->json([
-                'message' => 'Auditorio creado correctamente',
-                'auditorium' => $auditorium
-            ], 201);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Auditorio creado correctamente',
+                    'auditorium' => $auditorium
+                ], 201);
+            } else {
+                return redirect()->route('auditoriums.index')
+                    ->with('success', 'Auditorio creado correctamente');
+            }
             
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Error al crear el auditorio',
-                'error' => $e->getMessage()
-            ], 500);
+            
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Error al crear el auditorio',
+                    'error' => $e->getMessage()
+                ], 500);
+            } else {
+                return redirect()->back()
+                    ->with('error', 'Error al crear el auditorio: ' . $e->getMessage());
+            }
         }
     }
 
@@ -106,38 +136,57 @@ class AuditoriumController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()], 422);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            } else {
+                return redirect()->back()->withErrors($validator)->withInput();
+            }
         }
 
         $auditorium = Auditorium::findOrFail($id);
         
         // Verificar si tiene sesiones programadas
         if ($auditorium->screenings()->count() > 0) {
-            return response()->json([
-                'message' => 'No se puede modificar el auditorio porque tiene sesiones programadas'
-            ], 400);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'No se puede modificar el auditorio porque tiene sesiones programadas'
+                ], 400);
+            } else {
+                return redirect()->back()
+                    ->with('error', 'No se puede modificar el auditorio porque tiene sesiones programadas');
+            }
         }
         
         $auditorium->update($request->only('name'));
         
-        return response()->json([
-            'message' => 'Auditorio actualizado correctamente',
-            'auditorium' => $auditorium
-        ]);
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json([
+                'message' => 'Auditorio actualizado correctamente',
+                'auditorium' => $auditorium
+            ]);
+        } else {
+            return redirect()->route('auditoriums.index')
+                ->with('success', 'Auditorio actualizado correctamente');
+        }
     }
 
     /**
      * Elimina un auditorio.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $auditorium = Auditorium::findOrFail($id);
         
         // Verificar si tiene sesiones programadas
         if ($auditorium->screenings()->count() > 0) {
-            return response()->json([
-                'message' => 'No se puede eliminar el auditorio porque tiene sesiones programadas'
-            ], 400);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'No se puede eliminar el auditorio porque tiene sesiones programadas'
+                ], 400);
+            } else {
+                return redirect()->back()
+                    ->with('error', 'No se puede eliminar el auditorio porque tiene sesiones programadas');
+            }
         }
         
         DB::beginTransaction();
@@ -151,16 +200,27 @@ class AuditoriumController extends Controller
             
             DB::commit();
             
-            return response()->json([
-                'message' => 'Auditorio eliminado correctamente'
-            ]);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Auditorio eliminado correctamente'
+                ]);
+            } else {
+                return redirect()->route('auditoriums.index')
+                    ->with('success', 'Auditorio eliminado correctamente');
+            }
             
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Error al eliminar el auditorio',
-                'error' => $e->getMessage()
-            ], 500);
+            
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Error al eliminar el auditorio',
+                    'error' => $e->getMessage()
+                ], 500);
+            } else {
+                return redirect()->back()
+                    ->with('error', 'Error al eliminar el auditorio: ' . $e->getMessage());
+            }
         }
     }
 }

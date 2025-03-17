@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Validator;
 
 class TicketController extends Controller
 {
@@ -19,11 +20,19 @@ class TicketController extends Controller
     {
         try {
             // Validación de datos de entrada
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'screening_id' => 'required|exists:screenings,id',
                 'seat_ids' => 'required|array',
                 'seat_ids.*' => 'exists:seats,id'
             ]);
+            
+            if ($validator->fails()) {
+                if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                    return response()->json(['errors' => $validator->errors()], 422);
+                } else {
+                    return redirect()->back()->withErrors($validator)->withInput();
+                }
+            }
             
             $userId = Auth::id();
             $screeningId = $request->screening_id;
@@ -34,17 +43,25 @@ class TicketController extends Controller
             
             // VALIDACIÓN 1: Verificar que el usuario no tenga más de 10 entradas para esta sesión
             if (count($seatIds) > 10) {
-                return response()->json([
-                    'message' => 'No se pueden reservar más de 10 asientos por sesión'
-                ], 400);
+                if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                    return response()->json([
+                        'message' => 'No se pueden reservar más de 10 asientos por sesión'
+                    ], 400);
+                } else {
+                    return redirect()->back()->with('error', 'No se pueden reservar más de 10 asientos por sesión');
+                }
             }
             
             // VALIDACIÓN 2: Verificar que el usuario no tenga entradas para otra sesión futura
             $hasFutureTickets = $this->userHasFutureTickets($userId, $screeningId);
             if ($hasFutureTickets) {
-                return response()->json([
-                    'message' => 'Ya tienes entradas para otra sesión futura. No puedes reservar entradas para múltiples sesiones futuras a la vez.'
-                ], 400);
+                if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                    return response()->json([
+                        'message' => 'Ya tienes entradas para otra sesión futura. No puedes reservar entradas para múltiples sesiones futuras a la vez.'
+                    ], 400);
+                } else {
+                    return redirect()->back()->with('error', 'Ya tienes entradas para otra sesión futura. No puedes reservar entradas para múltiples sesiones futuras a la vez.');
+                }
             }
             
             // Verificar disponibilidad de asientos
@@ -53,10 +70,14 @@ class TicketController extends Controller
                 ->get();
                 
             if ($unavailableSeats->count() > 0) {
-                return response()->json([
-                    'message' => 'Algunos asientos seleccionados no están disponibles',
-                    'unavailable_seats' => $unavailableSeats->pluck('number')
-                ], 400);
+                if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                    return response()->json([
+                        'message' => 'Algunos asientos seleccionados no están disponibles',
+                        'unavailable_seats' => $unavailableSeats->pluck('number')
+                    ], 400);
+                } else {
+                    return redirect()->back()->with('error', 'Algunos asientos seleccionados no están disponibles');
+                }
             }
             
             DB::beginTransaction();
@@ -90,18 +111,28 @@ class TicketController extends Controller
             
             DB::commit();
             
-            return response()->json([
-                'message' => 'Reserva realizada con éxito',
-                'tickets' => $tickets,
-                'total_price' => $totalPrice
-            ], 201);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Reserva realizada con éxito',
+                    'tickets' => $tickets,
+                    'total_price' => $totalPrice
+                ], 201);
+            } else {
+                return redirect()->route('tickets.index')
+                    ->with('success', 'Reserva realizada con éxito');
+            }
             
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Error al realizar la reserva',
-                'error' => $e->getMessage()
-            ], 500);
+            
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Error al realizar la reserva',
+                    'error' => $e->getMessage()
+                ], 500);
+            } else {
+                return redirect()->back()->with('error', 'Error al realizar la reserva: ' . $e->getMessage());
+            }
         }
     }
     
@@ -130,10 +161,18 @@ class TicketController extends Controller
     public function confirmTickets(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'ticket_ids' => 'required|array',
                 'ticket_ids.*' => 'exists:tickets,id'
             ]);
+            
+            if ($validator->fails()) {
+                if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                    return response()->json(['errors' => $validator->errors()], 422);
+                } else {
+                    return redirect()->back()->withErrors($validator)->withInput();
+                }
+            }
             
             $userId = Auth::id();
             $ticketIds = $request->ticket_ids;
@@ -145,9 +184,13 @@ class TicketController extends Controller
                 ->get();
                 
             if ($tickets->count() != count($ticketIds)) {
-                return response()->json([
-                    'message' => 'Algunos tickets no pertenecen al usuario o ya han sido confirmados'
-                ], 400);
+                if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                    return response()->json([
+                        'message' => 'Algunos tickets no pertenecen al usuario o ya han sido confirmados'
+                    ], 400);
+                } else {
+                    return redirect()->back()->with('error', 'Algunos tickets no pertenecen al usuario o ya han sido confirmados');
+                }
             }
             
             DB::beginTransaction();
@@ -159,17 +202,27 @@ class TicketController extends Controller
             
             DB::commit();
             
-            return response()->json([
-                'message' => 'Compra confirmada con éxito',
-                'tickets' => $tickets
-            ], 200);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Compra confirmada con éxito',
+                    'tickets' => $tickets
+                ], 200);
+            } else {
+                return redirect()->route('tickets.index')
+                    ->with('success', 'Compra confirmada con éxito');
+            }
             
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Error al confirmar la compra',
-                'error' => $e->getMessage()
-            ], 500);
+            
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Error al confirmar la compra',
+                    'error' => $e->getMessage()
+                ], 500);
+            } else {
+                return redirect()->back()->with('error', 'Error al confirmar la compra: ' . $e->getMessage());
+            }
         }
     }
     
@@ -179,10 +232,18 @@ class TicketController extends Controller
     public function cancelTickets(Request $request)
     {
         try {
-            $request->validate([
+            $validator = Validator::make($request->all(), [
                 'ticket_ids' => 'required|array',
                 'ticket_ids.*' => 'exists:tickets,id'
             ]);
+            
+            if ($validator->fails()) {
+                if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                    return response()->json(['errors' => $validator->errors()], 422);
+                } else {
+                    return redirect()->back()->withErrors($validator)->withInput();
+                }
+            }
             
             $userId = Auth::id();
             $ticketIds = $request->ticket_ids;
@@ -194,9 +255,13 @@ class TicketController extends Controller
                 ->get();
                 
             if ($tickets->count() != count($ticketIds)) {
-                return response()->json([
-                    'message' => 'Algunos tickets no pertenecen al usuario o no pueden ser cancelados'
-                ], 400);
+                if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                    return response()->json([
+                        'message' => 'Algunos tickets no pertenecen al usuario o no pueden ser cancelados'
+                    ], 400);
+                } else {
+                    return redirect()->back()->with('error', 'Algunos tickets no pertenecen al usuario o no pueden ser cancelados');
+                }
             }
             
             DB::beginTransaction();
@@ -215,23 +280,33 @@ class TicketController extends Controller
             
             DB::commit();
             
-            return response()->json([
-                'message' => 'Tickets cancelados con éxito'
-            ], 200);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Tickets cancelados con éxito'
+                ], 200);
+            } else {
+                return redirect()->route('tickets.index')
+                    ->with('success', 'Tickets cancelados con éxito');
+            }
             
         } catch (\Exception $e) {
             DB::rollBack();
-            return response()->json([
-                'message' => 'Error al cancelar los tickets',
-                'error' => $e->getMessage()
-            ], 500);
+            
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Error al cancelar los tickets',
+                    'error' => $e->getMessage()
+                ], 500);
+            } else {
+                return redirect()->back()->with('error', 'Error al cancelar los tickets: ' . $e->getMessage());
+            }
         }
     }
     
     /**
      * Obtiene los tickets del usuario actual
      */
-    public function getUserTickets()
+    public function getUserTickets(Request $request)
     {
         $userId = Auth::id();
         
@@ -239,14 +314,20 @@ class TicketController extends Controller
             ->where('user_id', $userId)
             ->orderBy('created_at', 'desc')
             ->get();
-            
-        return response()->json($tickets);
+        
+        // Si la solicitud es de API o comienza con /api/, devolver JSON
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json($tickets);
+        }
+        
+        // Si es una solicitud web, devolver vista
+        return view('tickets.index', compact('tickets'));
     }
     
     /**
      * Obtiene detalles de un ticket específico
      */
-    public function getTicketDetails($id)
+    public function getTicketDetails(Request $request, $id)
     {
         $userId = Auth::id();
         
@@ -254,14 +335,20 @@ class TicketController extends Controller
             ->where('id', $id)
             ->where('user_id', $userId)
             ->firstOrFail();
-            
-        return response()->json($ticket);
+        
+        // Si la solicitud es de API o comienza con /api/, devolver JSON
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json($ticket);
+        }
+        
+        // Si es una solicitud web, devolver vista
+        return view('tickets.show', compact('ticket'));
     }
     
     /**
      * Genera un boleto imprimible con todos los detalles
      */
-    public function generateTicketPdf($id)
+    public function generateTicketPdf(Request $request, $id)
     {
         $userId = Auth::id();
         
@@ -309,16 +396,22 @@ class TicketController extends Controller
             'total_price' => $ticket->total_pay
         ];
         
-        return response()->json([
-            'message' => 'Ticket generado con éxito',
-            'ticket_data' => $ticketData
-        ]);
+        // Si la solicitud es de API o comienza con /api/, devolver JSON
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json([
+                'message' => 'Ticket generado con éxito',
+                'ticket_data' => $ticketData
+            ]);
+        }
+        
+        // Si es una solicitud web, devolver vista para impresión
+        return view('tickets.print', compact('ticketData'));
     }
     
     /**
      * Permite a usuarios invitados acceder a sus tickets mediante un token temporal
      */
-    public function getGuestTicket($id, $token)
+    public function getGuestTicket(Request $request, $id, $token)
     {
         // Buscar el ticket y su usuario asociado
         $ticket = Ticket::with(['screening.movie', 'screening.auditorium', 'seat', 'user', 'snack'])
@@ -334,9 +427,13 @@ class TicketController extends Controller
         $expectedToken = md5($ticket->user->email . $ticket->id . config('app.key'));
         
         if ($token !== $expectedToken) {
-            return response()->json([
-                'message' => 'Token de acceso inválido'
-            ], 403);
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Token de acceso inválido'
+                ], 403);
+            } else {
+                return redirect()->route('home')->with('error', 'Token de acceso inválido');
+            }
         }
         
         // Generar los mismos datos que en generateTicketPdf
@@ -368,9 +465,15 @@ class TicketController extends Controller
             'total_price' => $ticket->total_pay
         ];
         
-        return response()->json([
-            'message' => 'Ticket encontrado',
-            'ticket_data' => $ticketData
-        ]);
+        // Si la solicitud es de API o comienza con /api/, devolver JSON
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json([
+                'message' => 'Ticket encontrado',
+                'ticket_data' => $ticketData
+            ]);
+        }
+        
+        // Si es una solicitud web, devolver vista para impresión
+        return view('tickets.guest_print', compact('ticketData'));
     }
 }

@@ -1,6 +1,5 @@
 // Importaciones necesarias para Vue (Pinia)
 import { defineStore } from 'pinia';
-// Ya no se importa el servicio API
 
 // Definición del store para asientos
 export const useSeatsStore = defineStore('seats', {
@@ -57,11 +56,17 @@ export const useSeatsStore = defineStore('seats', {
         this.error = null;
         this.currentScreeningId = screeningId;
         
-        // Usar fetch directamente con la URL completa
-        const response = await fetch(`http://localhost:8000/api/screening/${screeningId}/seats`);
+        // Hacer la petición con el header Accept: application/json
+        const response = await fetch(`http://localhost:8000/api/screening/${screeningId}/seats`, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
         if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+          throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
         this.seats = data.seats_by_row;
         this.auditorium = data.auditorium;
@@ -82,18 +87,18 @@ export const useSeatsStore = defineStore('seats', {
         this.loading = true;
         this.error = null;
         
-        // Usar fetch directamente con la URL completa
+        // Hacer la petición con el header Accept: application/json
         const response = await fetch(`http://localhost:8000/api/seats/${seatId}/status`, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
           },
           body: JSON.stringify({ status })
         });
         
         if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+          throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
         }
         
         const data = await response.json();

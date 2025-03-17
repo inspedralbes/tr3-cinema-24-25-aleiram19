@@ -1,7 +1,6 @@
 // Importaciones necesarias para Vue (Pinia)
 import { defineStore } from 'pinia';
 import { useNuxtApp } from 'nuxt/app';
-// Ya no se importa el servicio API
 
 // Definición del store para películas
 export const useMoviesStore = defineStore('movies', {
@@ -38,11 +37,18 @@ export const useMoviesStore = defineStore('movies', {
         this.loading = true;
         this.error = null;
         
-        // Usar fetch directamente con la URL completa
-        const response = await fetch('http://localhost:8000/api/movie');
+        // Hacer la petición con el header Accept: application/json
+        const response = await fetch('http://localhost:8000/api/movie', {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+        
         if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+          throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
         this.movies = data;
         
@@ -76,11 +82,17 @@ export const useMoviesStore = defineStore('movies', {
         this.loading = true;
         this.error = null;
         
-        // Usar fetch directamente con la URL completa
-        const response = await fetch('http://localhost:8000/api/movie/current');
+        // Hacer la petición con el header Accept: application/json
+        const response = await fetch('http://localhost:8000/api/movie/current', {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
         if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+          throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
         this.movies = data;
         
@@ -114,11 +126,17 @@ export const useMoviesStore = defineStore('movies', {
         this.loading = true;
         this.error = null;
         
-        // Usar fetch directamente con la URL completa
-        const response = await fetch(`http://localhost:8000/api/movie/${id}`);
+        // Hacer la petición con el header Accept: application/json
+        const response = await fetch(`http://localhost:8000/api/movie/${id}`, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
         if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+          throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
         
         // Actualizar la película en el estado local

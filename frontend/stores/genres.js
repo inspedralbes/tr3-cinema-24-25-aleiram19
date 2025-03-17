@@ -1,6 +1,6 @@
 // Importaciones necesarias para Vue (Pinia)
 import { defineStore } from 'pinia';
-// Ya no se importa el servicio API
+import { useNuxtApp } from 'nuxt/app';
 
 // Definición del store para géneros
 export const useGenresStore = defineStore('genres', {
@@ -32,17 +32,38 @@ export const useGenresStore = defineStore('genres', {
         this.loading = true;
         this.error = null;
         
-        // Usar fetch directamente con la URL completa
-        const response = await fetch('http://localhost:8000/api/genre');
+        // Hacer la petición con el header Accept: application/json
+        const response = await fetch('http://localhost:8000/api/genre', {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
         if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+          throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
+        console.log('Datos de géneros recibidos:', data);
         this.genres = data;
+        
+        // Mostrar un mensaje de éxito usando Toast
+        const nuxtApp = useNuxtApp();
+        if (nuxtApp.$toast) {
+          nuxtApp.$toast.success('Géneros cargados correctamente');
+        }
+        
         return data;
       } catch (error) {
         console.error('Error en fetchGenres:', error);
         this.error = error.message;
+        
+        // Mostrar un mensaje de error usando Toast
+        const nuxtApp = useNuxtApp();
+        if (nuxtApp.$toast) {
+          nuxtApp.$toast.error(`Error al cargar géneros: ${error.message}`);
+        }
+        
         return [];
       } finally {
         this.loading = false;
@@ -55,11 +76,17 @@ export const useGenresStore = defineStore('genres', {
         this.loading = true;
         this.error = null;
         
-        // Usar fetch directamente con la URL completa
-        const response = await fetch(`http://localhost:8000/api/genre/${genreId}/movies`);
+        // Hacer la petición con el header Accept: application/json
+        const response = await fetch(`http://localhost:8000/api/genre/${genreId}/movies`, {
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
         if (!response.ok) {
-          throw new Error(`Error: ${response.status} ${response.statusText}`);
+          throw new Error(`Error en la petición: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
         return data; // No se actualiza el estado local, se devuelve la respuesta
       } catch (error) {
