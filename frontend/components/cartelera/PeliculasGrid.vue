@@ -47,38 +47,47 @@
         </div>
       </div>
       
-      <!-- Grid de películas -->
+      <!-- GRID DE PELÍCULAS - COMPLETAMENTE SIMPLIFICADO -->
       <div v-if="!loading && !error && peliculas" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- Tarjeta de Película -->
         <div 
           v-for="pelicula in peliculas" 
           :key="pelicula.id"
-          class="rounded-lg overflow-hidden bg-gradient-to-br from-blue-900/50 to-blue-800/60 shadow-lg hover:shadow-blue-500/30 transition-all duration-300 hover:-translate-y-2"
+          class="movie-card rounded-lg overflow-hidden shadow-lg hover:shadow-blue-500/30 transition duration-300 hover:-translate-y-2"
         >
-          <div class="relative overflow-hidden h-[360px] md:h-[320px]">
+          <!-- Imagen -->
+          <div class="relative h-[360px] md:h-[320px]">
             <!-- Fondo como respaldo -->
-            <div class="w-full h-full bg-gradient-to-b from-blue-900 to-gray-900">
+            <div class="w-full h-full bg-gradient-to-br from-blue-900/50 to-blue-800/60">
               <div v-if="!pelicula.image || pelicula.image === ''" class="flex items-center justify-center h-full p-5 text-center">
                 <span class="text-white text-lg font-bold">{{ pelicula.title }}</span>
               </div>
               <img 
                 v-else 
-                :src="pelicula.image.startsWith('/') ? pelicula.image : `/storage/movies/${pelicula.image}`" 
+                :src="getImagePath(pelicula.image)" 
                 :alt="pelicula.title"
                 class="w-full h-full object-cover"
                 @error="$emit('imageError', $event)"
               />
             </div>
-            <div class="absolute inset-0 bg-gradient-to-b from-blue-900/10 to-blue-900/90 flex flex-col justify-end items-center p-6 opacity-0 hover:opacity-100 transition-opacity duration-300">
+            
+            <!-- Overlay de botones -->
+            <div class="movie-overlay absolute inset-0 flex flex-col justify-end items-center p-6 z-20">
+              <!-- Puntuación -->
               <div class="absolute top-2 right-2 bg-gradient-to-r from-blue-900/80 to-blue-800/80 text-white rounded-full px-3 py-1 font-bold flex items-center gap-1 shadow-md">
                 <i class="fas fa-star text-yellow-400"></i>
                 <span>{{ Math.floor(Math.random() * 3) + 7 }}.{{ Math.floor(Math.random() * 10) }}</span>
               </div>
+              
+              <!-- Botón COMPRAR -->
               <NuxtLink 
                 :to="'/select-movie?id=' + pelicula.id" 
-                class="bg-gradient-to-r from-blue-600 to-blue-500 text-white uppercase font-bold py-2 px-6 rounded-full mb-2 hover:from-blue-500 hover:to-blue-400 hover:scale-105 transition-all shadow-md"
+                class="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white uppercase font-bold py-2 px-6 rounded-full mb-2 hover:from-blue-500 hover:to-blue-400 hover:scale-105 transition-all shadow-md text-center"
               >
                 COMPRAR
               </NuxtLink>
+              
+              <!-- Botón Ver Trailer -->
               <button 
                 v-if="pelicula.trailer" 
                 class="text-white font-medium flex items-center gap-1 hover:text-blue-400 transition-colors" 
@@ -88,11 +97,17 @@
               </button>
             </div>
           </div>
-          <div class="p-4">
+          
+          <!-- Información de la película -->
+          <div class="p-4 bg-gradient-to-br from-blue-900/50 to-blue-800/60">
             <h3 class="font-bold text-white text-lg mb-1">{{ pelicula.title }}</h3>
             <div class="flex justify-between items-center">
-              <span class="text-gray-400 text-sm flex items-center"><i class="fas fa-clock mr-1 text-blue-400"></i>{{ pelicula.duration }} min</span>
-              <span class="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-full px-3 py-0.5 text-xs font-medium shadow-sm">{{ getGeneroNombre(pelicula.movie_genre_id) }}</span>
+              <span class="text-gray-400 text-sm flex items-center">
+                <i class="fas fa-clock mr-1 text-blue-400"></i>{{ pelicula.duration }} min
+              </span>
+              <span class="bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-full px-3 py-0.5 text-xs font-medium shadow-sm">
+                {{ getGeneroNombre(pelicula.movie_genre_id) }}
+              </span>
             </div>
           </div>
         </div>
@@ -128,7 +143,6 @@
 </template>
 
 <script setup>
-// Props para recibir datos desde la página
 const props = defineProps({
   peliculas: {
     type: Array,
@@ -160,13 +174,77 @@ const props = defineProps({
   }
 });
 
-// Emitir eventos para que la página los maneje
 defineEmits(['filtrar', 'verTrailer', 'cerrarTrailer', 'recargar', 'imageError']);
 
-// Métodos auxiliares que no requieren estado
 const getGeneroNombre = (generoId) => {
   if (!generoId) return 'Sin clasificar';
   const genero = props.generos.find(g => g.id === generoId);
   return genero ? genero.name : 'Desconocido';
 };
+
+const getImagePath = (imagePath) => {
+  if (!imagePath) return '';
+  
+  if (imagePath.startsWith('/img/')) {
+    return imagePath;
+  } else if (imagePath.startsWith('/')) {
+    return imagePath;
+  } else {
+    return `/storage/movies/${imagePath}`;
+  }
+};
 </script>
+
+<style scoped>
+/* Estilos para la tarjeta de película */
+.movie-card {
+  position: relative;
+  cursor: pointer;
+}
+
+/* Estilos para el overlay */
+.movie-overlay {
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease-in-out;
+  background: linear-gradient(to bottom, rgba(13, 37, 77, 0.1), rgba(13, 37, 77, 0.9));
+  z-index: 10;
+}
+
+/* Cuando se hace hover sobre la tarjeta, el overlay se vuelve visible */
+.movie-card:hover .movie-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Efectos para los botones dentro del overlay */
+.movie-overlay a, 
+.movie-overlay button {
+  transform: translateY(20px);
+  opacity: 0;
+  transition: all 0.3s ease-in-out;
+  transition-delay: 0.1s;
+  cursor: pointer;
+}
+
+.movie-card:hover .movie-overlay a,
+.movie-card:hover .movie-overlay button {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+/* Aseguramos que los botones sean claramente visibles */
+.movie-overlay a {
+  display: block;
+  text-align: center;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.movie-overlay button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+</style>

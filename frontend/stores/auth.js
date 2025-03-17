@@ -21,8 +21,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
       
       try {
-        const config = useRuntimeConfig();
-        const response = await fetch(`${config.public.apiBaseUrl}/login`, {
+        const response = await fetch(`http://localhost:8000/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -59,8 +58,7 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
       
       try {
-        const config = useRuntimeConfig();
-        const response = await fetch(`${config.public.apiBaseUrl}/register`, {
+        const response = await fetch(`http://localhost:8000/api/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -96,14 +94,13 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       
       try {
-        const config = useRuntimeConfig();
         const storedToken = this.token || localStorage.getItem('token');
         
         if (!storedToken) {
           throw new Error('No hay token disponible');
         }
         
-        const response = await fetch(`${config.public.apiBaseUrl}/user`, {
+        const response = await fetch(`http://localhost:8000/api/user`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${storedToken}`,
@@ -132,11 +129,10 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true;
       
       try {
-        const config = useRuntimeConfig();
         const storedToken = this.token || localStorage.getItem('token');
         
         if (storedToken) {
-          await fetch(`${config.public.apiBaseUrl}/logout`, {
+          await fetch(`http://localhost:8000/api/logout`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${storedToken}`,

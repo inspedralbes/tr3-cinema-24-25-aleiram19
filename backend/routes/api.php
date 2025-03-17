@@ -33,6 +33,9 @@ Route::prefix('screening')->group(function() {
     Route::get('/', [ScreeningController::class, 'index']);
     Route::get('/{id}', [ScreeningController::class, 'show']);
     Route::get('/{id}/seats', [ScreeningController::class, 'getAvailableSeats']);
+    Route::post('/', [ScreeningController::class, 'store']);
+    Route::put('/{id}', [ScreeningController::class, 'update']);
+    Route::delete('/{id}', [ScreeningController::class, 'destroy']);
 });
 
 // Rutas públicas para películas
@@ -53,6 +56,12 @@ Route::prefix('genre')->group(function() {
 Route::prefix('snack')->group(function() {
     Route::get('/', [SnackController::class, 'index']);
     Route::get('/{id}', [SnackController::class, 'show']);
+});
+
+// Rutas públicas para asientos
+Route::prefix('seats')->group(function() {
+    Route::put('/{id}/status', [SeatController::class, 'updateStatus']);
+    Route::post('/reset', [SeatController::class, 'resetSeats']);
 });
 
 // Rutas para invitados
@@ -91,10 +100,7 @@ Route::middleware('auth:sanctum')->group(function() {
     
     // Rutas para administradores
     Route::middleware('role:admin')->group(function() {
-        // Gestión de sesiones
-        Route::post('/screening', [ScreeningController::class, 'store']);
-        Route::put('/screening/{id}', [ScreeningController::class, 'update']);
-        Route::delete('/screening/{id}', [ScreeningController::class, 'destroy']);
+        // Gestión de sesiones (movida a rutas públicas)
         
         // Gestión de películas
         Route::post('/movie', [MovieController::class, 'store']);
@@ -113,8 +119,6 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::put('/auditoriums/{id}', [AuditoriumController::class, 'update']);
         Route::delete('/auditoriums/{id}', [AuditoriumController::class, 'destroy']);
         
-        // Gestión de asientos
-        Route::put('/seats/{id}/status', [SeatController::class, 'updateStatus']);
-        Route::post('/seats/reset', [SeatController::class, 'resetSeats']);
+        // Gestión de asientos (movida a rutas públicas)
     });
 });

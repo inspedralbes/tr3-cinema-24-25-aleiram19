@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('duration'); // minutos
             $table->string('movie_genre');
             $table->date('release_date');
-            $table->string('image')->nullable(); // URL del póster o imagen
+            $table->text('image')->nullable(); // URL del póster o imagen
             $table->timestamps();
         }); 
     }

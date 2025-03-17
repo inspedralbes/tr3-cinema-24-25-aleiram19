@@ -25,7 +25,6 @@ export const useTicketsStore = defineStore('tickets', {
       this.error = null;
       
       try {
-        const config = useRuntimeConfig();
         const authStore = useAuthStore();
         const token = authStore.token;
         
@@ -33,7 +32,7 @@ export const useTicketsStore = defineStore('tickets', {
           throw new Error('Autenticación requerida');
         }
         
-        const response = await fetch(`${config.public.apiBaseUrl}/tickets`, {
+        const response = await fetch(`http://localhost:8000/api/tickets`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -62,7 +61,6 @@ export const useTicketsStore = defineStore('tickets', {
       this.error = null;
       
       try {
-        const config = useRuntimeConfig();
         const authStore = useAuthStore();
         const token = authStore.token;
         
@@ -70,7 +68,7 @@ export const useTicketsStore = defineStore('tickets', {
           throw new Error('Autenticación requerida');
         }
         
-        const response = await fetch(`${config.public.apiBaseUrl}/tickets/${id}`, {
+        const response = await fetch(`http://localhost:8000/api/tickets/${id}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -99,7 +97,6 @@ export const useTicketsStore = defineStore('tickets', {
       this.error = null;
       
       try {
-        const config = useRuntimeConfig();
         const authStore = useAuthStore();
         const token = authStore.token;
         
@@ -109,7 +106,7 @@ export const useTicketsStore = defineStore('tickets', {
           return false;
         }
         
-        const response = await fetch(`${config.public.apiBaseUrl}/tickets/screening/${screeningId}/can-buy`, {
+        const response = await fetch(`http://localhost:8000/api/tickets/screening/${screeningId}/can-buy`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -165,7 +162,6 @@ export const useTicketsStore = defineStore('tickets', {
           throw new Error('No hay asientos seleccionados');
         }
         
-        const config = useRuntimeConfig();
         const authStore = useAuthStore();
         const token = authStore.token;
         
@@ -181,7 +177,7 @@ export const useTicketsStore = defineStore('tickets', {
           }))
         };
         
-        const response = await fetch(`${config.public.apiBaseUrl}/tickets/reserve`, {
+        const response = await fetch(`http://localhost:8000/api/tickets/reserve`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -213,7 +209,6 @@ export const useTicketsStore = defineStore('tickets', {
       this.error = null;
       
       try {
-        const config = useRuntimeConfig();
         const authStore = useAuthStore();
         const token = authStore.token;
         
@@ -221,7 +216,7 @@ export const useTicketsStore = defineStore('tickets', {
           throw new Error('Autenticación requerida');
         }
         
-        const response = await fetch(`${config.public.apiBaseUrl}/tickets/confirm`, {
+        const response = await fetch(`http://localhost:8000/api/tickets/confirm`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -257,7 +252,6 @@ export const useTicketsStore = defineStore('tickets', {
       this.error = null;
       
       try {
-        const config = useRuntimeConfig();
         const authStore = useAuthStore();
         const token = authStore.token;
         
@@ -265,7 +259,7 @@ export const useTicketsStore = defineStore('tickets', {
           throw new Error('Autenticación requerida');
         }
         
-        const response = await fetch(`${config.public.apiBaseUrl}/tickets/cancel`, {
+        const response = await fetch(`http://localhost:8000/api/tickets/cancel`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

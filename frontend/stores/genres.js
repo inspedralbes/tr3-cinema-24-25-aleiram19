@@ -1,157 +1,74 @@
+// Importaciones necesarias para Vue (Pinia)
 import { defineStore } from 'pinia';
-import { useRuntimeConfig } from 'nuxt/app';
+// Ya no se importa el servicio API
 
+// Definición del store para géneros
 export const useGenresStore = defineStore('genres', {
+  // Estado del store
   state: () => ({
-    genres: [],
-    loading: false,
-    error: null,
-    currentGenre: null
+    genres: [],          // Lista de géneros
+    loading: false,      // Indicador de carga
+    error: null          // Mensaje de error si ocurre alguno
   }),
-  
+
+  // Getters
   getters: {
+    // Obtener todos los géneros
+    getAllGenres() {
+      return this.genres;
+    },
+    
+    // Obtener género por ID
     getGenreById: (state) => (id) => {
-      return state.genres.find(genre => genre.id === parseInt(id));
-    },
-    
-    getGenreName: (state) => (id) => {
-      const genre = state.genres.find(genre => genre.id === parseInt(id));
-      return genre ? genre.name : 'Desconocido';
-    },
-    
-    getAllGenreNames: (state) => {
-      return state.genres.map(genre => genre.name);
+      return state.genres.find(genre => genre.id === id);
     }
   },
-  
+
+  // Acciones
   actions: {
-    // Función base para realizar llamadas a la API
-    async apiCall(method, endpoint, body = null) {
-      const config = useRuntimeConfig();
-      const baseUrl = config.public.apiBaseUrl;
-      
-      const options = {
-        method,
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      };
-      
-      if (body) {
-        options.body = JSON.stringify(body);
-      }
-      
-      try {
-        const response = await fetch(`${baseUrl}/${endpoint}`, options);
-        
-        if (!response.ok) {
-          throw new Error(`Error API: ${response.status} ${response.statusText}`);
-        }
-        
-        return await response.json();
-      } catch (error) {
-        console.error(`Error en petición ${method} a ${endpoint}:`, error);
-        throw error;
-      }
-    },
-    
+    // Obtener todos los géneros
     async fetchGenres() {
-      this.loading = true;
-      this.error = null;
-      
       try {
-        this.genres = await this.apiCall('GET', 'genre');
+        this.loading = true;
+        this.error = null;
+        
+        // Usar fetch directamente con la URL completa
+        const response = await fetch('http://localhost:8000/api/genre');
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        this.genres = data;
+        return data;
       } catch (error) {
-        console.error('Error fetching genres:', error);
-        this.error = error.message || 'Error al cargar los géneros';
-      } finally {
-        this.loading = false;
-      }
-    },
-    
-    async fetchGenreById(id) {
-      if (!id) return;
-      
-      this.loading = true;
-      this.error = null;
-      
-      try {
-        const genre = await this.apiCall('GET', `genre/${id}`);
-        this.currentGenre = genre;
-        return genre;
-      } catch (error) {
-        console.error(`Error fetching genre with id ${id}:`, error);
-        this.error = error.message || 'Error al cargar el género';
-      } finally {
-        this.loading = false;
-      }
-    },
-    
-    async fetchMoviesByGenre(id) {
-      if (!id) return [];
-      
-      this.loading = true;
-      this.error = null;
-      
-      try {
-        return await this.apiCall('GET', `genre/${id}/movies`);
-      } catch (error) {
-        console.error(`Error fetching movies for genre ${id}:`, error);
-        this.error = error.message || 'Error al cargar las películas del género';
+        console.error('Error en fetchGenres:', error);
+        this.error = error.message;
         return [];
       } finally {
         this.loading = false;
       }
     },
     
-    async createGenre(genreData) {
-      this.loading = true;
-      this.error = null;
-      
+    // Obtener películas por género
+    async fetchMoviesByGenre(genreId) {
       try {
-        return await this.apiCall('POST', 'genre', genreData);
+        this.loading = true;
+        this.error = null;
+        
+        // Usar fetch directamente con la URL completa
+        const response = await fetch(`http://localhost:8000/api/genre/${genreId}/movies`);
+        if (!response.ok) {
+          throw new Error(`Error: ${response.status} ${response.statusText}`);
+        }
+        const data = await response.json();
+        return data; // No se actualiza el estado local, se devuelve la respuesta
       } catch (error) {
-        console.error('Error creating genre:', error);
-        this.error = error.message || 'Error al crear el género';
-        throw error;
+        console.error('Error en fetchMoviesByGenre:', error);
+        this.error = error.message;
+        return [];
       } finally {
         this.loading = false;
       }
-    },
-    
-    async updateGenre(id, genreData) {
-      this.loading = true;
-      this.error = null;
-      
-      try {
-        return await this.apiCall('PUT', `genre/${id}`, genreData);
-      } catch (error) {
-        console.error(`Error updating genre with id ${id}:`, error);
-        this.error = error.message || 'Error al actualizar el género';
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-    
-    async deleteGenre(id) {
-      this.loading = true;
-      this.error = null;
-      
-      try {
-        return await this.apiCall('DELETE', `genre/${id}`);
-      } catch (error) {
-        console.error(`Error deleting genre with id ${id}:`, error);
-        this.error = error.message || 'Error al eliminar el género';
-        throw error;
-      } finally {
-        this.loading = false;
-      }
-    },
-
-    setCurrentGenre(genre) {
-      this.currentGenre = genre;
     }
   }
 });

@@ -6,7 +6,8 @@ export default defineNuxtConfig({
   ],
   plugins: [
     { src: '~/plugins/bootstrap.client.js', mode: 'client' },
-    { src: '~/plugins/router.js', mode: 'client' }
+    { src: '~/plugins/router.js', mode: 'client' },
+    { src: '~/plugins/toast.js', mode: 'client' }
   ],
   modules: [
     '@nuxtjs/tailwindcss',

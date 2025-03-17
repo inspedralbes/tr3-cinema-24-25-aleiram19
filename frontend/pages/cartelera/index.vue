@@ -86,10 +86,24 @@ const handleImageError = (e) => {
 // Cargar datos
 const cargarDatos = async () => {
   try {
-    await Promise.all([
+    const [peliculasResponse] = await Promise.all([
       moviesStore.fetchCurrentMovies(),
       genresStore.fetchGenres()
     ]);
+    
+    // Registrar para depuración
+    console.log('Películas cargadas:', peliculasResponse ? peliculasResponse.length : 0);
+    console.log('Películas en store:', moviesStore.movies.length);
+    
+    // Verificar si todas las películas tienen imágenes
+    const conImagenes = moviesStore.movies.filter(p => p.image).length;
+    console.log(`Películas con imágenes: ${conImagenes} de ${moviesStore.movies.length}`);
+    
+    // Mostrar las URLs de las primeras 5 imágenes para verificar
+    const primeras5 = moviesStore.movies.slice(0, 5);
+    primeras5.forEach((p, i) => {
+      console.log(`Película ${i+1}: ${p.title}, Imagen: ${p.image || 'Sin imagen'}`);
+    });
   } catch (error) {
     console.error('Error al cargar datos:', error);
   }

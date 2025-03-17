@@ -143,30 +143,47 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'DefaultLayout',
-  
-  data() {
-    return {
-      // Estos valores deberían venir de un store de autenticación
-      isLoggedIn: false,
-      isAdmin: false,
-      userName: 'Usuario'
-    };
-  },
-  
-  methods: {
-    logout() {
-      // Implementar lógica de cierre de sesión
-      // Por ejemplo, usando el store de auth:
-      // this.$store.dispatch('auth/logout');
-      
-      // Por ahora, solo actualizamos el estado
-      this.isLoggedIn = false;
+<script setup>
+import { computed, onMounted } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+
+// Usar el store de autenticación
+const authStore = useAuthStore();
+
+// Obtener valores reactivos del store
+const isLoggedIn = computed(() => authStore.isLoggedIn);
+const isAdmin = computed(() => authStore.isAdmin);
+const userName = computed(() => {
+  if (authStore.user) {
+    return authStore.user.name || 'Usuario';
+  }
+  return 'Usuario';
+});
+
+// Método para cerrar sesión
+const logout = async () => {
+  try {
+    await authStore.logout();
+    // Usar el Toast para notificar al usuario
+    const toast = useNuxtApp().$toast;
+    if (toast) {
+      toast.success('Has cerrado sesión correctamente');
+    }
+    // Redireccionar al inicio
+    navigateTo('/');
+  } catch (error) {
+    console.error('Error al cerrar sesión:', error);
+    const toast = useNuxtApp().$toast;
+    if (toast) {
+      toast.error('Error al cerrar sesión: ' + error.message);
     }
   }
 };
+
+// Inicializar el estado de autenticación al montar el componente
+onMounted(() => {
+  authStore.init();
+});
 </script>
 
 <style scoped>

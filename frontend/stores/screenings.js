@@ -18,11 +18,8 @@ export const useScreeningsStore = defineStore('screenings', {
   },
 
   actions: {
-    // Función base para realizar llamadas a la API
+    // Función base para realizar llamadas a la API directamente con URL
     async apiCall(method, endpoint, body = null) {
-      const config = useRuntimeConfig();
-      const baseUrl = config.public.apiBaseUrl;
-      
       const options = {
         method,
         headers: {
@@ -36,7 +33,7 @@ export const useScreeningsStore = defineStore('screenings', {
       }
       
       try {
-        const response = await fetch(`${baseUrl}/${endpoint}`, options);
+        const response = await fetch(`http://localhost:8000/api/${endpoint}`, options);
         
         if (!response.ok) {
           throw new Error(`Error API: ${response.status} ${response.statusText}`);

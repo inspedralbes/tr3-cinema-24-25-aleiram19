@@ -58,7 +58,7 @@
           <div class="md:w-2/5 relative">
             <div v-if="currentMovie && currentMovie.image" class="h-full bg-gradient-to-r from-blue-800 to-blue-600 relative overflow-hidden">
               <img 
-                :src="currentMovie.image.startsWith('/') ? currentMovie.image : `/storage/movies/${currentMovie.image}`" 
+                :src="getImagePath(currentMovie.image)" 
                 :alt="selectedMovie.title" 
                 class="absolute inset-0 w-full h-full object-cover"
                 @error="handleImageError"
@@ -167,7 +167,7 @@
             </div>
             <div v-if="getMovieById(movie.id) && getMovieById(movie.id).image" class="absolute inset-0 w-full h-full">
               <img 
-                :src="getMovieById(movie.id).image.startsWith('/') ? getMovieById(movie.id).image : `/storage/movies/${getMovieById(movie.id).image}`" 
+                :src="getImagePath(getMovieById(movie.id).image)" 
                 :alt="movie.title" 
                 class="w-full h-full object-cover opacity-70 hover:opacity-100 transition-opacity"
                 @error="handleImageError"
@@ -215,7 +215,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, watch } from 'vue';
 import { useMoviesStore } from '@/stores/movies';
 import { useGenresStore } from '@/stores/genres';
 
@@ -236,6 +236,7 @@ const selectedMovie = ref(null);
 const movieId = ref(null);
 const loading = ref(false);
 const error = ref(null);
+const showScreeningMessage = ref(true);
 const trailerUrl = ref('');
 const showTrailer = ref(false);
 
@@ -312,6 +313,24 @@ const handleImageError = (e) => {
   }
 };
 
+// Función para determinar la ruta de la imagen correctamente
+const getImagePath = (imagePath) => {
+  if (!imagePath) return '';
+  
+  // Si la ruta comienza con '/img/', usarla directamente
+  if (imagePath.startsWith('/img/')) {
+    return imagePath;
+  }
+  // Si la ruta comienza con '/', pero no es '/img/', ajustar según necesario
+  else if (imagePath.startsWith('/')) {
+    return imagePath;
+  }
+  // Si es solo el nombre del archivo, construir la ruta completa
+  else {
+    return `/storage/movies/${imagePath}`;
+  }
+};
+
 const loadMovieData = async () => {
   loading.value = true;
   error.value = null;
@@ -352,6 +371,15 @@ const loadMovieData = async () => {
 };
 
 const selectShowtime = (movie, time) => {
+  // Guardar información relevante en sessionStorage para acceder en la página de asientos
+  sessionStorage.setItem('selectedMovie', JSON.stringify({
+    id: movie.id,
+    title: movie.title,
+    date: selectedDate.value,
+    time: time
+  }));
+  
+  // Navegar a la página de selección de asientos
   navigateTo(`/select-seats?movie=${movie.id}&date=${selectedDate.value}&time=${time}`);
 };
 
@@ -377,5 +405,10 @@ onMounted(async () => {
     movieId.value = route.query.id;
   }
   await loadMovieData();
+  
+  // Mostrar mensaje de screening por 5 segundos y luego ocultarlo gradualmente
+  setTimeout(() => {
+    showScreeningMessage.value = false;
+  }, 5000);
 });
 </script>
