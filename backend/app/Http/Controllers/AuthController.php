@@ -16,36 +16,55 @@ class AuthController extends Controller
      */
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
+        try {
+            \Log::info('Iniciando registro de usuario con datos:', $request->except(['password', 'password_confirmation']));
+            
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:8|confirmed',
+            ]);
 
-        // Buscar el rol de usuario predeterminado (normalmente 'user')
-        $userRole = Role::where('name', 'user')->first();
-        if (!$userRole) {
-            // Si no existe, crear el rol o usar un ID predeterminado
-            $userRole = Role::create(['name' => 'user']);
+            // Buscar el rol de usuario predeterminado (normalmente 'user')
+            $userRole = Role::where('name', 'user')->first();
+            if (!$userRole) {
+                // Si no existe, crear el rol o usar un ID predeterminado
+                $userRole = Role::create(['name' => 'user', 'description' => 'Usuario estándar']);
+                \Log::info('Rol de usuario creado con ID: ' . $userRole->id);
+            }
+
+            \Log::info('Usando rol de usuario con ID: ' . $userRole->id);
+
+            $user = User::create([
+                'name' => $request->name,
+                'last_name' => $request->last_name ?? '',
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'role_id' => $userRole->id,
+            ]);
+
+            \Log::info('Usuario creado con ID: ' . $user->id);
+
+            // Generar token con Sanctum
+            $token = $user->createToken('auth_token')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Usuario registrado correctamente',
+                'user' => $user,
+                'token' => $token
+            ], 201);
+        } catch (\Exception $e) {
+            \Log::error('Error en registro: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            
+            // Devolver un mensaje más descriptivo
+            return response()->json([
+                'message' => 'Error al registrar usuario',
+                'error' => $e->getMessage(),
+                'trace' => config('app.debug') ? $e->getTraceAsString() : null
+            ], 500);
         }
-
-        $user = User::create([
-            'name' => $request->name,
-            'last_name' => $request->last_name ?? '',
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role_id' => $userRole->id,
-            'is_guest' => false,
-        ]);
-
-        // Generar token con Sanctum
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        return response()->json([
-            'message' => 'Usuario registrado correctamente',
-            'user' => $user,
-            'token' => $token
-        ], 201);
     }
 
     /**

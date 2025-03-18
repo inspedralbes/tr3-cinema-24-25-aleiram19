@@ -269,7 +269,8 @@ const submitForm = async () => {
       name: form.value.name,
       email: form.value.email,
       password: form.value.password,
-      password_confirmation: form.value.confirmPassword
+      password_confirmation: form.value.confirmPassword,
+      last_name: form.value.name.split(' ').length > 1 ? form.value.name.split(' ').slice(1).join(' ') : ''
     });
     
     if (success) {

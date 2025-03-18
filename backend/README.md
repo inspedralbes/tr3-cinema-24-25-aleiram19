@@ -7,6 +7,44 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Instalación del Proyecto
+
+Sigue estos pasos para configurar el proyecto correctamente:
+
+1. Clona el repositorio
+2. Navega al directorio del backend
+3. Instala las dependencias:
+   ```
+   composer install
+   ```
+4. Configura el archivo .env (copia .env.example a .env)
+5. Genera una clave de aplicación:
+   ```
+   php artisan key:generate
+   ```
+6. Configura la base de datos en el archivo .env
+7. Ejecuta las migraciones:
+   ```
+   php artisan migrate
+   ```
+8. Publica la configuración de Sanctum para autenticación API:
+   ```
+   php artisan vendor:publish --provider="Laravel\Sanctum\SanctumServiceProvider"
+   ```
+9. Inicia el servidor:
+   ```
+   php artisan serve
+   ```
+
+## Rutas de Autenticación API
+
+El sistema incluye las siguientes rutas de autenticación:
+
+- **POST /api/register**: Registrar un nuevo usuario
+- **POST /api/login**: Iniciar sesión y obtener token
+- **POST /api/logout**: Cerrar sesión (requiere autenticación)
+- **GET /api/user-profile**: Obtener datos del usuario autenticado
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:

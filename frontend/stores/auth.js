@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { useRuntimeConfig } from '#app';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -21,7 +22,9 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
       
       try {
-        const response = await fetch(`/api/login`, {
+        const config = useRuntimeConfig();
+        const apiBaseUrl = config.public.apiBaseUrl;
+        const response = await fetch(`${apiBaseUrl}/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -58,19 +61,42 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
       
       try {
-        const response = await fetch(`/api/register`, {
+        console.log('Iniciando registro con datos:', userData);
+        
+        const config = useRuntimeConfig();
+        const apiBaseUrl = config.public.apiBaseUrl;
+        console.log('URL de la API:', `${apiBaseUrl}/register`);
+        
+        // Asegurar que last_name tenga un valor
+        if (!userData.last_name) {
+          userData.last_name = '';
+        }
+        
+        const response = await fetch(`${apiBaseUrl}/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
           },
           body: JSON.stringify(userData),
+          credentials: 'include',
         });
 
+        console.log('Estado de la respuesta:', response.status);
         const data = await response.json();
+        console.log('Datos de respuesta:', data);
         
         if (!response.ok) {
-          throw new Error(data.message || 'Error en el registro');
+          if (response.status === 500) {
+            throw new Error('Error en el servidor. Por favor, intenta más tarde.');
+          }
+          // Manejar errores de validación
+          if (data.errors) {
+            const errorMessages = Object.values(data.errors).flat().join('\n');
+            throw new Error(errorMessages || data.message || 'Error en el registro');
+          } else {
+            throw new Error(data.message || data.error || 'Error en el registro');
+          }
         }
         
         this.token = data.token;
@@ -100,7 +126,9 @@ export const useAuthStore = defineStore('auth', {
           throw new Error('No hay token disponible');
         }
         
-        const response = await fetch(`/api/user`, {
+        const config = useRuntimeConfig();
+        const apiBaseUrl = config.public.apiBaseUrl;
+        const response = await fetch(`${apiBaseUrl}/user`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${storedToken}`,
@@ -132,7 +160,9 @@ export const useAuthStore = defineStore('auth', {
         const storedToken = this.token || localStorage.getItem('token');
         
         if (storedToken) {
-          await fetch(`/api/logout`, {
+          const config = useRuntimeConfig();
+          const apiBaseUrl = config.public.apiBaseUrl;
+          await fetch(`${apiBaseUrl}/logout`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${storedToken}`,

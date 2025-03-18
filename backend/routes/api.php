@@ -11,6 +11,7 @@ use App\Http\Controllers\AuditoriumController;
 use App\Http\Controllers\SeatController;
 use App\Http\Controllers\SnackController;
 use App\Http\Controllers\GuestController;
+use App\Http\Controllers\AuthController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,6 +28,13 @@ use App\Http\Controllers\GuestController;
 Route::get('/test', function() {
     return response()->json(['message' => 'Backend API is working!', 'timestamp' => now()->toDateTimeString()]);
 });
+
+// Rutas de autenticación
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::get('/user', [AuthController::class, 'user'])->middleware('auth:sanctum');
+Route::get('/user-profile', [AuthController::class, 'user'])->middleware('auth:sanctum'); // Ruta adicional para compatibilidad
 
 // Ruta de diagnóstico CORS
 Route::options('/test-cors', function() {
