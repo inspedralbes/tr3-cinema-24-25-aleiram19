@@ -44,7 +44,6 @@ export const useGenresStore = defineStore('genres', {
         }
         
         const data = await response.json();
-        console.log('Datos de géneros recibidos:', data);
         this.genres = data;
         
         // Mostrar un mensaje de éxito usando Toast
