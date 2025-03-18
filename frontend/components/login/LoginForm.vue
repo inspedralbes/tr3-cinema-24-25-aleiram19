@@ -13,14 +13,23 @@
 
       <!-- Alerta de error -->
       <div v-if="authStore.error" class="bg-red-600 bg-opacity-80 text-white p-3 rounded-lg text-sm">
-        {{ authStore.error }}
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-exclamation-circle"></i>
+          <div>
+            <p class="font-medium">Error</p>
+            <p>{{ authStore.error }}</p>
+          </div>
+        </div>
+        <button @click="authStore.error = null" class="absolute top-2 right-2 text-white">
+          <i class="fas fa-times"></i>
+        </button>
       </div>
 
       <!-- Form -->
       <form @submit.prevent="submitForm" class="mt-8 space-y-6">
         <!-- Nombre (solo en registro) -->
         <div v-if="!isLogin" class="space-y-2">
-          <label for="name" class="block text-sm font-medium text-gray-300">Nombre completo</label>
+          <label for="name" class="block text-sm font-medium text-gray-300">Nombre</label>
           <div class="relative">
             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <i class="fas fa-user text-gray-500"></i>
@@ -30,7 +39,24 @@
               v-model="form.name" 
               type="text" 
               class="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-lg bg-blue-800 bg-opacity-50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Ingresa tu nombre completo" 
+              placeholder="Ingresa tu nombre" 
+              required
+            >
+          </div>
+        </div>
+        <!-- Lastname (solo en registro) -->
+        <div v-if="!isLogin" class="space-y-2">
+          <label for="last_name" class="block text-sm font-medium text-gray-300">Apellido</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <i class="fas fa-user text-gray-500"></i>
+            </div>
+            <input 
+              id="last_name" 
+              v-model="form.last_name" 
+              type="text" 
+              class="block w-full pl-10 pr-3 py-3 border border-gray-700 rounded-lg bg-blue-800 bg-opacity-50 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              placeholder="Ingresa tu apellido" 
               required
             >
           </div>
@@ -184,13 +210,6 @@
             <i class="fab fa-google text-red-500"></i>
             <span>Continuar con Google</span>
           </button>
-          <button 
-            type="button"
-            class="w-full flex items-center justify-center gap-3 px-4 py-2 border border-transparent rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-          >
-            <i class="fab fa-facebook-f"></i>
-            <span>Continuar con Facebook</span>
-          </button>
         </div>
       </form>
     </div>
@@ -205,10 +224,18 @@ import { useAuthStore } from '~/stores/auth';
 const router = useRouter();
 const authStore = useAuthStore();
 
-const isLogin = ref(true);
+const props = defineProps({
+  isLoginProp: {
+    type: Boolean,
+    default: true
+  }
+});
+
+const isLogin = ref(props.isLoginProp);
 const showPassword = ref(false);
 const form = ref({
   name: '',
+  last_name: '',
   email: '',
   password: '',
   confirmPassword: '',
@@ -225,6 +252,7 @@ const isFormValid = computed(() => {
     return form.value.email && form.value.password;
   } else {
     return form.value.name && 
+           form.value.last_name &&
            form.value.email && 
            form.value.password && 
            passwordsMatch.value && 
@@ -237,6 +265,7 @@ const toggleForm = () => {
   // Limpiar formulario al cambiar
   form.value = {
     name: '',
+    last_name: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -264,13 +293,19 @@ const submitForm = async () => {
       router.push('/');
     }
   } else {
+    // Verificar que las contraseñas coincidan
+    if (form.value.password !== form.value.confirmPassword) {
+      authStore.error = 'Las contraseñas no coinciden';
+      return;
+    }
+    
     // Lógica de registro con Pinia
     const success = await authStore.register({
       name: form.value.name,
       email: form.value.email,
       password: form.value.password,
       password_confirmation: form.value.confirmPassword,
-      last_name: form.value.name.split(' ').length > 1 ? form.value.name.split(' ').slice(1).join(' ') : ''
+      last_name: form.value.last_name || ''
     });
     
     if (success) {
