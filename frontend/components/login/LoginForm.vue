@@ -223,6 +223,7 @@ import { useAuthStore } from '~/stores/auth';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { $toast } = useNuxtApp();
 
 const props = defineProps({
   isLoginProp: {
@@ -290,6 +291,7 @@ const submitForm = async () => {
     });
     
     if (success) {
+      $toast.success(`¡Bienvenido de nuevo, ${authStore.user.name}!`);
       router.push('/');
     }
   } else {
@@ -309,6 +311,7 @@ const submitForm = async () => {
     });
     
     if (success) {
+      $toast.success(`¡Bienvenido a CineXperience, ${form.value.name}! Tu cuenta ha sido creada correctamente.`);
       router.push('/');
     }
   }

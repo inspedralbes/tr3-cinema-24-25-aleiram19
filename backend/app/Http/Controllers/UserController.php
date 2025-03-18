@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Role;
+// use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -83,7 +84,7 @@ class UserController extends Controller
      */
     public function show(Request $request, $id)
     {
-        $user = User::with('role', 'tickets', 'bookings')->findOrFail($id);
+        $user = User::with('role', 'tickets')->findOrFail($id);
         
         // Si la solicitud es de API o comienza con /api/, devolver JSON
         if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
@@ -167,15 +168,15 @@ class UserController extends Controller
     {
         $user = User::findOrFail($id);
 
-        // Verificar si tiene tickets o reservas
-        if ($user->tickets()->count() > 0 || $user->bookings()->count() > 0) {
+        // Verificar si tiene tickets
+        if ($user->tickets()->count() > 0) {
             if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
                 return response()->json([
-                    'message' => 'No se puede eliminar el usuario porque tiene tickets o reservas asociadas'
+                    'message' => 'No se puede eliminar el usuario porque tiene tickets asociados'
                 ], 400);
             } else {
                 return redirect()->back()
-                    ->with('error', 'No se puede eliminar el usuario porque tiene tickets o reservas asociadas');
+                    ->with('error', 'No se puede eliminar el usuario porque tiene tickets asociados');
             }
         }
 

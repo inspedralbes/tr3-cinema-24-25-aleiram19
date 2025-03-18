@@ -46,12 +46,17 @@
           <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-blue-400 transform -translate-x-1/2 transition-all duration-300 group-hover:w-full"></span>
         </a>
         
-        <NuxtLink 
-          to="/login"
-          class="text-white font-medium px-6 py-2 rounded-full border border-white/30 backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-white/10 hover:border-white/50"
-        >
-          <i class="fas fa-user mr-1"></i> Iniciar sesión
-        </NuxtLink>
+        <template v-if="!authStore.isAuthenticated">
+          <NuxtLink 
+            to="/login"
+            class="text-white font-medium px-6 py-2 rounded-full border border-white/30 backdrop-blur-sm transition-all duration-300 ease-in-out hover:bg-white/10 hover:border-white/50"
+          >
+            <i class="fas fa-user mr-1"></i> Iniciar sesión
+          </NuxtLink>
+        </template>
+        <template v-else>
+          <UserMenu :user="authStore.user" />
+        </template>
         
         <NuxtLink 
           to="/cartelera"
@@ -89,12 +94,19 @@
           <i class="fas fa-map-marker-alt mr-2"></i> Cines
         </a>
         
-        <NuxtLink 
-          to="/login"
-          class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
-        >
-          <i class="fas fa-user mr-2"></i> Iniciar sesión
-        </NuxtLink>
+        <template v-if="!authStore.isAuthenticated">
+          <NuxtLink 
+            to="/login"
+            class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+          >
+            <i class="fas fa-user mr-2"></i> Iniciar sesión
+          </NuxtLink>
+        </template>
+        <template v-else>
+          <div class="py-3 px-4 rounded-lg">
+            <UserMenu :user="authStore.user" />
+          </div>
+        </template>
         
         <NuxtLink 
           to="/cartelera"
@@ -123,6 +135,10 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { useAuthStore } from '~/stores/auth';
+import UserMenu from '~/components/user/UserMenu.vue';
+
+const authStore = useAuthStore();
 
 const isScrolled = ref(false);
 const mobileMenuOpen = ref(false);

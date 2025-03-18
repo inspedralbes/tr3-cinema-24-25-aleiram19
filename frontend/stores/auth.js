@@ -22,11 +22,10 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         // URL base fija para la API
-        const apiBaseUrl = 'http://localhost:8000/api';
         
         let response;
         try {
-          response = await fetch(`${apiBaseUrl}/login`, {
+          response = await fetch(`http://localhost:8000/api/login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -82,8 +81,7 @@ export const useAuthStore = defineStore('auth', {
         console.log('Iniciando registro con datos:', userData);
         
         // URL base fija para la API
-        const apiBaseUrl = 'http://localhost:8000/api';
-        console.log('URL de la API:', `${apiBaseUrl}/register`);
+        console.log('URL de la API:', `http://localhost:8000/api/register`);
         
         // Validar datos requeridos
         if (!userData.name || !userData.email || !userData.password || !userData.password_confirmation) {
@@ -119,7 +117,7 @@ export const useAuthStore = defineStore('auth', {
         
         let response;
         try {
-          response = await fetch(`${apiBaseUrl}/register`, {
+          response = await fetch(`http://localhost:8000/api/register`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -180,8 +178,7 @@ export const useAuthStore = defineStore('auth', {
           throw new Error('No hay token disponible');
         }
         
-        const apiBaseUrl = 'http://localhost:8000/api';
-        const response = await fetch(`${apiBaseUrl}/user`, {
+        const response = await fetch(`http://localhost:8000/api/user`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${storedToken}`,
@@ -213,8 +210,7 @@ export const useAuthStore = defineStore('auth', {
         const storedToken = this.token || localStorage.getItem('token');
         
         if (storedToken) {
-          const apiBaseUrl = 'http://localhost:8000/api';
-          await fetch(`${apiBaseUrl}/logout`, {
+          await fetch(`http://localhost:8000/api/logout`, {
             method: 'POST',
             headers: {
               'Authorization': `Bearer ${storedToken}`,

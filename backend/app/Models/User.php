@@ -8,7 +8,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Role;
-use App\Models\Booking;
+// use App\Models\Booking;
 use App\Models\Ticket;
 
 class User extends Authenticatable
@@ -61,12 +61,12 @@ class User extends Authenticatable
     }
     
     /**
-     * Relación con reservas
+     * Relación con reservas - Comentada temporalmente hasta crear el modelo Booking
      */
-    public function bookings()
+    /*public function bookings()
     {
         return $this->hasMany(Booking::class);
-    }
+    }*/
     
     /**
      * Relación con tickets
