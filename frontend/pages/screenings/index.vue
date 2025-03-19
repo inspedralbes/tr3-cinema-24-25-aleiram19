@@ -239,14 +239,12 @@ export default {
           await this.moviesStore.fetchMovies();
         }
         
-        // Cargar sesiones y auditorios
-        // Para el ejemplo, vamos a simular datos
-        this.loadMockData();
+        // Cargar sesiones y auditorios desde la API
+        const screeningsStore = useScreeningsStore();
+        this.screenings = await screeningsStore.fetchScreenings();
         
-        // En una implementación real:
-        // const screeningsStore = useScreeningsStore();
-        // this.screenings = await screeningsStore.fetchScreenings();
-        // this.auditoriums = await screeningsStore.fetchAuditoriums();
+        // Cargar los auditorios desde la API
+        this.auditoriums = await screeningsStore.fetchAuditoriums();
       } catch (error) {
         console.error('Error al cargar datos:', error);
         this.error = 'Error al cargar las funciones. Por favor, intenta de nuevo.';

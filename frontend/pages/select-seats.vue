@@ -3,18 +3,51 @@
     <LandingPageNavBar />
     <div class="container mx-auto px-4 pt-24">
       <div class="max-w-4xl mx-auto">
-        <h1 class="text-3xl font-bold text-white mb-8">Seleccionar Asientos</h1>
+        <div class="mb-6 flex items-center justify-between">
+          <h1 class="text-3xl font-bold text-white">Seleccionar Asientos</h1>
+          <NuxtLink :to="`/movies/${movieInfo.id}`" class="text-white hover:text-blue-300 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i> Volver a la película
+          </NuxtLink>
+        </div>
+
+        <!-- Mensaje de error -->
+        <div v-if="error" class="bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/50 text-white p-6 rounded-lg mb-8 shadow-md">
+          <div class="flex items-center mb-4">
+            <i class="fas fa-exclamation-circle text-red-400 text-2xl mr-3"></i>
+            <p class="font-medium text-lg">{{ error }}</p>
+          </div>
+          <button 
+            @click="loadScreeningData" 
+            class="mt-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white px-5 py-2 rounded-lg hover:from-blue-500 hover:to-blue-400 transition-all duration-300 shadow-md flex items-center"
+          >
+            <i class="fas fa-sync-alt mr-2"></i> Reintentar
+          </button>
+        </div>
 
         <!-- Información de la película -->
         <div class="bg-blue-900/50 backdrop-blur-sm rounded-xl p-6 mb-8">
           <div class="flex items-center justify-between mb-4">
             <div>
               <h2 class="text-xl font-bold text-white">{{ movieInfo.title }}</h2>
-              <p class="text-gray-300">{{ formatDate(movieInfo.date) }} - {{ movieInfo.time }}</p>
+              <div class="flex items-center mt-2">
+                <div class="bg-blue-500/30 text-blue-100 px-3 py-1 rounded-md inline-flex items-center">
+                  <i class="far fa-calendar-alt mr-2"></i>
+                  <span>{{ formatDate(movieInfo.date) }}</span>
+                </div>
+                <div class="bg-blue-500/30 text-blue-100 px-3 py-1 rounded-md ml-3 inline-flex items-center">
+                  <i class="far fa-clock mr-2"></i>
+                  <span>{{ movieInfo.time }}</span>
+                </div>
+              </div>
             </div>
             <div class="text-right">
               <p class="text-gray-300">{{ seatsStore.auditorium ? `Sala ${seatsStore.auditorium.number}` : 'Cargando sala...' }}</p>
-              <p class="text-blue-400">{{ seatsStore.screening ? (seatsStore.screening.is_special ? 'ESPECIAL' : 'NORMAL') : '' }}</p>
+              <p v-if="seatsStore.screening?.is_special" class="text-sm mt-1 bg-red-500/30 text-red-100 px-2 py-1 rounded-md inline-block">
+                <i class="fas fa-star mr-1"></i> Día del Espectador
+              </p>
+              <p v-else class="text-sm mt-1 bg-blue-500/30 text-blue-100 px-2 py-1 rounded-md inline-block">
+                Sesión Normal
+              </p>
             </div>
           </div>
         </div>
@@ -118,7 +151,7 @@
               </div>
               <div class="text-right">
                 <p class="text-gray-300">Total:</p>
-                <p class="text-2xl font-bold text-white">${{ totalPrice }}</p>
+                <p class="text-2xl font-bold text-white">{{ formatPrice(totalPrice) }}</p>
               </div>
             </div>
             <button
@@ -151,6 +184,7 @@ const seatsStore = useSeatsStore();
 // Estados locales para la selección de asientos
 const selectedSeats = ref([]);
 const screeningId = ref(null);
+const error = ref(null);
 
 // Cargar la información de la película desde la URL o sessionStorage
 const loadMovieInfo = () => {
@@ -236,13 +270,24 @@ const totalPrice = computed(() => {
 // Formatear fecha
 const formatDate = (dateString) => {
   if (!dateString) return '';
-  const date = new Date(dateString);
-  return new Intl.DateTimeFormat('es-ES', { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
-  }).format(date);
+  try {
+    const date = new Date(dateString);
+    const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const day = weekdays[date.getDay()];
+    return `${day} ${date.getDate()} de ${date.toLocaleString('es-ES', {month: 'long'})}`;
+  } catch (e) {
+    console.error('Error al formatear fecha:', e);
+    return dateString;
+  }
+};
+
+// Formatear precio
+const formatPrice = (price) => {
+  if (price === undefined || price === null) return '0,00 €';
+  return Number(price).toLocaleString('es-ES', {
+    style: 'currency',
+    currency: 'EUR'
+  });
 };
 
 // Confirmar la selección de asientos
@@ -260,29 +305,40 @@ const confirmSelection = () => {
 // Cargar datos de la película y proyección desde la API
 const loadScreeningData = async () => {
   try {
-    // Obtener el ID de la proyección
-    // En un sistema real, aquí obtendrías el ID de proyección basado en película, fecha y hora
-    // Para la demostración, usamos un valor de ejemplo o generamos uno
-    const movieId = parseInt(route.query.movie) || 1;
-    screeningId.value = route.query.screening_id || 1; // Valor temporal para demostración
+    // Obtener el ID de la proyección de los parámetros de la URL
+    screeningId.value = route.query.screening_id;
     
-    // Cargar información de la película si no la tenemos completa
-    if (!movieInfo.title || movieInfo.title === 'Película' || movieInfo.title === 'Cargando película...') {
-      // Si no tenemos películas cargadas, las cargamos
-      if (!moviesStore.movies.length) {
-        await moviesStore.fetchCurrentMovies();
+    if (!screeningId.value) {
+      console.error('Error: No se ha especificado un ID de proyección');
+      // Intentar recuperar del sessionStorage
+      const storedMovie = sessionStorage.getItem('selectedMovie');
+      if (storedMovie) {
+        const movieData = JSON.parse(storedMovie);
+        screeningId.value = movieData.screening_id;
+        console.log('ID de proyección recuperado del sessionStorage:', screeningId.value);
       }
       
-      // Obtener la película por ID
-      const movie = moviesStore.getMovieById(movieId);
-      if (movie) {
-        movieInfo.id = movie.id;
-        movieInfo.title = movie.title;
+      if (!screeningId.value) {
+        error.value = 'Error: No se ha especificado un ID de proyección';
+        return;
       }
     }
     
-    // Cargar asientos para la proyección
-    await seatsStore.fetchSeatsForScreening(screeningId.value);
+    console.log('Cargando proyección con ID:', screeningId.value);
+    
+    // Cargar la información de la proyección y los asientos
+    const screeningData = await seatsStore.fetchSeatsForScreening(screeningId.value);
+    
+    if (screeningData && screeningData.screening && screeningData.screening.movie) {
+      // Actualizar la información de la película
+      movieInfo.id = screeningData.screening.movie.id;
+      movieInfo.title = screeningData.screening.movie.title;
+      movieInfo.date = screeningData.screening.date_time;
+      
+      // Formatear la hora para mostrarla
+      const timeDate = new Date(screeningData.screening.date_time);
+      movieInfo.time = timeDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    }
   } catch (error) {
     console.error('Error cargando datos:', error);
   }

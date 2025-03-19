@@ -33,9 +33,12 @@
               <i class="bi bi-film fs-1 text-muted"></i>
             </div>
             
-            <NuxtLink :to="`/buy-tickets/${movie.id}`" class="btn btn-primary w-100 mt-3">
-              <i class="bi bi-ticket-perforated me-2"></i> Comprar Entradas
-            </NuxtLink>
+            <div class="py-2 px-3 bg-light rounded mt-3 mb-2">
+              <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-circle text-info me-2"></i>
+                <small>Selecciona una función de abajo para comprar entradas</small>
+              </div>
+            </div>
           </div>
         </div>
         
@@ -96,11 +99,15 @@
                 class="list-group-item d-flex justify-content-between align-items-center"
               >
                 <div>
-                  <strong>{{ formatScreeningDate(screening.date_time) }}</strong>
-                  <span class="ms-3">{{ screening.auditorium.name }}</span>
+                  <strong class="screening-day">{{ formatScreeningDate(screening.date_time) }}</strong>
+                  <div class="screening-details">
+                    <span class="badge bg-secondary me-2">{{ screening.is_special ? 'Sesión Especial' : 'Normal' }}</span>
+                    <span class="ms-1">{{ screening.auditorium ? screening.auditorium.name : `Sala ${screening.auditorium_id}` }}</span>
+                    <span class="ms-3 price">{{ screening.price }}€</span>
+                  </div>
                 </div>
                 
-                <NuxtLink :to="`/buy-tickets/${movie.id}/${screening.id}`" class="btn btn-sm btn-outline-primary">
+                <NuxtLink :to="`/select-seats?screening_id=${screening.id}`" class="btn btn-sm btn-outline-primary">
                   Seleccionar
                 </NuxtLink>
               </div>
@@ -138,7 +145,6 @@
 import { useMoviesStore } from '~/stores/movies';
 import { useGenresStore } from '~/stores/genres';
 import MovieCard from './MovieCard.vue';
-import apiService from '~/services/api';
 
 export default {
   name: 'MovieDetail',
@@ -205,35 +211,24 @@ export default {
     async loadScreenings() {
       this.loadingScreenings = true;
       try {
-        // Aquí deberíamos usar el servicio API para obtener las sesiones
-        // Por ahora, simularemos algunos datos
-        // this.screenings = await apiService.screenings.getByMovie(this.movieId);
+        // Usamos fetch para obtener las proyecciones de esta película
+        const response = await fetch(`http://localhost:8000/api/movie/${this.movieId}/screenings`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
         
-        // Datos de ejemplo
-        setTimeout(() => {
-          this.screenings = [
-            {
-              id: 1,
-              date_time: new Date(Date.now() + 24 * 60 * 60 * 1000), // Mañana
-              auditorium: { id: 1, name: 'Sala 1' }
-            },
-            {
-              id: 2,
-              date_time: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // Pasado mañana
-              auditorium: { id: 2, name: 'Sala 2' }
-            },
-            {
-              id: 3,
-              date_time: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // En 3 días
-              auditorium: { id: 1, name: 'Sala 1' }
-            }
-          ];
-          this.loadingScreenings = false;
-        }, 1000);
+        if (!response.ok) {
+          throw new Error(`Error al obtener proyecciones: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        this.screenings = data;
       } catch (error) {
         console.error('Error al cargar las sesiones:', error);
       } finally {
-        // this.loadingScreenings = false;
+        this.loadingScreenings = false;
       }
     },
     
@@ -271,13 +266,17 @@ export default {
     formatScreeningDate(dateObj) {
       if (!dateObj) return '';
       
-      return new Date(dateObj).toLocaleString('es-ES', {
-        weekday: 'long',
-        month: 'long',
+      const date = new Date(dateObj);
+      const weekdays = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+      const day = weekdays[date.getDay()];
+      
+      // Formateamos la fecha con el día de la semana destacado
+      return `${day} - ${date.toLocaleString('es-ES', {
         day: 'numeric',
+        month: 'long',
         hour: '2-digit',
         minute: '2-digit'
-      });
+      })}`;
     },
     
     getEmbedUrl(url) {
@@ -328,9 +327,28 @@ export default {
 
 .list-group-item {
   transition: background-color 0.2s ease;
+  margin-bottom: 0.5rem;
+  border-radius: 0.5rem;
 }
 
 .list-group-item:hover {
   background-color: #f8f9fa;
+}
+
+.screening-day {
+  display: block;
+  font-size: 1.1rem;
+  color: #343a40;
+}
+
+.screening-details {
+  margin-top: 0.25rem;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
+.price {
+  font-weight: bold;
+  color: #28a745;
 }
 </style>

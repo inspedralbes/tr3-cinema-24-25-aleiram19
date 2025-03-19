@@ -45,6 +45,22 @@ export const useScreeningsStore = defineStore('screenings', {
         throw error;
       }
     },
+    
+    async fetchAuditoriums() {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const data = await this.apiCall('GET', 'auditorium');
+        return data;
+      } catch (error) {
+        this.error = error.message;
+        console.error('Error al obtener los auditorios:', error);
+        return [];
+      } finally {
+        this.loading = false;
+      }
+    },
 
     async fetchScreenings() {
       this.loading = true;

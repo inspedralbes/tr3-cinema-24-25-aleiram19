@@ -55,11 +55,15 @@ Route::prefix('screening')->group(function() {
     Route::delete('/{id}', [ScreeningController::class, 'destroy']);
 });
 
+// Ruta para obtener screenings por fecha
+Route::get('/screenings', [ScreeningController::class, 'getScreeningsByDate']);
+
 // Rutas públicas para películas
 Route::prefix('movie')->group(function() {
     Route::get('/', [MovieController::class, 'index']);
     Route::get('/current', [MovieController::class, 'getCurrentMovies']);
     Route::get('/getMovies', [MovieController::class, 'getMovies']);
+    Route::get('/{id}/screenings', [MovieController::class, 'getScreenings']);
     Route::get('/{id}', [MovieController::class, 'show']);
 });
 
@@ -82,6 +86,12 @@ Route::prefix('seats')->group(function() {
     Route::put('/{id}/status', [SeatController::class, 'updateStatus']);
     Route::post('/reset', [SeatController::class, 'resetSeats']);
     Route::get('/{id}', [SeatController::class, 'show']);
+});
+
+// Rutas públicas para auditorios
+Route::prefix('auditorium')->group(function() {
+    Route::get('/', [AuditoriumController::class, 'index']);
+    Route::get('/{id}', [AuditoriumController::class, 'show']);
 });
 
 // Rutas alternativas para asientos (singular)

@@ -243,4 +243,29 @@ class MovieController extends Controller
         
         return response()->json($formatted);
     }
+    
+    /**
+     * Obtiene las proyecciones (screenings) de una película específica
+     * 
+     * @param Request $request
+     * @param int $id ID de la película
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getScreenings(Request $request, $id)
+    {
+        try {
+            $movie = Movie::findOrFail($id);
+            
+            // Obtener las proyecciones con la información del auditorio
+            $screenings = $movie->screenings()
+                ->with('auditorium')
+                ->orderBy('date_time')
+                ->get();
+            
+            return response()->json($screenings);
+        } catch (\Exception $e) {
+            \Log::error('Error al obtener las proyecciones de la película: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al obtener las proyecciones'], 500);
+        }
+    }
 }

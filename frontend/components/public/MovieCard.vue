@@ -34,8 +34,8 @@
         <i class="bi bi-info-circle me-1"></i> Detalles
       </NuxtLink>
       
-      <NuxtLink :to="`/buy-tickets/${movie.id}`" class="btn btn-primary">
-        <i class="bi bi-ticket-perforated me-1"></i> Comprar
+      <NuxtLink :to="`/movies/${movie.id}`" class="btn btn-primary">
+        <i class="bi bi-ticket-perforated me-1"></i> Ver Funciones
       </NuxtLink>
     </div>
   </div>

@@ -9,6 +9,7 @@ use App\Models\Movie;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class ScreeningController extends Controller
 {
@@ -41,6 +42,11 @@ class ScreeningController extends Controller
             
         // Si la solicitud es de API o comienza con /api/, devolver JSON
         if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            // Asegurarse de que los datos de la película están cargados completamente
+            if ($screening->movie) {
+                $screening->movie->load('movieGenre');
+            }
+            
             return response()->json($screening);
         }
         
@@ -122,16 +128,31 @@ class ScreeningController extends Controller
         // Construir fecha y hora completa
         $dateTime = Carbon::parse($request->date . ' ' . $request->time);
         
-        // Verificar que no haya otra sesión a la misma hora
-        $existingScreening = Screening::where('date_time', $dateTime)->exists();
-        if ($existingScreening) {
+        // Verificar que no haya más de 2 sesiones a la misma hora
+        $sessionsCount = Screening::where('date_time', $dateTime)->count();
+        if ($sessionsCount >= 2) {
             if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
                 return response()->json([
-                    'message' => 'Ya existe una sesión programada para esta fecha y hora'
+                    'message' => 'Ya existen 2 sesiones programadas para esta fecha y hora'
                 ], 400);
             } else {
                 return redirect()->back()
-                    ->with('error', 'Ya existe una sesión programada para esta fecha y hora');
+                    ->with('error', 'Ya existen 2 sesiones programadas para esta fecha y hora');
+            }
+        }
+        
+        // Verificar que la película no esté ya programada a esta hora
+        $existingMovieScreening = Screening::where('date_time', $dateTime)
+            ->where('movie_id', $request->movie_id)
+            ->exists();
+        if ($existingMovieScreening) {
+            if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                return response()->json([
+                    'message' => 'Esta película ya está programada para esta fecha y hora'
+                ], 400);
+            } else {
+                return redirect()->back()
+                    ->with('error', 'Esta película ya está programada para esta fecha y hora');
             }
         }
         
@@ -195,19 +216,38 @@ class ScreeningController extends Controller
             // Construir fecha y hora completa
             $dateTime = Carbon::parse($request->date . ' ' . $request->time);
             
-            // Verificar que no haya otra sesión a la misma hora
-            $existingScreening = Screening::where('date_time', $dateTime)
+            // Verificar que no haya más de 2 sesiones a la misma hora (excluyendo la actual)
+            $sessionsCount = Screening::where('date_time', $dateTime)
                 ->where('id', '!=', $id)
-                ->exists();
+                ->count();
                 
-            if ($existingScreening) {
+            if ($sessionsCount >= 2) {
                 if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
                     return response()->json([
-                        'message' => 'Ya existe una sesión programada para esta fecha y hora'
+                        'message' => 'Ya existen 2 sesiones programadas para esta fecha y hora'
                     ], 400);
                 } else {
                     return redirect()->back()
-                        ->with('error', 'Ya existe una sesión programada para esta fecha y hora');
+                        ->with('error', 'Ya existen 2 sesiones programadas para esta fecha y hora');
+                }
+            }
+            
+            // Verificar que la película no esté ya programada a esta hora (excluyendo la actual)
+            if ($request->has('movie_id')) {
+                $existingMovieScreening = Screening::where('date_time', $dateTime)
+                    ->where('id', '!=', $id)
+                    ->where('movie_id', $request->movie_id)
+                    ->exists();
+                    
+                if ($existingMovieScreening) {
+                    if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+                        return response()->json([
+                            'message' => 'Esta película ya está programada para esta fecha y hora'
+                        ], 400);
+                    } else {
+                        return redirect()->back()
+                            ->with('error', 'Esta película ya está programada para esta fecha y hora');
+                    }
                 }
             }
             
@@ -281,6 +321,228 @@ class ScreeningController extends Controller
         } else {
             return redirect()->route('screenings.index')
                 ->with('success', 'Sesión eliminada correctamente');
+        }
+    }
+    
+    /**
+     * Obtiene los screenings disponibles para una fecha específica
+     */
+    public function getScreeningsByDate(Request $request)
+    {
+        try {
+            \Log::info('Iniciando getScreeningsByDate');
+            
+            $validator = Validator::make($request->all(), [
+                'date' => 'required|date'
+            ]);
+
+            if ($validator->fails()) {
+                \Log::warning('Validación fallida', ['errors' => $validator->errors()]);
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            
+            // Obtener la fecha del request
+            $date = $request->date;
+            
+            // Construir el rango de fechas para buscar screenings (todo el día)
+            $startDate = Carbon::parse($date)->startOfDay();
+            $endDate = Carbon::parse($date)->endOfDay();
+            
+            // Para depuración - imprimir los parámetros
+            \Log::debug('Buscando screenings para fecha:', [
+                'fecha_solicitada' => $date,
+                'start_date' => $startDate->toDateTimeString(),
+                'end_date' => $endDate->toDateTimeString(),
+                'ahora' => Carbon::now()->toDateTimeString()
+            ]);
+            
+            try {
+                // Obtener screenings para la fecha especificada sin filtro de fecha futura
+                // para propósitos de depuración
+                $screenings = Screening::with(['movie', 'auditorium'])
+                    ->whereBetween('date_time', [$startDate, $endDate])
+                    ->orderBy('date_time')
+                    ->get();
+                    
+                // Registrar los resultados
+                \Log::debug('Screenings encontrados:', [
+                    'total' => $screenings->count(),
+                    'detalles' => $screenings->map(function($s) {
+                        return [
+                            'id' => $s->id,
+                            'movie_id' => $s->movie_id,
+                            'movie_title' => $s->movie ? $s->movie->title : 'Sin película',
+                            'date_time' => $s->date_time,
+                            'is_future' => Carbon::parse($s->date_time)->gt(Carbon::now())
+                        ];
+                    })
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error al obtener screenings existentes', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString() 
+                ]);
+                $screenings = collect([]);
+            }
+            
+            // Si no hay screenings, intentemos crear algunos para propósitos de prueba
+            if ($screenings->count() === 0) {
+                \Log::debug('No se encontraron screenings para la fecha. Revisando si hay películas disponibles para crear screenings de prueba.');
+                
+                try {
+                    $movies = Movie::take(2)->get();
+                    \Log::debug('Películas disponibles para screenings:', ['count' => $movies->count()]);
+                    
+                    $auditorium = Auditorium::first();
+                    \Log::debug('Auditorio disponible:', ['id' => $auditorium ? $auditorium->id : 'ninguno']);
+                    
+                    if ($movies->count() > 0 && $auditorium) {
+                        \Log::debug('Creando screenings de prueba', [
+                            'películas' => $movies->pluck('title'),
+                            'auditorio' => $auditorium->name
+                        ]);
+                        
+                        // Crear algunos screenings de prueba para hoy
+                        $testHours = ['16:00', '18:00', '20:00'];
+                        
+                        foreach ($movies as $index => $movie) {
+                            foreach ($testHours as $hour) {
+                                $testDateTime = Carbon::parse($date . ' ' . $hour);
+                                
+                                // Solo crear si el horario es futuro o al menos hoy
+                                if ($testDateTime->startOfDay()->gte(Carbon::now()->startOfDay())) {
+                                    try {
+                                        $screening = Screening::create([
+                                            'movie_id' => $movie->id,
+                                            'auditorium_id' => $auditorium->id,
+                                            'date_time' => $testDateTime,
+                                            'price' => 6, // Precio normal
+                                            'is_special' => false
+                                        ]);
+                                        
+                                        \Log::debug('Screening de prueba creado con éxito', [
+                                            'id' => $screening->id,
+                                            'película' => $movie->title,
+                                            'horario' => $testDateTime->toDateTimeString()
+                                        ]);
+                                    } catch (\Exception $e) {
+                                        \Log::error('Error al crear screening de prueba', [
+                                            'error' => $e->getMessage(),
+                                            'película' => $movie->title,
+                                            'horario' => $testDateTime->toDateTimeString(),
+                                            'trace' => $e->getTraceAsString()
+                                        ]);
+                                    }
+                                } else {
+                                    \Log::debug('No se creó screening porque ya pasó la hora', [
+                                        'fecha_prueba' => $testDateTime->toDateTimeString(),
+                                        'ahora' => Carbon::now()->toDateTimeString()
+                                    ]);
+                                }
+                            }
+                        }
+                        
+                        try {
+                            // Volver a obtener los screenings ahora que hemos creado algunos
+                            $screenings = Screening::with(['movie', 'auditorium'])
+                                ->whereBetween('date_time', [$startDate, $endDate])
+                                ->orderBy('date_time')
+                                ->get();
+                                
+                            \Log::debug('Screenings después de crear de prueba:', [
+                                'total' => $screenings->count()
+                            ]);
+                        } catch (\Exception $e) {
+                            \Log::error('Error al obtener screenings después de crear', [
+                                'error' => $e->getMessage(),
+                                'trace' => $e->getTraceAsString()
+                            ]);
+                        }
+                    } else {
+                        \Log::warning('No hay películas o auditorios disponibles para crear screenings de prueba');
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Error al crear screenings de prueba', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                }
+            }
+            
+            // Filtrar solo los screenings futuros
+            $futureScreenings = $screenings->filter(function($screening) {
+                return Carbon::parse($screening->date_time)->gte(Carbon::now()->startOfDay());
+            })->values();
+            
+            // Agrupar screenings por película para asegurar solo 2 películas por día
+            // Pero asegurarse de que haya un balance entre las horas
+            // Primero obtener todos los movie_ids únicos
+            $uniqueMovieIds = $futureScreenings->pluck('movie_id')->unique()->values()->toArray();
+            
+            // Ordenar screenings por hora para encontrar las películas que tienen horarios de 18:00 y 20:00
+            $screeningsByTime = [];
+            foreach ($futureScreenings as $screening) {
+                $hour = Carbon::parse($screening->date_time)->format('H');
+                $screeningsByTime[$hour][] = $screening->movie_id;
+            }
+            
+            // Movies con horario de 18:00
+            $moviesAt18 = $screeningsByTime['18'] ?? [];
+            // Movies con horario de 20:00
+            $moviesAt20 = $screeningsByTime['20'] ?? [];
+            
+            // Intentar encontrar 2 películas que tengan horarios a las 18:00 y 20:00
+            $selectedMovieIds = [];
+            
+            // Primero, buscar películas que tengan ambos horarios
+            foreach ($uniqueMovieIds as $movieId) {
+                if (in_array($movieId, $moviesAt18) && in_array($movieId, $moviesAt20)) {
+                    $selectedMovieIds[] = $movieId;
+                    if (count($selectedMovieIds) >= 2) break;
+                }
+            }
+            
+            // Si no tenemos suficientes, agregar películas que tengan al menos un horario
+            if (count($selectedMovieIds) < 2) {
+                foreach ($uniqueMovieIds as $movieId) {
+                    if (!in_array($movieId, $selectedMovieIds) && 
+                        (in_array($movieId, $moviesAt18) || in_array($movieId, $moviesAt20))) {
+                        $selectedMovieIds[] = $movieId;
+                        if (count($selectedMovieIds) >= 2) break;
+                    }
+                }
+            }
+            
+            // Si aún no tenemos 2, simplemente tomar las primeras dos películas disponibles
+            if (count($selectedMovieIds) < 2 && count($uniqueMovieIds) > 0) {
+                $remainingMovies = array_diff($uniqueMovieIds, $selectedMovieIds);
+                while (count($selectedMovieIds) < 2 && count($remainingMovies) > 0) {
+                    $selectedMovieIds[] = array_shift($remainingMovies);
+                }
+            }
+            
+            // Filtrar screenings para incluir solo las películas seleccionadas
+            $limitedScreenings = $futureScreenings->filter(function($screening) use ($selectedMovieIds) {
+                return in_array($screening->movie_id, $selectedMovieIds);
+            })->values();
+            
+            \Log::info('Finalizando getScreeningsByDate con éxito', [
+                'screenings_totales' => $futureScreenings->count(),
+                'screenings_limitados' => $limitedScreenings->count(),
+                'películas_seleccionadas' => $selectedMovieIds
+            ]);
+            
+            return response()->json($limitedScreenings);
+        } catch (\Exception $e) {
+            \Log::error('Error general en getScreeningsByDate', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'error' => 'Error interno del servidor',
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
 }

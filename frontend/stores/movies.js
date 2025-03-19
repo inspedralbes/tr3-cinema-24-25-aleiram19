@@ -20,7 +20,7 @@ export const useMoviesStore = defineStore('movies', {
     
     // Obtener películas actualmente en cartelera
     getCurrentMovies() {
-      return this.movies.filter(movie => movie.is_released === true);
+      return this.movies; // Devolvemos todas las películas sin filtrar
     },
     
     // Obtener película por ID
