@@ -18,7 +18,6 @@ class MovieGenreSeeder extends Seeder
             'Acción',
             'Aventura',
             'Comedia',
-            'Terror',
             'Drama',
         ];
 

@@ -35,18 +35,7 @@ class ScreeningSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            [
-                'movie_id' => 3,
-                'auditorium_id' => 3,
-                // Para la película 3, se elige el horario de las 20:00
-                'date_time' => Carbon::now()->addDays(1)->setTime(20, 0),
-                'price' => 6.00, // Precio normal
-                'is_special' => false,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
         ]);
-
         // Configuración de sesión especial (día de l'espectador)
         // Suponemos que el día de l'espectador es el día siguiente al de las sesiones normales.
         // En este ejemplo se programa una sesión especial para la película 1 con precio especial.

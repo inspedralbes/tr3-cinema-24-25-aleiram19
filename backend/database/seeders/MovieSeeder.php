@@ -55,21 +55,7 @@ class MovieSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 4. Ghostbusters: Apocalipsis Fantasma
-            [
-                'title' => 'Ghostbusters: Apocalipsis Fantasma',
-                'director' => 'Jason Reitman',
-                'actors' => 'Melissa McCarthy, Kristen Wiig, Chris Hemsworth',
-                'description' => 'Los cazafantasmas se reúnen para enfrentar una amenaza sobrenatural que desata el caos en la ciudad, combinando humor y terror en una lucha épica contra lo paranormal.',
-                'trailer' => 'https://www.youtube.com/embed/itP3y0ADBgo',
-                'duration' => 115,
-                'movie_genre_id' => 4, // Comedia
-                'release_date' => '2022-11-01',
-                'image' => '/img/ghost_peli.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // 5. Furiosa: De la Saga Mad Max
+            // 4. Furiosa: De la Saga Mad Max
             [
                 'title' => 'Furiosa: De la Saga Mad Max',
                 'director' => 'George Miller',
@@ -83,7 +69,7 @@ class MovieSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 6. Inside Out 2
+            // 5. Inside Out 2
             [
                 'title' => 'Inside Out 2',
                 'director' => 'Pete Docter',
@@ -97,35 +83,7 @@ class MovieSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 7. Mi Villano Favorito 4
-            [
-                'title' => 'Mi Villano Favorito 4',
-                'director' => 'Pierre Coffin',
-                'actors' => 'Steve Carell, Miranda Cosgrove, Tony Hale',
-                'description' => 'Gru y sus adorables secuaces se embarcan en una nueva aventura llena de humor y corazón, enfrentando desafíos inesperados en el mundo de los villanos.',
-                'trailer' => 'https://www.youtube.com/embed/ulPKDcGwxUg',
-                'duration' => 95,
-                'movie_genre_id' => 4, // Comedia
-                'release_date' => '2023-09-01',
-                'image' => '/img/villano_peli.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // 8. Alien: Romulus
-            [
-                'title' => 'Alien: Romulus',
-                'director' => 'Neill Blomkamp',
-                'actors' => 'Sigourney Weaver, Alicia Vikander, John Boyega',
-                'description' => 'Una nueva entrega en el icónico universo de Alien, donde la tripulación de una nave espacial se enfrenta a horrores indescriptibles al explorar los confines misteriosos del espacio.',
-                'trailer' => 'https://www.youtube.com/embed/5nWH2Pd-x-c',
-                'duration' => 120,
-                'movie_genre_id' => 5, // Terror
-                'release_date' => '2023-07-01',
-                'image' => '/img/alien_peli.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // 9. Deadpool & Wolverine
+            // 6. Deadpool & Wolverine
             [
                 'title' => 'Deadpool & Wolverine',
                 'director' => 'David Leitch',
@@ -139,21 +97,7 @@ class MovieSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 10. Joker: Folie à Deux
-            [
-                'title' => 'Joker: Folie à Deux',
-                'director' => 'Todd Phillips',
-                'actors' => 'Joaquin Phoenix, Lady Gaga',
-                'description' => 'Una profunda exploración psicológica del caos en la mente del Joker, que ahonda en sus complejas relaciones y motivaciones a través de una narrativa intensa y perturbadora.',
-                'trailer' => 'https://www.youtube.com/embed/uDzfa0w86VwI',
-                'duration' => 135,
-                'movie_genre_id' => 6, // Drama
-                'release_date' => '2023-04-01',
-                'image' => '/img/joker_peli.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // 11. Mufasa: El Rey León
+            // 7. Mufasa: El Rey León
             [
                 'title' => 'Mufasa: El Rey León',
                 'director' => 'Jon Favreau',
@@ -167,21 +111,7 @@ class MovieSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 12. Oppenheimer
-            [
-                'title' => 'Oppenheimer',
-                'director' => 'Christopher Nolan',
-                'actors' => 'Cillian Murphy, Emily Blunt',
-                'description' => 'Un drama histórico que examina la vida del científico detrás de la creación de la bomba atómica, explorando las implicaciones morales y personales de un descubrimiento devastador.',
-                'trailer' => 'https://www.youtube.com/embed/JpUd4BS7yI0',
-                'duration' => 180,
-                'movie_genre_id' => 6, // Drama
-                'release_date' => '2023-12-01',
-                'image' => '/img/oppenhaimer_peli.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // 13. EL CABALLERO OSCURO
+            // 8. EL CABALLERO OSCURO
             [
                 'title' => 'El Caballero Oscuro',
                 'director' => 'Christopher Nolan',
@@ -195,7 +125,7 @@ class MovieSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 14. INTERSTELLAR
+            // 9. INTERSTELLAR
             [
                 'title' => 'Interstellar',
                 'director' => 'Christopher Nolan',
@@ -209,7 +139,7 @@ class MovieSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 15. GLADIATOR
+            // 10. GLADIATOR
             [
                 'title' => 'Gladiator',
                 'director' => 'Ridley Scott',
@@ -223,7 +153,7 @@ class MovieSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 16. BEAUTY AND THE BEAST
+            // 11. BEAUTY AND THE BEAST
             [
                 'title' => 'Beauty and the Beast',
                 'director' => 'Bill Condon',
@@ -231,13 +161,13 @@ class MovieSeeder extends Seeder
                 'description' => 'Una encantadora adaptación del clásico cuento, donde la belleza y la bestia descubren que el amor y la comprensión pueden transformar incluso las almas más endurecidas.',
                 'trailer' => 'https://www.youtube.com/embed/pnkgw6pAKkM',
                 'duration' => 129,
-                'movie_genre_id' => 6, // Drama
+                'movie_genre_id' => 5, // Drama
                 'release_date' => '2023-11-01',
                 'image' => '/img/bellaybestia_peli.jpg',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 17. MICKEY 17
+            // 12. MICKEY 17
             [
                 'title' => 'Mickey 17',
                 'director' => 'Bong Joon Ho',
@@ -251,21 +181,7 @@ class MovieSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 18. WOLFGANG
-            [
-                'title' => 'WolfGang',
-                'director' => 'Martin Scorsese',
-                'actors' => 'Leonardo DiCaprio, Jonah Hill',
-                'description' => 'Una emotiva narrativa que combina drama y música, contando la historia de un individuo extraordinario cuya pasión y talento lo impulsan a superar grandes desafíos personales.',
-                'trailer' => 'https://www.youtube.com/embed/Wm9o1N69WY0',
-                'duration' => 132,
-                'movie_genre_id' => 6, // Drama
-                'release_date' => '2023-07-15',
-                'image' => '/img/wolfgang_peli.jpg',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            // 19. ANORA
+            // 13. ANORA
             [
                 'title' => 'Anora',
                 'director' => 'Greta Gerwig',
@@ -273,13 +189,13 @@ class MovieSeeder extends Seeder
                 'description' => 'Un drama intenso y cautivador que explora las complejidades de las relaciones humanas, destacando actuaciones sobresalientes y una narrativa profundamente emotiva.',
                 'trailer' => 'https://www.youtube.com/embed/xV7jnVhBD2E',
                 'duration' => 125,
-                'movie_genre_id' => 6, // Drama
+                'movie_genre_id' => 5, // Drama
                 'release_date' => '2023-06-15',
                 'image' => '/img/anora_peli.jpg',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
-            // 20. PADDINGTON: AVENTURA EN LA SELVA
+            // 14. PADDINGTON: AVENTURA EN LA SELVA
             [
                 'title' => 'Paddington: Aventura en la Selva',
                 'director' => 'Paul King',

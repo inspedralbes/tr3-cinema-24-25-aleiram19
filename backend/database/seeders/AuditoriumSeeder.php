@@ -15,35 +15,14 @@ class AuditoriumSeeder extends Seeder
         DB::table('auditoriums')->insert([
             [
                 'name' => 'Sala 1',
-                'capacity' => 80,
-                'type' => '2D',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Sala 2',
-                'capacity' => 80,
-                'type' => '3D',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Sala 3',
-                'capacity' => 80,
-                'type' => '2D',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'name' => 'Sala 4',
-                'capacity' => 80,
+                'capacity' => 120,
                 'type' => '2D',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'Sala VIP',
-                'capacity' => 40,
+                'capacity' => 120,
                 'type' => 'IMAX',
                 'created_at' => now(),
                 'updated_at' => now(),
