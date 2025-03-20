@@ -31,20 +31,19 @@
         </NuxtLink>
         
         <NuxtLink 
+          to="/sessiones"
+          class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+        >
+          <i class="fas fa-tags mr-2"></i> Sesiones
+        </NuxtLink>
+
+        <NuxtLink 
           to="/promociones"
           class="text-white font-medium px-4 py-2 relative group transition-all duration-300 ease-in-out hover:text-blue-400"
         >
           <i class="fas fa-tags mr-1"></i> Promociones
           <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-blue-400 transform -translate-x-1/2 transition-all duration-300 group-hover:w-full"></span>
         </NuxtLink>
-        
-        <a 
-          href="#"
-          class="text-white font-medium px-4 py-2 relative group transition-all duration-300 ease-in-out hover:text-blue-400"
-        >
-          <i class="fas fa-map-marker-alt mr-1"></i> Cines
-          <span class="absolute bottom-0 left-1/2 w-0 h-0.5 bg-blue-400 transform -translate-x-1/2 transition-all duration-300 group-hover:w-full"></span>
-        </a>
         
         <template v-if="!authStore.isAuthenticated">
           <NuxtLink 
@@ -81,18 +80,18 @@
         </NuxtLink>
         
         <NuxtLink 
+          to="/sessiones"
+          class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
+        >
+          <i class="fas fa-tags mr-2"></i> Sesiones
+        </NuxtLink>
+
+        <NuxtLink 
           to="/promociones"
           class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
         >
           <i class="fas fa-tags mr-2"></i> Promociones
         </NuxtLink>
-        
-        <a 
-          href="#"
-          class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
-        >
-          <i class="fas fa-map-marker-alt mr-2"></i> Cines
-        </a>
         
         <template v-if="!authStore.isAuthenticated">
           <NuxtLink 
