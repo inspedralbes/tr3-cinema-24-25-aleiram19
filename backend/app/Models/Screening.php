@@ -99,4 +99,14 @@ class Screening extends Model
             ->where('status', 'reserved')
             ->count();
     }
+    
+    /**
+     * Verifica si la sesión tiene entradas vendidas
+     * 
+     * @return bool True si tiene entradas, false en caso contrario
+     */
+    public function hasTickets()
+    {
+        return $this->tickets()->count() > 0;
+    }
 }

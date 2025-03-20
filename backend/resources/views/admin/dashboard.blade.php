@@ -17,6 +17,10 @@
                 <i class="fas fa-chair"></i>
                 Asientos
             </a>
+            <a href="{{ route('screenings.index') }}" class="content-link screening">
+                <i class="fas fa-video"></i>
+                Screenings
+            </a>
         </div>
     </div>
 @endsection

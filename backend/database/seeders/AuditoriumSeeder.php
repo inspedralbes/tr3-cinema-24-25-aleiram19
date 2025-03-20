@@ -21,9 +21,9 @@ class AuditoriumSeeder extends Seeder
                 'updated_at' => now(),
             ],
             [
-                'name' => 'Sala VIP',
+                'name' => 'Sala 2',
                 'capacity' => 120,
-                'type' => 'IMAX',
+                'type' => '2D',
                 'created_at' => now(),
                 'updated_at' => now(),
             ],

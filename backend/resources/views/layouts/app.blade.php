@@ -546,11 +546,14 @@
                 <a href="{{ route('movies.index') }}" class="{{ request()->routeIs('movies.*') ? 'active' : '' }}">
                     <i class="fas fa-film me-1"></i> Películas
                 </a>
-                <a href="{{ route('seats.index') }}" class="{{ request()->routeIs('seats.*') ? 'active' : '' }}">
-                    <i class="fas fa-chair me-1"></i> Asientos
+                <a href="{{ route('screenings.index') }}" class="{{ request()->routeIs('screenings.*') ? 'active' : '' }}">
+                    <i class="fas fa-video me-1"></i> Sessiones
                 </a>
                 <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
                     <i class="fas fa-users me-1"></i> Usuarios
+                </a>
+                <a href="{{ route('seats.index') }}" class="{{ request()->routeIs('seats.*') ? 'active' : '' }}">
+                    <i class="fas fa-chair me-1"></i> Asientos
                 </a>
             </div>
         </nav>

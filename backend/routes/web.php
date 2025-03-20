@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\SeatController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ScreeningController;   
 
 /*
 |--------------------------------------------------------------------------
@@ -55,4 +56,14 @@ Route::prefix('admin/seats')->group(function () {
     Route::get('/{id}/edit', [SeatController::class, 'edit'])->name('seats.edit');
     Route::put('/{id}', [SeatController::class, 'update'])->name('seats.update');
     Route::delete('/{id}', [SeatController::class, 'destroy'])->name('seats.destroy');
+});
+
+Route::prefix('admin/screening')->group(function () {
+    Route::get('/', [ScreeningController::class, 'index'])->name('screenings.index');
+    Route::get('/create', [ScreeningController::class, 'create'])->name('screenings.create');
+    Route::post('/', [ScreeningController::class, 'store'])->name('screenings.store');
+    Route::get('/{id}', [ScreeningController::class, 'show'])->name('screenings.show');
+    Route::get('/{id}/edit', [ScreeningController::class, 'edit'])->name('screenings.edit');
+    Route::put('/{id}', [ScreeningController::class, 'update'])->name('screenings.update');
+    Route::delete('/{id}', [ScreeningController::class, 'destroy'])->name('screenings.destroy');
 });

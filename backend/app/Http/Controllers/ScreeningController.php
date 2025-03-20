@@ -33,6 +33,16 @@ class ScreeningController extends Controller
     }
     
     /**
+     * Muestra el formulario para crear una nueva sesión
+     */
+    public function create()
+    {
+        $movies = Movie::all();
+        $auditoriums = Auditorium::all();
+        return view('screenings.create', compact('movies', 'auditoriums'));
+    }
+
+    /**
      * Obtiene los detalles de una sesión
      */
     public function show(Request $request, $id)
@@ -176,6 +186,17 @@ class ScreeningController extends Controller
         }
     }
     
+    /**
+     * Muestra el formulario para editar una sesión existente
+     */
+    public function edit($id)
+    {
+        $screening = Screening::findOrFail($id);
+        $movies = Movie::all();
+        $auditoriums = Auditorium::all();
+        return view('screenings.edit', compact('screening', 'movies', 'auditoriums'));
+    }
+
     /**
      * Actualiza una sesión existente
      * Este método solo estaría disponible para administradores
@@ -545,4 +566,5 @@ class ScreeningController extends Controller
             ], 500);
         }
     }
+    
 }
