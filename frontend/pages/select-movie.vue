@@ -185,25 +185,19 @@ const loadMovieData = async () => {
       moviesStore.fetchCurrentMovies(),
       genresStore.fetchGenres()
     ]);
-    
-    console.log('Películas cargadas:', moviesStore.movies.length);
-    console.log('Géneros cargados:', genresStore.genres.length);
-    
+        
     if (movieId.value && moviesStore.movies.length > 0) {
       // Buscar la película por ID
       const foundMovie = moviesStore.movies.find(movie => movie.id === parseInt(movieId.value));
       
       if (foundMovie) {
-        console.log('Película encontrada:', foundMovie.title);
         movieData.value = foundMovie;
       } else {
         error.value = 'Película no encontrada';
       }
     } else {
-      error.value = 'No se pudo determinar qué película mostrar';
     }
   } catch (e) {
-    console.error('Error cargando datos:', e);
     error.value = 'Error cargando datos de la película';
   } finally {
     loading.value = false;
@@ -226,11 +220,9 @@ const closeTrailer = () => {
 
 // Al montar el componente
 onMounted(async () => {
-  console.log('Componente montado');
   const route = useRoute();
   
   if (route.query.id) {
-    console.log(`ID de película detectado en la URL: ${route.query.id}`);
     movieId.value = route.query.id;
     await loadMovieData();
   } else {
