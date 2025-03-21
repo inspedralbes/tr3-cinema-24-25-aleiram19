@@ -210,6 +210,8 @@
             <i class="fab fa-google text-red-500"></i>
             <span>Continuar con Google</span>
           </button>
+
+          
         </div>
       </form>
     </div>

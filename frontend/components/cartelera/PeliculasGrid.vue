@@ -79,12 +79,12 @@
                 <span>{{ Math.floor(Math.random() * 3) + 7 }}.{{ Math.floor(Math.random() * 10) }}</span>
               </div>
               
-              <!-- Botón COMPRAR -->
+              <!-- Botón INFORMACIÓN -->
               <NuxtLink 
                 :to="'/select-movie?id=' + pelicula.id" 
                 class="w-full bg-gradient-to-r from-blue-600 to-blue-500 text-white uppercase font-bold py-2 px-6 rounded-full mb-2 hover:from-blue-500 hover:to-blue-400 hover:scale-105 transition-all shadow-md text-center"
               >
-                COMPRAR
+                INFORMACIÓN
               </NuxtLink>
               
               <!-- Botón Ver Trailer -->
