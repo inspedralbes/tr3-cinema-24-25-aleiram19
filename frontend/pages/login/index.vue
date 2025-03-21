@@ -9,9 +9,9 @@ export default {
   name: 'LoginPage',
   head() {
     return {
-      title: 'Iniciar Sesión - CineXeperience',
+      title: 'Iniciar Sesión - CineXperience',
       meta: [
-        { hid: 'description', name: 'description', content: 'Inicia sesión en tu cuenta de CineXeperience' }
+        { hid: 'description', name: 'description', content: 'Inicia sesión en tu cuenta de CineXperience' }
       ]
     }
   }

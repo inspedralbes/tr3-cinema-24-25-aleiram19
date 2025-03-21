@@ -1,4 +1,3 @@
-// Importaciones necesarias para Vue (Pinia)
 import { defineStore } from 'pinia';
 
 // Definición del store para asientos

@@ -171,9 +171,11 @@
 
 <script setup>
 import { ref, computed, onMounted, reactive } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
+import { navigateTo } from '#app';
 import { useMoviesStore } from '@/stores/movies';
 import { useSeatsStore } from '@/stores/seats';
+import { useTicketStore } from '@/stores/ticket';
 
 const route = useRoute();
 
@@ -295,11 +297,36 @@ const confirmSelection = () => {
   // Guardar los asientos seleccionados en sessionStorage
   sessionStorage.setItem('selectedSeats', JSON.stringify(selectedSeats.value));
   
-  // Aquí iría la lógica para confirmar la selección
+  // Guardar los datos de la función seleccionada en el store de tickets
+  // para que estén disponibles en el proceso de checkout
+  const ticketStore = useTicketStore();
+  ticketStore.setSelectedScreening({
+    id: screeningId.value,
+    movie: {
+      id: movieInfo.id,
+      title: movieInfo.title
+    },
+    start_time: movieInfo.date + ' ' + movieInfo.time,
+    room: seatsStore.auditorium ? { name: `Sala ${seatsStore.auditorium.number}` } : { name: 'Sala' },
+    price: selectedSeats.value.length > 0 ? selectedSeats.value[0].price : 0
+  });
+  
+  // Configurar los asientos seleccionados en el store
+  ticketStore.clearSelectedSeats();
+  selectedSeats.value.forEach(seat => {
+    const [row, column] = seat.number.split('');
+    ticketStore.selectSeat({
+      id: seat.id,
+      row: row,
+      column: column,
+      price: seat.price
+    });
+  });
+  
   console.log('Asientos confirmados:', selectedSeats.value);
   
-  // Navegar a la siguiente página (por ejemplo, una página de pago o confirmación)
-  // navigateTo('/payment');
+  // Navegar a la página de checkout
+  navigateTo('/checkout');
 };
 
 // Cargar datos de la película y proyección desde la API

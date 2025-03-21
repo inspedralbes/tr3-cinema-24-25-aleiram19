@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import { useRuntimeConfig } from 'nuxt/app';
 
 export const useScreeningsStore = defineStore('screenings', {
   state: () => ({
