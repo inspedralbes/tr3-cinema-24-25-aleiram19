@@ -9,6 +9,8 @@ export default defineNuxtRouteMiddleware((to, from) => {
   
   if (!authStore.isAuthenticated) {
     // Si no está autenticado, redirigir a login con un parámetro de redirección
-    return navigateTo(`/login?redirect=${encodeURIComponent(to.fullPath)}`);
+    const redirectPath = to.fullPath;
+    console.log('Redirigiendo a login con parámetro redirect:', redirectPath);
+    return navigateTo(`/login?redirect=${encodeURIComponent(redirectPath)}`);
   }
 });

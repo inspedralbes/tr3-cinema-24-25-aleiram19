@@ -26,12 +26,11 @@ class ScreeningSeeder extends Seeder
         // Obtenemos todas las películas disponibles
         $allMovies = Movie::all();
         
-        // Verificamos que haya al menos 7 días * 2 películas = 14 películas
-        // Si hay menos, repetiremos algunas películas
+        // Verificamos que haya películas
         $totalMovies = $allMovies->count();
         
         // Si no hay películas, no creamos screenings
-        if ($allMovies->count() === 0) {
+        if ($totalMovies === 0) {
             $this->command->info('No hay películas disponibles para crear screenings');
             return;
         }
@@ -45,22 +44,22 @@ class ScreeningSeeder extends Seeder
             return;
         }
         
-        // Horarios disponibles (solo 18:00 y 20:00 según el requerimiento)
-        $times = [18, 20];
+        // Horarios disponibles (asignamos un horario para cada película)
+        $times = [18, 20]; // 18:00 para la primera película, 20:00 para la segunda
         
         // Crear proyecciones para los próximos 7 días
         $screenings = [];
         $now = Carbon::now();
         
-        // Determinar si el miércoles es día especial
-        $isWednesdaySpecial = true;
+        // El día del espectador es el miércoles
+        $specialDay = Carbon::WEDNESDAY;
         
         // Para cada día
         for ($day = 0; $day < 7; $day++) {
             $date = $now->copy()->addDays($day);
             
-            // Determinar si es día especial (miércoles)
-            $isSpecialDay = ($date->dayOfWeek === Carbon::WEDNESDAY && $isWednesdaySpecial);
+            // Determinar si es día del espectador (miércoles)
+            $isSpecialDay = ($date->dayOfWeek === $specialDay);
             
             // Seleccionar 2 películas diferentes para este día
             // Usamos el índice del día para rotar entre todas las películas disponibles
@@ -71,44 +70,44 @@ class ScreeningSeeder extends Seeder
                 $moviesForThisDay[] = $allMovies[$movieIndex];
             }
             
-            // Distribuir exactamente 2 películas por día, una a las 18:00 y otra a las 20:00
-            // Para cada día, aseguramos que la película 1 tenga horario de 18:00 y la película 2 tenga horario de 20:00
-            foreach ($moviesForThisDay as $index => $movie) {
-                // Asignar horario fijo según índice (0 -> 18:00, 1 -> 20:00)
-                $time = $times[$index]; // Esto asegura que la película 1 sea a las 18 y la película 2 a las 20
+            // Asignamos cada película a un auditorio diferente
+            // Usamos 2 películas por día (esto se puede ampliar en el futuro)
+            for ($i = 0; $i < 2; $i++) {
+                $movie = $moviesForThisDay[$i];
+                $time = $times[$i]; // 18:00 para la primera película, 20:00 para la segunda
+                $auditorium = $auditoriums[$i]; // Cada película va a un auditorio diferente
                 
-                // Asignamos a la sala (alternando)
-                $auditoriumIndex = $index % $auditoriums->count();
-                $auditorium = $auditoriums[$auditoriumIndex];
-                
-                // Solo crear si el horario es futuro o hoy pero hora futura
                 $screeningDateTime = $date->copy()->setTime($time, 0, 0);
                 
+                // Solo crear si el horario es futuro o hoy pero hora futura
                 if ($screeningDateTime->gt($now)) {
-                    // Calcular precio base según la sala y si es día especial
-                    $basePrice = 6.00; // Precio base normal
+                    // Configuramos precio normal y VIP según los requisitos
+                    $normalPrice = 6.00; // Precio normal base
+                    $vipPrice = 8.00;    // Precio VIP base (fila F)
                     
-                    // Aumentamos precio para la última sala (asumimos que es premium/IMAX)
-                    if ($auditorium->id === $auditoriums->last()->id) {
-                        $basePrice = 8.00;
-                    }
-                    
-                    // Reducir precio si es día especial
+                    // Reducir precios si es día del espectador (miércoles)
                     if ($isSpecialDay) {
-                        $basePrice = max(4.00, $basePrice - 2.00); // Reducimos 2€, pero mínimo 4€
+                        $normalPrice = 4.00; // 6€ - 2€ para día del espectador
+                        $vipPrice = 6.00;    // 8€ - 2€ para día del espectador
                     }
                     
+                    // Crear screening con el precio base
                     $screenings[] = [
                         'movie_id' => $movie->id,
                         'auditorium_id' => $auditorium->id,
                         'date_time' => $screeningDateTime,
-                        'price' => $basePrice,
+                        'price' => $normalPrice,  // Precio normal para asientos regulares
                         'is_special' => $isSpecialDay,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ];
                     
-                    $this->command->info("Creando screening: {$movie->title} - {$screeningDateTime}");
+                    $this->command->info("Creando screening: {$movie->title} en {$auditorium->name} - {$screeningDateTime->format('Y-m-d H:i')} - Precio normal: {$normalPrice}€");
+                    
+                    // Informar sobre precios VIP para la sala 2 (tiene asientos VIP en la fila F)
+                    if ($auditorium->id == 2) {
+                        $this->command->info("  - Asientos VIP (fila F) para esta proyección: {$vipPrice}€");
+                    }
                 }
             }
         }

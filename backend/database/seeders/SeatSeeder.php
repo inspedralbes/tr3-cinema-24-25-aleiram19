@@ -25,9 +25,9 @@ class SeatSeeder extends Seeder
             }
         }
 
-        // Crear asientos para la Sala VIP (auditorium_id = 2) - 6 filas (A-F) × 10 sillones
+        // Crear asientos para la Sala 2 (auditorium_id = 2) - 12 filas (A-L) × 10 sillones
         // La fila F tiene asientos VIP
-        for ($row = 'A'; $row <= 'F'; $row++) {
+        for ($row = 'A'; $row <= 'L'; $row++) {
             for ($column = 1; $column <= 10; $column++) {
                 DB::table('seats')->insert([
                     'auditorium_id' => 2,

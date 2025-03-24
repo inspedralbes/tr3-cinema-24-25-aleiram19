@@ -7,7 +7,7 @@
     <div class="w-full max-w-2xl space-y-8 bg-blue-900 bg-opacity-80 rounded-xl shadow-xl p-8 sm:p-10 text-white">
       <!-- Header -->
       <div class="text-center">
-        <h2 class="text-3xl font-bold mb-2">Continuar como Invitado</h2>
+        <h2 class="text-3xl font-bold mb-2">Continuar con tu compra</h2>
         <p class="text-gray-400 text-sm">
           Completa tus datos para continuar con la compra
         </p>
@@ -280,8 +280,8 @@ const submitForm = async () => {
     // Mostrar mensaje de éxito
     $toast.success('Información guardada correctamente');
     
-    // Redireccionar a la siguiente página del checkout
-    router.push('/checkout/payment');
+    // Redireccionar a la página de confirmación
+    router.push('/checkout/confirmation');
   } catch (err) {
     error.value = err.message || 'Ha ocurrido un error al procesar tu información';
   } finally {

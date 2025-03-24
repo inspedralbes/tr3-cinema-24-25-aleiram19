@@ -67,9 +67,20 @@ export const useSeatsStore = defineStore('seats', {
         }
         
         const data = await response.json();
+        
         this.seats = data.seats_by_row;
         this.auditorium = data.auditorium;
         this.screening = data.screening;
+        
+        // Verificar la estructura del auditorio
+        if (this.auditorium) {
+          if (this.auditorium.number === undefined) {
+            // Si no tiene número pero tiene ID, podríamos usar el ID como número
+            if (this.auditorium.id && !this.auditorium.number) {
+              this.auditorium.number = this.auditorium.id;
+            }
+          }
+        }
         return data;
       } catch (error) {
         console.error('Error en fetchSeatsForScreening:', error);

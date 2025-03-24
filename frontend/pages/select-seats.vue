@@ -5,8 +5,8 @@
       <div class="max-w-4xl mx-auto">
         <div class="mb-6 flex items-center justify-between">
           <h1 class="text-3xl font-bold text-white">Seleccionar Asientos</h1>
-          <NuxtLink :to="`/movies/${movieInfo.id}`" class="text-white hover:text-blue-300 transition-colors">
-            <i class="fas fa-arrow-left mr-2"></i> Volver a la película
+          <NuxtLink :to="`/screenings`" class="text-white hover:text-blue-300 transition-colors">
+            <i class="fas fa-arrow-left mr-2"></i> Volver a sesiones
           </NuxtLink>
         </div>
 
@@ -41,7 +41,7 @@
               </div>
             </div>
             <div class="text-right">
-              <p class="text-gray-300">{{ seatsStore.auditorium ? `Sala ${seatsStore.auditorium.number}` : 'Cargando sala...' }}</p>
+              <p class="text-gray-300">{{ getAuditoriumDisplay() }}</p>
               <p v-if="seatsStore.screening?.is_special" class="text-sm mt-1 bg-red-500/30 text-red-100 px-2 py-1 rounded-md inline-block">
                 <i class="fas fa-star mr-1"></i> Día del Espectador
               </p>
@@ -175,7 +175,7 @@ import { useRoute, useRouter } from 'vue-router';
 import { navigateTo } from '#app';
 import { useMoviesStore } from '@/stores/movies';
 import { useSeatsStore } from '@/stores/seats';
-import { useTicketStore } from '@/stores/ticket';
+import { useTicketsStore } from '@/stores/tickets';
 
 const route = useRoute();
 
@@ -198,6 +198,7 @@ const loadMovieInfo = () => {
   
   // Si no hay datos en sessionStorage, usar los parámetros de la URL
   if (route.query.movie) {
+    console.log('Usando información de película desde parámetros URL:', route.query.movie);
     return {
       id: parseInt(route.query.movie),
       title: 'Película',  // Se actualizará después
@@ -207,6 +208,7 @@ const loadMovieInfo = () => {
   }
   
   // Valor por defecto
+  console.log('No se encontró información de película, usando valores por defecto');
   return { title: "Cargando película..." };
 };
 
@@ -292,6 +294,25 @@ const formatPrice = (price) => {
   });
 };
 
+// Obtener el nombre de la sala para mostrar
+const getAuditoriumDisplay = () => {
+  if (!seatsStore.auditorium) {
+    return 'Cargando sala...';
+  }
+  
+  // Debug
+  
+  if (seatsStore.auditorium.number) {
+    return `Sala ${seatsStore.auditorium.number}`;
+  } else if (seatsStore.auditorium.name) {
+    return seatsStore.auditorium.name;
+  } else if (seatsStore.auditorium.id) {
+    return `Sala ${seatsStore.auditorium.id}`;
+  } else {
+    return 'Sala';
+  }
+};
+
 // Confirmar la selección de asientos
 const confirmSelection = () => {
   // Guardar los asientos seleccionados en sessionStorage
@@ -299,17 +320,19 @@ const confirmSelection = () => {
   
   // Guardar los datos de la función seleccionada en el store de tickets
   // para que estén disponibles en el proceso de checkout
-  const ticketStore = useTicketStore();
-  ticketStore.setSelectedScreening({
+  const ticketStore = useTicketsStore();
+  // Nota: El método setSelectedScreening no existe en useTicketsStore
+  // Guardamos la información del screening en sessionStorage
+  sessionStorage.setItem('selectedScreening', JSON.stringify({
     id: screeningId.value,
     movie: {
       id: movieInfo.id,
       title: movieInfo.title
     },
     start_time: movieInfo.date + ' ' + movieInfo.time,
-    room: seatsStore.auditorium ? { name: `Sala ${seatsStore.auditorium.number}` } : { name: 'Sala' },
+    room: { name: getAuditoriumDisplay() },
     price: selectedSeats.value.length > 0 ? selectedSeats.value[0].price : 0
-  });
+  }));
   
   // Configurar los asientos seleccionados en el store
   ticketStore.clearSelectedSeats();
@@ -323,8 +346,18 @@ const confirmSelection = () => {
     });
   });
   
-  console.log('Asientos confirmados:', selectedSeats.value);
-  
+  // Guardamos el screening_id en el store
+  ticketStore.currentTicket = {
+    screening_id: screeningId.value,
+    screening: {
+      id: screeningId.value,
+      movie: {
+        id: movieInfo.id,
+        title: movieInfo.title
+      }
+    }
+  };
+
   // Navegar a la página de checkout
   navigateTo('/checkout');
 };
@@ -350,9 +383,7 @@ const loadScreeningData = async () => {
         return;
       }
     }
-    
-    console.log('Cargando proyección con ID:', screeningId.value);
-    
+
     // Cargar la información de la proyección y los asientos
     const screeningData = await seatsStore.fetchSeatsForScreening(screeningId.value);
     
@@ -365,9 +396,35 @@ const loadScreeningData = async () => {
       // Formatear la hora para mostrarla
       const timeDate = new Date(screeningData.screening.date_time);
       movieInfo.time = timeDate.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      
+      // Guardar la información actualizada en sessionStorage para uso futuro
+      sessionStorage.setItem('selectedMovie', JSON.stringify({
+        id: movieInfo.id,
+        screening_id: screeningId.value,
+        title: movieInfo.title,
+        date: movieInfo.date,
+        time: movieInfo.time
+      }));
+      console.log('Película cargada correctamente:', movieInfo.title);
+    } else {
+      //console.error('No se encontró información completa de proyección o película');
+      // Si falla la carga desde la API pero tenemos el ID de la película en la URL
+      if (route.query.movie && !movieInfo.id) {
+        const movieId = parseInt(route.query.movie);
+        // Intentar cargar la película desde el store de películas
+        const moviesData = await moviesStore.fetchMovies();
+        const foundMovie = moviesStore.movies.find(m => m.id === movieId);
+        
+        if (foundMovie) {
+          movieInfo.id = foundMovie.id;
+          movieInfo.title = foundMovie.title;
+          console.log('Película recuperada del store:', foundMovie.title);
+        }
+      }
     }
   } catch (error) {
     console.error('Error cargando datos:', error);
+    error.value = 'Error al cargar la información de la película y asientos';
   }
 };
 

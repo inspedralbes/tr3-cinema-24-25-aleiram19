@@ -96,47 +96,163 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useTicketsStore } from '~/stores/tickets';
+import { useAuthStore } from '~/stores/auth';
 
 const router = useRouter();
 const { $toast } = useNuxtApp();
+const ticketsStore = useTicketsStore();
+const authStore = useAuthStore();
 
-// Generar un código de confirmación aleatorio
-const confirmationCode = ref(generateConfirmationCode());
+// Usamos un código de confirmación provisional que se actualizará
+const confirmationCode = ref('Generando...');
 
-// Datos del ticket (normalmente vendrían de un API o del store)
+// Datos del ticket iniciales
 const ticketData = ref({
-  movieTitle: 'Avatar: El camino del agua',
-  showtime: '20 de marzo 2025, 19:30',
-  room: 'Sala 5 - 3D',
-  seats: 'F12, F13',
+  movieTitle: 'Película no disponible',
+  showtime: 'Fecha no disponible',
+  room: 'Sala no disponible',
+  seats: 'Asientos no disponibles',
   buyerName: 'Invitado',
   buyerEmail: 'invitado@example.com'
 });
 
-// Comprobar si hay una confirmación real al montar el componente
+// Comprobar que hay datos válidos y generar confirmación
 onMounted(() => {
-  // Aquí podríamos obtener los datos reales de la API o del store
-  // Si no hay datos de confirmación, redirigir al inicio
+  console.log('Datos en confirmación:', {
+    currentTicket: ticketsStore.currentTicket,
+    selectedSeats: ticketsStore.selectedSeats
+  });
   
-  // Esta es una simulación, en una implementación real 
-  // verificaríamos si hay datos de compra para mostrar
-  const hasConfirmation = true;
-  
-  if (!hasConfirmation) {
-    $toast.error('No hay información de confirmación disponible');
-    router.push('/');
+  // Verificar si hay asientos seleccionados y una sesión seleccionada
+  if (!ticketsStore.currentTicket || !ticketsStore.selectedSeats || ticketsStore.selectedSeats.length === 0) {
+    $toast.error('No hay información de compra para confirmar');
+    router.push('/select-movie');
+    return;
   }
+
+  // Actualizar los datos del ticket con la información real del store
+  ticketData.value = {
+    movieTitle: ticketsStore.currentTicket.screening?.movie?.title || 
+               ticketsStore.currentTicket.screening?.title || 
+               'No disponible',
+    showtime: formatDateTime(ticketsStore.currentTicket.screening?.date_time) || 
+              formatDateTime(ticketsStore.currentTicket.screening?.date + ' ' + ticketsStore.currentTicket.screening?.time) || 
+              'Fecha no disponible',
+    room: ticketsStore.currentTicket.screening?.auditorium?.name || 
+          `Sala ${ticketsStore.currentTicket.screening?.room_id}` || 
+          'No disponible',
+    seats: formatSeats(ticketsStore.selectedSeats),
+    buyerName: authStore.user?.name || 'Invitado',
+    buyerEmail: authStore.user?.email || 'invitado@example.com'
+  };
+
+  // Crear un ID de confirmación solo para mostrar al usuario en la UI
+  // pero no lo usaremos para el backend
+  confirmationCode.value = generateRandomCode(8);
+  
+  // Procesar compra directamente sin método de pago
+  processDirectPurchase();
 });
 
-function generateConfirmationCode() {
-  // Generar un código alfanumérico de 8 caracteres
+// Formatear la fecha y hora
+function formatDateTime(dateTimeStr) {
+  if (!dateTimeStr) return null;
+  
+  try {
+    const date = new Date(dateTimeStr);
+    // Verificar si la fecha es válida
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    
+    return date.toLocaleString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  } catch (error) {
+    console.error('Error al formatear fecha:', error);
+    return null;
+  }
+}
+
+// Formatear los asientos seleccionados
+function formatSeats(seats) {
+  if (!seats || seats.length === 0) return 'Ninguno seleccionado';
+  
+  return seats.map(seat => {
+    // Manejar diferentes estructuras de asientos
+    if (seat.number) {
+      return seat.number;
+    } else if (seat.row && seat.column) {
+      return `${seat.row}${seat.column}`;
+    } else {
+      return 'Desconocido';
+    }
+  }).join(', ');
+}
+
+// Procesar compra directamente sin método de pago
+async function processDirectPurchase() {
+  try {
+    // Mostrar estado de carga
+    $toast.info('Procesando compra...');
+    
+    // Ya generamos el código de confirmación para la UI, pero no lo usamos para el backend
+    
+    // Calcular el total a pagar (si no lo tenemos ya)
+    let totalPay;
+    if (ticketsStore.currentTicket?.screening?.price) {
+      totalPay = ticketsStore.selectedSeats.length * ticketsStore.currentTicket.screening.price;
+    } else {
+      // Valor por defecto si no hay precio definido
+      totalPay = ticketsStore.selectedSeats.length * 100;
+    }
+    
+    // Utilizar el método de confirmación de tickets del store consolidado
+    const reservationData = {
+      screening_id: ticketsStore.currentTicket?.screening_id,
+      seats: ticketsStore.selectedSeats.map(seat => ({
+        number: seat.number || `${seat.row}${seat.column}`
+      })),
+      // eliminamos confirmation_code
+      quantity: ticketsStore.selectedSeats.length,
+      total_pay: totalPay
+    };
+    
+    console.log('Datos de reserva:', reservationData);
+    
+    // Confirmar tickets
+    const result = await ticketsStore.confirmTickets(reservationData);
+    
+    if (result) {
+      // Notificar al usuario que la compra fue exitosa
+      $toast.success('¡Compra realizada con éxito!');
+    } else {
+      // Manejar error
+      $toast.error(ticketsStore.error || 'Error al procesar la compra');
+    }
+  } catch (error) {
+    // Manejar error inesperado
+    $toast.error('Ha ocurrido un error inesperado');
+    console.error('Error al procesar la compra:', error);
+  }
+}
+
+// Función auxiliar para generar códigos de confirmación
+function generateRandomCode(length) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
-  for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < length; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
 }
+
+// Ya no necesitamos una función de generación de código, el backend se encarga de eso
 
 function downloadTicket() {
   // En una implementación real, aquí se generaría un PDF o similar

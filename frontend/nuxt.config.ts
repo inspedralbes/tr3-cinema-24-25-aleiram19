@@ -6,8 +6,8 @@ export default defineNuxtConfig({
   ],
   plugins: [
     { src: '~/plugins/bootstrap.client.js', mode: 'client' },
-    { src: '~/plugins/router.js', mode: 'client' },
-    { src: '~/plugins/toast.js', mode: 'client' }
+    { src: '~/plugins/toast.js', mode: 'client' },
+    { src: '~/plugins/auth.js', mode: 'client' }
   ],
   modules: [
     '@nuxtjs/tailwindcss',
@@ -60,5 +60,9 @@ export default defineNuxtConfig({
     public: {
       apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:8000/api'
     }
+  },
+  // Middlewares globales
+  routeRules: {
+    '/checkout/payment/**': { middleware: ['skipPayment'] }
   }
 })

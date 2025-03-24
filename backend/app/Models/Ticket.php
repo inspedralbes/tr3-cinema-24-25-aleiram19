@@ -17,10 +17,10 @@ class Ticket extends Model
         'seat_id',
         'snack_id',
         'snack_quantity',
-        'status',
         'quantity',
         'total_pay',
-        'purchase_date'
+        'purchase_date',
+        'confirmation_code'
     ];
 
     // Relación con usuario

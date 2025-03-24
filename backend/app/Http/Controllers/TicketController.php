@@ -98,7 +98,7 @@ class TicketController extends Controller
                     'user_id' => $userId,
                     'screening_id' => $screeningId,
                     'seat_id' => $seatId,
-                    'status' => 'reserved',
+                    'quantity' => 1,
                     'total_pay' => $price,
                     'purchase_date' => now()
                 ]);
@@ -145,7 +145,6 @@ class TicketController extends Controller
         
         // Obtener los tickets futuros del usuario que no sean para la sesión actual
         $futureTickets = Ticket::where('user_id', $userId)
-            ->where('status', 'reserved')
             ->whereHas('screening', function($query) use ($now, $currentScreeningId) {
                 $query->where('date_time', '>', $now)
                       ->where('id', '!=', $currentScreeningId);
@@ -180,7 +179,6 @@ class TicketController extends Controller
             // Verificar que los tickets pertenecen al usuario
             $tickets = Ticket::whereIn('id', $ticketIds)
                 ->where('user_id', $userId)
-                ->where('status', 'reserved')
                 ->get();
                 
             if ($tickets->count() != count($ticketIds)) {
@@ -195,10 +193,8 @@ class TicketController extends Controller
             
             DB::beginTransaction();
             
-            // Actualizar estado de los tickets
-            foreach ($tickets as $ticket) {
-                $ticket->update(['status' => 'purchased']);
-            }
+            // No necesitamos actualizar el estado de los tickets
+            // ya que no tenemos un campo status
             
             DB::commit();
             
@@ -251,7 +247,6 @@ class TicketController extends Controller
             // Verificar que los tickets pertenecen al usuario
             $tickets = Ticket::whereIn('id', $ticketIds)
                 ->where('user_id', $userId)
-                ->where('status', 'reserved')
                 ->get();
                 
             if ($tickets->count() != count($ticketIds)) {
@@ -475,5 +470,101 @@ class TicketController extends Controller
         
         // Si es una solicitud web, devolver vista para impresión
         return view('tickets.guest_print', compact('ticketData'));
+    }
+    
+    /**
+     * Procesa la compra directa de tickets
+     */
+    public function purchase(Request $request)
+    {
+        try {
+            // Validación de datos de entrada
+            $validator = Validator::make($request->all(), [
+                'screening_id' => 'required|exists:screenings,id',
+                'seats' => 'required|array',
+                'seats.*.number' => 'required|string'
+                // Eliminamos la validación del confirmation_code
+            ]);
+            
+            if ($validator->fails()) {
+                return response()->json(['errors' => $validator->errors()], 422);
+            }
+            
+            $userId = Auth::id();
+            $screeningId = $request->screening_id;
+            $seats = $request->seats;
+            
+            // Obtener la sesión
+            $screening = Screening::findOrFail($screeningId);
+            
+            DB::beginTransaction();
+            
+            $tickets = [];
+            $totalAmount = 0;
+            
+            // Procesar cada asiento
+            foreach ($seats as $seatData) {
+                // Verificar si el asiento existe en la base de datos
+                $seat = Seat::where('number', $seatData['number'])
+                    ->where('auditorium_id', $screening->auditorium_id)
+                    ->first();
+                
+                if (!$seat) {
+                    // Si el asiento no existe, lo creamos
+                    $seat = new Seat();
+                    $seat->auditorium_id = $screening->auditorium_id;
+                    $seat->number = $seatData['number']; // Usamos directamente el número proporcionado
+                    $seat->status = 'busy'; // Lo marcamos como ocupado
+                    $seat->save();
+                } else {
+                    // Si ya existe, verificamos que esté disponible
+                    if ($seat->status === 'busy') {
+                        DB::rollBack();
+                        return response()->json([
+                            'message' => 'El asiento ' . $seat->number . ' ya está ocupado'
+                        ], 400);
+                    }
+                    
+                    // Marcar como ocupado
+                    $seat->status = 'busy';
+                    $seat->save();
+                }
+                
+                // Calcular precio del asiento
+                $price = $screening->calculatePrice($seat->number);
+                $totalAmount += $price;
+                
+                // Crear el ticket
+                $ticket = new Ticket();
+                $ticket->user_id = $userId;
+                $ticket->screening_id = $screeningId;
+                $ticket->seat_id = $seat->id;
+                // No usamos status, solo nos interesa que el asiento esté ocupado
+                $ticket->quantity = 1; // Agregamos 1 como valor por defecto para quantity
+                $ticket->total_pay = $price;
+                $ticket->purchase_date = now();
+                // Eliminamos la asignación del confirmation_code
+                $ticket->save();
+                
+                $tickets[] = $ticket;
+            }
+            
+            DB::commit();
+            
+            return response()->json([
+                'message' => 'Compra procesada con éxito',
+                'tickets' => $tickets,
+                'total_amount' => $totalAmount
+                // Eliminamos el confirmation_code de la respuesta
+            ], 201);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            return response()->json([
+                'message' => 'Error al procesar la compra',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -175,14 +175,17 @@ class ScreeningController extends Controller
             'is_special' => $request->is_special ?? false
         ]);
         
+        $priceInfo = $screening->getPriceMatrix();
+        $priceMessage = "Precio normal: {$priceInfo['normal']}€, Precio VIP (fila F): {$priceInfo['vip']}€";
+        
         if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
             return response()->json([
-                'message' => 'Sesión creada correctamente',
+                'message' => "Sesión creada correctamente. {$priceMessage}",
                 'screening' => $screening
             ], 201);
         } else {
             return redirect()->route('screenings.index')
-                ->with('success', 'Sesión creada correctamente');
+                ->with('success', "Sesión creada correctamente. {$priceMessage}");
         }
     }
     
@@ -302,14 +305,17 @@ class ScreeningController extends Controller
         
         $screening->save();
         
+        $priceInfo = $screening->getPriceMatrix();
+        $priceMessage = "Precio normal: {$priceInfo['normal']}€, Precio VIP (fila F): {$priceInfo['vip']}€";
+        
         if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
             return response()->json([
-                'message' => 'Sesión actualizada correctamente',
+                'message' => "Sesión actualizada correctamente. {$priceMessage}",
                 'screening' => $screening
             ]);
         } else {
             return redirect()->route('screenings.index')
-                ->with('success', 'Sesión actualizada correctamente');
+                ->with('success', "Sesión actualizada correctamente. {$priceMessage}");
         }
     }
     

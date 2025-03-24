@@ -220,10 +220,11 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '~/stores/auth';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 const { $toast } = useNuxtApp();
 
@@ -294,7 +295,10 @@ const submitForm = async () => {
     
     if (success) {
       $toast.success(`¡Bienvenido de nuevo, ${authStore.user.name}!`);
-      router.push('/');
+      
+      // Verificar si hay un parámetro de redirección
+      const redirectTo = route.query.redirect || '/';
+      router.push(redirectTo);
     }
   } else {
     // Verificar que las contraseñas coincidan
@@ -314,7 +318,10 @@ const submitForm = async () => {
     
     if (success) {
       $toast.success(`¡Bienvenido a CineXperience, ${form.value.name}! Tu cuenta ha sido creada correctamente.`);
-      router.push('/');
+      
+      // Verificar si hay un parámetro de redirección
+      const redirectTo = route.query.redirect || '/';
+      router.push(redirectTo);
     }
   }
 };

@@ -52,13 +52,13 @@ class Screening extends Model
      * - Precio día del espectador normal: 4€ (cuando is_special=true)
      * - Precio día del espectador VIP: 6€ (fila F y is_special=true)
      *
-     * @param string $seatRow Número o identificador del asiento (ej. A1, F5, etc)
+     * @param string $seatNumber Número o identificador del asiento (ej. A1, F5, etc)
      * @return float Precio calculado del asiento
      */
-    public function calculatePrice($seatRow)
+    public function calculatePrice($seatNumber)
     {
         // Convertir a mayúscula y tomar el primer carácter (por ejemplo, "F1" -> "F")
-        $row = strtoupper(substr($seatRow, 0, 1));
+        $row = strtoupper(substr($seatNumber, 0, 1));
         
         // Verificar si es fila VIP (fila F)
         $isVipSeat = ($row === 'F');

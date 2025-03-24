@@ -1,5 +1,6 @@
 <template>
-  <div class="min-h-screen bg-blue-900 text-white p-6">
+  <NuxtLayout name="default">
+  <div class="min-h-screen bg-navy-900 text-white py-12 px-4">
     <!-- Loading state -->
     <div v-if="screeningsStore.loading" class="flex justify-center my-10">
       <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
@@ -18,7 +19,7 @@
       </NuxtLink>
       
       <!-- Movie details -->
-      <div class="bg-blue-800 rounded-lg overflow-hidden shadow-lg mb-8">
+      <div class="bg-blue-800 rounded-lg overflow-hidden shadow-lg mb-8 border border-blue-700">
         <div class="md:flex">
           <!-- Movie poster -->
           <div class="md:w-1/3 h-64 md:h-auto bg-gray-700">
@@ -79,7 +80,7 @@
       </div>
       
       <!-- Seats selection section -->
-      <div class="bg-blue-800 rounded-lg overflow-hidden shadow-lg p-6">
+      <div class="bg-blue-800 rounded-lg overflow-hidden shadow-lg p-6 border border-blue-700">
         <h2 class="text-2xl font-bold mb-6">Selección de Asientos</h2>
         
         <!-- Check if user can buy tickets -->
@@ -186,6 +187,7 @@
       </NuxtLink>
     </div>
   </div>
+  </NuxtLayout>
 </template>
 
 <script setup>
@@ -303,3 +305,26 @@ const formatSelectedSeats = computed(() => {
     .join(', ');
 });
 </script>
+
+<style scoped>
+/* Estilos para mejorar la responsividad */
+@media (max-width: 768px) {
+  .grid-cols-10 {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+  
+  .max-w-6xl {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Mejora visual para fondos */
+.bg-blue-800 {
+  background-color: rgba(5, 86, 151, 0.95);
+}
+
+.bg-navy-900 {
+  background-color: #051D40;
+}
+</style>

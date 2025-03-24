@@ -31,10 +31,10 @@
         </NuxtLink>
         
         <NuxtLink 
-          to="/sessiones"
+          to="/screenings"
           class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
         >
-          <i class="fas fa-tags mr-2"></i> Sesiones
+          <i class="fas fa-calendar-alt mr-2"></i> Sesiones
         </NuxtLink>
 
         <NuxtLink 
@@ -80,10 +80,10 @@
         </NuxtLink>
         
         <NuxtLink 
-          to="/sessiones"
+          to="/screenings"
           class="text-white font-medium py-3 px-4 rounded-lg hover:bg-white/10 transition-colors"
         >
-          <i class="fas fa-tags mr-2"></i> Sesiones
+          <i class="fas fa-calendar-alt mr-2"></i> Sesiones
         </NuxtLink>
 
         <NuxtLink 

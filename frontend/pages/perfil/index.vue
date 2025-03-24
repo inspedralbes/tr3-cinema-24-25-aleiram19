@@ -294,14 +294,15 @@
 import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 import { useTicketsStore } from '~/stores/tickets';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
 const ticketsStore = useTicketsStore();
 const { $toast } = useNuxtApp();
 
-// Pestaña activa
+// Pestaña activa - por defecto 'perfil', pero puede ser cambiada por parámetros de URL
 const activeTab = ref('perfil');
 
 // Datos del formulario de perfil
@@ -371,6 +372,11 @@ onMounted(async () => {
   
   // Cargar tickets del usuario
   await ticketsStore.fetchUserTickets();
+  
+  // Si hay un parámetro 'tab' en la URL, activamos esa pestaña
+  if (route.query.tab && ['perfil', 'tickets', 'promociones'].includes(route.query.tab)) {
+    activeTab.value = route.query.tab;
+  }
 });
 
 // Métodos

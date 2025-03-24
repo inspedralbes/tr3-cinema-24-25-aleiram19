@@ -142,6 +142,7 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::get('/{id}/generate-pdf', [TicketController::class, 'generateTicketPdf']);
         Route::get('/{id}', [TicketController::class, 'getTicketDetails']);
         Route::get('/screening/{id}/can-buy', [UserTicketsController::class, 'canBuyTickets']);
+        Route::post('/purchase', [TicketController::class, 'purchase']);
     });
     
     // Rutas para administradores

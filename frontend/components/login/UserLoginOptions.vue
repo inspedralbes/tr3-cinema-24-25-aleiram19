@@ -1,4 +1,5 @@
 <template>
+  <NavBar />
   <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-blue-900 bg-opacity-90">
     <div class="w-full max-w-md space-y-8 bg-blue-900 bg-opacity-80 rounded-xl shadow-xl p-8 sm:p-10 text-white">
       <!-- Header -->
@@ -66,12 +67,15 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 
 const goToLogin = () => {
-  router.push('/login');
+  // Redirigir al login con el parámetro de redirección a la página de checkout
+  const redirectPath = '/checkout';
+  router.push(`/login?redirect=${encodeURIComponent(redirectPath)}`);
 };
 
 const goToGuest = () => {

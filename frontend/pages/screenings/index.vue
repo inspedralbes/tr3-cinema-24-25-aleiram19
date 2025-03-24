@@ -1,138 +1,105 @@
 <template>
-  <div class="screenings-page">
-    <div class="container py-5">
-      <div class="row mb-4">
-        <div class="col-12">
-          <h1>Cartelera</h1>
-          <p class="lead">Consulta nuestras próximas funciones y compra tus entradas</p>
-        </div>
+  <div class="min-h-screen flex flex-col bg-[#051D40]">
+    <LandingPageNavBar />
+    <div class="bg-navy-900 text-white min-h-screen py-12 pt-20">
+    <div class="container mx-auto px-4">
+      <!-- Título de la página -->
+      <div class="text-center mb-14">
+        <h1 class="text-4xl font-extrabold text-white uppercase tracking-wide animate-fade-in">SESIONES DE CINE</h1>
+        <div class="h-1 w-24 bg-gradient-to-r from-blue-600 to-blue-400 mx-auto mt-4 rounded shadow-md"></div>
+        <p class="text-gray-300 mt-4">Consulta nuestras sesiones por día y película</p>
       </div>
       
-      <div class="screenings-filters mb-4">
-        <div class="row g-3">
-          <div class="col-md-3">
-            <div class="input-group">
-              <span class="input-group-text"><i class="bi bi-calendar"></i></span>
-              <input 
-                type="date" 
-                class="form-control" 
-                v-model="selectedDate"
-                min="2023-01-01"
-              />
-            </div>
-          </div>
-          
-          <div class="col-md-3">
-            <select class="form-select" v-model="selectedMovie">
-              <option value="">Todas las películas</option>
-              <option 
-                v-for="movie in movies" 
-                :key="movie.id" 
-                :value="movie.id"
-              >
-                {{ movie.title }}
-              </option>
-            </select>
-          </div>
-          
-          <div class="col-md-3">
-            <select class="form-select" v-model="selectedAuditorium">
-              <option value="">Todas las salas</option>
-              <option 
-                v-for="auditorium in auditoriums" 
-                :key="auditorium.id" 
-                :value="auditorium.id"
-              >
-                {{ auditorium.name }}
-              </option>
-            </select>
-          </div>
-          
-          <div class="col-md-3">
-            <button 
-              class="btn btn-primary w-100" 
-              @click="applyFilters"
-            >
-              <i class="bi bi-search me-2"></i> Buscar Funciones
-            </button>
-          </div>
-        </div>
+      <!-- Estado de carga -->
+      <div v-if="loading" class="text-center py-20">
+        <div class="border-4 border-blue-600/30 border-t-blue-600 rounded-full w-10 h-10 animate-spin mx-auto"></div>
+        <p class="text-white mt-4">Cargando sesiones...</p>
       </div>
       
-      <div v-if="loading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Cargando...</span>
-        </div>
-        <p class="mt-2">Cargando funciones...</p>
+      <!-- Sin resultados -->
+      <div v-else-if="!screenings.length" class="text-center py-16 bg-gradient-to-br from-blue-900/50 to-blue-800/60 rounded-xl p-8 border border-blue-700/50 max-w-2xl mx-auto shadow-lg">
+        <i class="fas fa-calendar-times text-6xl text-blue-400 mb-6"></i>
+        <p class="text-2xl font-bold text-white mb-2">No hay sesiones disponibles</p>
+        <p class="text-gray-300">Por favor, vuelve a consultar más tarde.</p>
       </div>
       
-      <div v-else-if="error" class="alert alert-danger">
-        {{ error }}
-      </div>
-      
-      <div v-else-if="!filteredScreenings.length" class="text-center py-5">
-        <i class="bi bi-calendar-x fs-1 text-muted"></i>
-        <p class="mt-2">No hay funciones disponibles con los filtros seleccionados.</p>
-      </div>
-      
+      <!-- Resultados agrupados por día -->
       <div v-else>
-        <!-- Agrupación por día -->
         <div 
-          v-for="(group, date) in groupedScreenings" 
+          v-for="(screeningsByDay, date) in groupedScreenings" 
           :key="date" 
-          class="screening-day mb-5"
+          class="mb-12"
         >
-          <h3 class="date-header">{{ formatGroupDate(date) }}</h3>
+          <!-- Encabezado del día -->
+          <div class="flex items-center mb-6 pb-3">
+            <i class="fas fa-calendar-day text-3xl text-blue-400 mr-3"></i>
+            <h2 class="text-2xl font-bold text-white">{{ formatGroupDate(date) }}</h2>
+            <div class="ml-4 h-0.5 flex-grow bg-gradient-to-r from-blue-600 to-transparent opacity-60 rounded"></div>
+          </div>
           
-          <div class="row row-cols-1 row-cols-lg-2 g-4">
+          <!-- Películas por día -->
+          <div class="space-y-8">
             <div 
-              v-for="screening in group" 
-              :key="screening.id" 
-              class="col"
+              v-for="(screeningsByMovie, movieId) in getScreeningsByMovie(screeningsByDay)" 
+              :key="movieId" 
+              class="bg-gradient-to-br from-blue-900/50 to-blue-800/60 rounded-lg overflow-hidden shadow-lg hover:shadow-blue-500/20 transition-all duration-300 hover:-translate-y-1 border border-blue-700/40"
             >
-              <div class="card screening-card h-100">
-                <div class="row g-0">
-                  <div class="col-md-4">
+              <div class="md:flex">
+                <!-- Poster de la película -->
+                <div class="md:w-1/4 h-64 md:h-auto relative overflow-hidden">
+                  <!-- Poster con fallback -->
+                  <div class="relative w-full h-full bg-gradient-to-br from-blue-900/80 to-blue-800/60">
                     <img 
-                      v-if="getMoviePoster(screening.movie_id)" 
-                      :src="`/storage/${getMoviePoster(screening.movie_id)}`" 
-                      :alt="getMovieTitle(screening.movie_id)" 
-                      class="img-fluid rounded-start screening-poster"
+                      v-if="getMoviePoster(movieId)" 
+                      :src="getMoviePoster(movieId)" 
+                      :alt="getMovieTitle(movieId)" 
+                      class="w-full h-full object-cover"
+                      @error="handleImageError"
+                      :key="`movie-poster-${movieId}`"
                     />
-                    <div v-else class="no-poster d-flex align-items-center justify-content-center h-100 rounded-start">
-                      <i class="bi bi-film fs-1 text-muted"></i>
+                    <div 
+                      class="absolute inset-0 flex items-center justify-center text-center p-4"
+                      :class="{ 'opacity-0': !imageFallbacks[movieId] }"
+                    >
+                      <div class="flex flex-col items-center justify-center">
+                        <i class="fas fa-film text-5xl text-blue-400 mb-4"></i>
+                        <h3 class="text-xl font-bold text-white">{{ getMovieTitle(movieId) }}</h3>
+                      </div>
                     </div>
                   </div>
+                </div>
+                
+                <!-- Información de la película y sesiones -->
+                <div class="md:w-3/4 p-6">
+                  <h3 class="text-xl md:text-2xl font-bold mb-4 text-white">{{ getMovieTitle(movieId) }}</h3>
                   
-                  <div class="col-md-8">
-                    <div class="card-body d-flex flex-column h-100">
-                      <h5 class="card-title">{{ getMovieTitle(screening.movie_id) }}</h5>
-                      
-                      <div class="screening-info mb-3">
-                        <div class="mb-1">
-                          <i class="bi bi-clock me-2"></i>
-                          <strong>Hora:</strong> {{ formatTime(screening.date_time) }}
+                  <!-- Sesiones disponibles -->
+                  <div class="mb-4">
+                    <h4 class="text-lg font-medium mb-3 text-blue-300">Horario: {{ formatTime(screeningsByMovie[0].date_time) }}</h4>
+                    <div class="flex flex-wrap gap-3">
+                      <div class="bg-blue-950 px-4 py-3 rounded-lg border border-blue-800 transition-colors hover:bg-blue-800">
+                        <div class="flex items-center space-x-4">
+                          <div>
+                            <div class="text-sm text-blue-200 mb-2">
+                              <span class="font-medium">Salas disponibles:</span> 
+                              <span class="text-white">{{ getSalasList(screeningsByMovie) }}</span>
+                            </div>
+                            <div class="flex items-center text-green-400 font-bold">
+                              <i class="fas fa-tag text-green-300 mr-2"></i>
+                              Precio: {{ formatPrice(screeningsByMovie[0].price || 8.5) }}
+                            </div>
+                          </div>
+                          
+                          <div class="ml-auto">
+                            <NuxtLink 
+                              :to="`/select-seats?screening_id=${screeningsByMovie[0].id}&movie=${movieId}`" 
+                              class="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white text-sm font-medium px-4 py-2 rounded-full transition-all duration-300 hover:shadow-md hover:scale-105 flex items-center space-x-1"
+                              @click="saveMovieInfoToSession(movieId, screeningsByMovie[0])"
+                            >
+                              <i class="fas fa-ticket-alt mr-1"></i> Comprar Entradas
+                            </NuxtLink>
+                          </div>
                         </div>
-                        <div class="mb-1">
-                          <i class="bi bi-building me-2"></i>
-                          <strong>Sala:</strong> {{ getAuditoriumName(screening.auditorium_id) }}
-                        </div>
-                        <div>
-                          <i class="bi bi-tag me-2"></i>
-                          <strong>Género:</strong> {{ getMovieGenre(screening.movie_id) }}
-                        </div>
-                      </div>
-                      
-                      <div class="screening-footer mt-auto d-flex justify-content-between align-items-center">
-                        <span class="price">
-                          <strong>Precio:</strong> {{ formatPrice(screening.price || 8.5) }}
-                        </span>
-                        <NuxtLink 
-                          :to="`/buy-tickets/${screening.movie_id}/${screening.id}`" 
-                          class="btn btn-primary"
-                        >
-                          <i class="bi bi-ticket-perforated me-1"></i> Comprar
-                        </NuxtLink>
                       </div>
                     </div>
                   </div>
@@ -143,25 +110,34 @@
         </div>
       </div>
     </div>
+    </div>
+    <LandingPageFooter />
   </div>
 </template>
 
 <script>
 import { useMoviesStore } from '~/stores/movies';
 import { useScreeningsStore } from '~/stores/screenings';
+import { useHead } from '#imports';
+import LandingPageNavBar from '~/components/LandingPage/NavBar.vue';
+import LandingPageFooter from '~/components/LandingPage/Footer.vue';
 
 export default {
   name: 'ScreeningsPage',
+  
+  components: {
+    LandingPageNavBar,
+    LandingPageFooter
+  },
   
   data() {
     return {
       screenings: [],
       auditoriums: [],
-      selectedDate: this.formatDateForInput(new Date()),
-      selectedMovie: '',
-      selectedAuditorium: '',
       loading: false,
-      error: null
+      error: null,
+      genres: [],
+      imageFallbacks: {}
     };
   },
   
@@ -174,40 +150,10 @@ export default {
       return this.moviesStore.movies;
     },
     
-    filteredScreenings() {
-      let result = [...this.screenings];
-      
-      // Filtrar por película
-      if (this.selectedMovie) {
-        result = result.filter(s => s.movie_id == this.selectedMovie);
-      }
-      
-      // Filtrar por sala
-      if (this.selectedAuditorium) {
-        result = result.filter(s => s.auditorium_id == this.selectedAuditorium);
-      }
-      
-      // Filtrar por fecha
-      if (this.selectedDate) {
-        const selectedDateStart = new Date(this.selectedDate);
-        selectedDateStart.setHours(0, 0, 0, 0);
-        
-        const selectedDateEnd = new Date(this.selectedDate);
-        selectedDateEnd.setHours(23, 59, 59, 999);
-        
-        result = result.filter(s => {
-          const screeningDate = new Date(s.date_time);
-          return screeningDate >= selectedDateStart && screeningDate <= selectedDateEnd;
-        });
-      }
-      
-      return result;
-    },
-    
     groupedScreenings() {
       const groups = {};
       
-      this.filteredScreenings.forEach(screening => {
+      this.screenings.forEach(screening => {
         const date = new Date(screening.date_time).toISOString().split('T')[0];
         if (!groups[date]) {
           groups[date] = [];
@@ -226,9 +172,49 @@ export default {
   
   async created() {
     await this.loadData();
+    
+    // Debugging: Imprimir las primeras películas para verificar sus propiedades
+    if (this.movies && this.movies.length > 0) {
+      
+      // Verificar campos de imágenes para las primeras 3 películas
+      for (let i = 0; i < Math.min(3, this.movies.length); i++) {
+        const movie = this.movies[i];
+              }
+    }
   },
   
   methods: {
+    // Manejar errores de carga de imágenes
+    handleImageError(event) {
+      console.log('Error al cargar imagen:', event.target.src);
+      // Obtener el ID de la película desde el atributo alt o key
+      const movieId = event.target.alt;
+      // Marcar esta película como que tiene fallback
+      this.imageFallbacks[movieId] = true;
+      // La opacidad del div de fallback cambiará automáticamente por el binding
+    },
+    // Método para agrupar proyecciones por película
+    getScreeningsByMovie(screeningsOfDay) {
+      const groups = {};
+      
+      screeningsOfDay.forEach(screening => {
+        const movieId = screening.movie_id;
+        if (!groups[movieId]) {
+          groups[movieId] = [];
+        }
+        groups[movieId].push(screening);
+      });
+      
+      // Ordenar por película alfabéticamente
+      return Object.fromEntries(
+        Object.entries(groups).sort(([movieIdA], [movieIdB]) => {
+          const movieA = this.getMovieTitle(parseInt(movieIdA));
+          const movieB = this.getMovieTitle(parseInt(movieIdB));
+          return movieA.localeCompare(movieB);
+        })
+      );
+    },
+    
     async loadData() {
       this.loading = true;
       this.error = null;
@@ -247,116 +233,75 @@ export default {
         this.auditoriums = await screeningsStore.fetchAuditoriums();
       } catch (error) {
         console.error('Error al cargar datos:', error);
-        this.error = 'Error al cargar las funciones. Por favor, intenta de nuevo.';
+        this.error = 'Error al cargar las sesiones. Por favor, intenta de nuevo.';
       } finally {
         this.loading = false;
       }
     },
     
-    loadMockData() {
-      // Auditorios simulados
-      this.auditoriums = [
-        { id: 1, name: 'Sala 1' },
-        { id: 2, name: 'Sala 2' },
-        { id: 3, name: 'Sala 3 - 3D' },
-        { id: 4, name: 'Sala VIP' }
-      ];
-      
-      // Funciones simuladas
-      const today = new Date();
-      const tomorrow = new Date(today);
-      tomorrow.setDate(tomorrow.getDate() + 1);
-      const dayAfterTomorrow = new Date(today);
-      dayAfterTomorrow.setDate(dayAfterTomorrow.getDate() + 2);
-      
-      this.screenings = [];
-      
-      // Asegurarnos de que tenemos películas
-      if (this.movies.length) {
-        // Funciones para hoy
-        for (let i = 0; i < 5; i++) {
-          const hour = 14 + (i * 2); // 14:00, 16:00, 18:00, 20:00, 22:00
-          const movie = this.movies[i % this.movies.length];
-          const auditorium = this.auditoriums[i % this.auditoriums.length];
-          
-          const screeningDate = new Date(today);
-          screeningDate.setHours(hour, 0, 0);
-          
-          this.screenings.push({
-            id: i + 1,
-            movie_id: movie.id,
-            auditorium_id: auditorium.id,
-            date_time: screeningDate,
-            price: 8.5 + (i % 3) // Variar precios: 8.5, 9.5, 10.5
-          });
-        }
-        
-        // Funciones para mañana
-        for (let i = 0; i < 5; i++) {
-          const hour = 14 + (i * 2);
-          const movie = this.movies[(i + 2) % this.movies.length];
-          const auditorium = this.auditoriums[(i + 1) % this.auditoriums.length];
-          
-          const screeningDate = new Date(tomorrow);
-          screeningDate.setHours(hour, 0, 0);
-          
-          this.screenings.push({
-            id: i + 6,
-            movie_id: movie.id,
-            auditorium_id: auditorium.id,
-            date_time: screeningDate,
-            price: 8.5 + (i % 3)
-          });
-        }
-        
-        // Funciones para pasado mañana
-        for (let i = 0; i < 5; i++) {
-          const hour = 14 + (i * 2);
-          const movie = this.movies[(i + 4) % this.movies.length];
-          const auditorium = this.auditoriums[(i + 2) % this.auditoriums.length];
-          
-          const screeningDate = new Date(dayAfterTomorrow);
-          screeningDate.setHours(hour, 0, 0);
-          
-          this.screenings.push({
-            id: i + 11,
-            movie_id: movie.id,
-            auditorium_id: auditorium.id,
-            date_time: screeningDate,
-            price: 8.5 + (i % 3)
-          });
-        }
-      }
-    },
-    
-    applyFilters() {
-      // Ya aplicamos los filtros automáticamente a través de computed properties
-      // Esta función podría usarse si quisiéramos hacer una petición al servidor
+    getSalasList(screenings) {
+      // Extrae los nombres de las salas y los une en una cadena
+      const salasNames = screenings.map(screening => 
+        this.getAuditoriumName(screening.auditorium_id)
+      );
+      return salasNames.join(', ');
     },
     
     getMovieTitle(movieId) {
-      const movie = this.movies.find(m => m.id === movieId);
+      const movie = this.movies.find(m => m.id === parseInt(movieId));
       return movie ? movie.title : 'Película no encontrada';
     },
     
     getMoviePoster(movieId) {
-      const movie = this.movies.find(m => m.id === movieId);
-      return movie ? movie.poster : null;
+      // Si ya sabemos que la imagen falló, usa directamente el fallback
+      if (this.imageFallbacks[movieId]) {
+        return '/img/logo_cine.png';
+      }
+      
+      const movie = this.movies.find(m => m.id === parseInt(movieId));
+      if (movie) {
+        // Primero intentar con poster
+        if (movie.poster) {
+          // Si comienza con '/storage', es una ruta en el servidor
+          if (movie.poster.startsWith('/storage/')) {
+            return movie.poster;
+          }
+          // Si no tiene el prefijo '/storage', añadirlo
+          else if (!movie.poster.startsWith('/')) {
+            return `/storage/${movie.poster}`;
+          }
+          // Si ya es una URL completa o tiene otro prefijo
+          else {
+            return movie.poster;
+          }
+        }
+        // Si no hay poster pero hay image
+        else if (movie.image) {
+          if (movie.image.startsWith('/img/')) {
+            return movie.image;
+          } else if (movie.image.startsWith('/')) {
+            return movie.image;
+          } else {
+            return `/img/${movie.image}`;
+          }
+        }
+      }
+      // Si no hay poster o imagen, usa una imagen predeterminada
+      return '/img/logo_cine.png';
     },
     
     getMovieGenre(movieId) {
-      const movie = this.movies.find(m => m.id === movieId);
-      if (movie && movie.genre) {
+      const movie = this.movies.find(m => m.id === parseInt(movieId));
+      if (movie && movie.genre && movie.genre.name) {
         return movie.genre.name;
-      } else if (movie && movie.movie_genre_id) {
-        const genre = this.genres.find(g => g.id === movie.movie_genre_id);
-        return genre ? genre.name : 'Sin género';
+      } else if (movie && movie.genre_name) {
+        return movie.genre_name;
       }
       return 'Sin género';
     },
     
     getAuditoriumName(auditoriumId) {
-      const auditorium = this.auditoriums.find(a => a.id === auditoriumId);
+      const auditorium = this.auditoriums.find(a => a.id === parseInt(auditoriumId));
       return auditorium ? auditorium.name : 'Sala no encontrada';
     },
     
@@ -408,70 +353,77 @@ export default {
     },
     
     formatPrice(price) {
+      if (typeof price !== 'number') {
+        price = parseFloat(price) || 0;
+      }
       return `${price.toFixed(2)} €`;
     },
     
-    formatDateForInput(date) {
-      return date.toISOString().split('T')[0];
+    // Guardar información de la película y sesión en sessionStorage para que esté disponible
+    // en la página de selección de asientos
+    saveMovieInfoToSession(movieId, screening) {
+      const movie = this.movies.find(m => m.id === parseInt(movieId));
+      if (!movie) return;
+      
+      const screeningDate = new Date(screening.date_time);
+      const formattedTime = screeningDate.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      const movieInfo = {
+        id: parseInt(movieId),
+        screening_id: screening.id,
+        title: movie.title,
+        date: screening.date_time,
+        time: formattedTime
+      };
+      
+      sessionStorage.setItem('selectedMovie', JSON.stringify(movieInfo));
     }
   },
   
-  head() {
-    return {
-      title: 'Cartelera - Cinema'
-    };
+  // Definimos metadatos de la página utilizando useHead para Nuxt 3
+  setup() {
+    useHead({
+      title: 'Sesiones - Cinema',
+      meta: [
+        { name: 'description', content: 'Consulta la cartelera y sesiones disponibles del cine' }
+      ]
+    });
   }
 };
 </script>
 
 <style scoped>
-.screenings-page {
-  min-height: 80vh;
+.transition-transform {
+  transition: transform 0.3s ease;
 }
 
-.screening-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  overflow: hidden;
+/* Mejoras de estilos para la visualización */
+.bg-blue-900 {
+  background-color: rgba(5, 29, 64, 0.95);
 }
 
-.screening-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+.bg-navy-900 {
+  background-color: #051D40;
 }
 
-.screening-poster {
-  height: 100%;
-  object-fit: cover;
+/* Animaciones */
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.no-poster {
-  background-color: #f0f0f0;
-  min-height: 200px;
+.animate-fade-in {
+  animation: fade-in 0.6s ease-out forwards;
 }
 
-.date-header {
-  position: relative;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-  text-transform: capitalize;
-}
-
-.date-header::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 50px;
-  height: 3px;
-  background-color: var(--bs-primary);
-}
-
-.screening-info {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-.price {
-  font-size: 1.1rem;
+/* Estilos responsivos mejorados */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
 }
 </style>

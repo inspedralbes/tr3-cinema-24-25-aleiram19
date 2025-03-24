@@ -216,22 +216,37 @@ export const useTicketsStore = defineStore('tickets', {
           throw new Error('Autenticación requerida');
         }
         
-        const response = await fetch(`http://localhost:8000/api/tickets/confirm`, {
+        // Log para depuración
+        console.log('Datos de reservationData:', reservationData);
+        
+        // Si no existe un endpoint confirm, usar el endpoint purchase
+        // que incluye el código de confirmación
+        const response = await fetch(`http://localhost:8000/api/tickets/purchase`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify(reservationData),
+          body: JSON.stringify({
+            screening_id: reservationData.screening_id,
+            seats: reservationData.seats,
+            // Eliminamos el campo confirmation_code
+            // Añadir campos requeridos para la tabla tickets
+            quantity: reservationData.quantity || 1,
+            total_pay: reservationData.total_pay || this.selectedSeats.length * 100 // Usar el valor proporcionado o calcular un valor por defecto
+          }),
         });
 
         if (!response.ok) {
           const errorData = await response.json();
+          console.error('Respuesta de error del servidor:', errorData);
           throw new Error(errorData.message || 'Error al confirmar los tickets');
         }
         
         const data = await response.json();
+        console.log('Respuesta de confirmación:', data);
+        
         // Actualizar la lista de tickets del usuario
         await this.fetchUserTickets();
         // Limpiar los asientos seleccionados
