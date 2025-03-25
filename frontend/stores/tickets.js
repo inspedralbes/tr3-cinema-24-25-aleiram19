@@ -38,6 +38,8 @@ export const useTicketsStore = defineStore('tickets', {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
+          // Solo usamos mode: 'cors' sin credentials para evitar problemas
+          mode: 'cors',
         });
 
         if (!response.ok) {
@@ -74,6 +76,8 @@ export const useTicketsStore = defineStore('tickets', {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
+          // Solo usamos mode: 'cors' sin credentials para evitar problemas
+          mode: 'cors',
         });
 
         if (!response.ok) {
@@ -112,6 +116,8 @@ export const useTicketsStore = defineStore('tickets', {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
+          // Solo usamos mode: 'cors' sin credentials para evitar problemas
+          mode: 'cors',
         });
 
         if (!response.ok) {
@@ -184,6 +190,8 @@ export const useTicketsStore = defineStore('tickets', {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
+          // Solo usamos mode: 'cors' sin credentials para evitar problemas
+          mode: 'cors',
           body: JSON.stringify(seatsData),
         });
 
@@ -219,8 +227,17 @@ export const useTicketsStore = defineStore('tickets', {
         // Log para depuración
         console.log('Datos de reservationData:', reservationData);
         
-        // Si no existe un endpoint confirm, usar el endpoint purchase
-        // que incluye el código de confirmación
+        // Usar el mismo enfoque que las otras funciones
+        const requestBody = {
+          screening_id: reservationData.screening_id,
+          seats: reservationData.seats,
+          quantity: reservationData.quantity || 1,
+          total_pay: reservationData.total_pay || this.selectedSeats.length * 100 // Usar el valor proporcionado o calcular un valor por defecto
+        };
+        
+        console.log('Realizando solicitud a: http://localhost:8000/api/tickets/purchase');
+        console.log('Con datos:', requestBody);
+        
         const response = await fetch(`http://localhost:8000/api/tickets/purchase`, {
           method: 'POST',
           headers: {
@@ -228,14 +245,8 @@ export const useTicketsStore = defineStore('tickets', {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            screening_id: reservationData.screening_id,
-            seats: reservationData.seats,
-            // Eliminamos el campo confirmation_code
-            // Añadir campos requeridos para la tabla tickets
-            quantity: reservationData.quantity || 1,
-            total_pay: reservationData.total_pay || this.selectedSeats.length * 100 // Usar el valor proporcionado o calcular un valor por defecto
-          }),
+          mode: 'cors',
+          body: JSON.stringify(requestBody),
         });
 
         if (!response.ok) {
@@ -246,6 +257,16 @@ export const useTicketsStore = defineStore('tickets', {
         
         const data = await response.json();
         console.log('Respuesta de confirmación:', data);
+        
+        // Verificar si se enviaron todos los correos electrónicos
+        if (data.all_emails_sent === false) {
+          // Mostrar alerta al usuario con más detalles
+          const warningMessage = data.warning || 'No se pudo enviar el correo con el código QR.';
+          console.warn('Advertencia: ' + warningMessage);
+        } else {
+          // Confirmar que los correos se enviaron correctamente
+          console.log('Todos los correos se enviaron correctamente');
+        }
         
         // Actualizar la lista de tickets del usuario
         await this.fetchUserTickets();
@@ -281,6 +302,8 @@ export const useTicketsStore = defineStore('tickets', {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
+          // Solo usamos mode: 'cors' sin credentials para evitar problemas
+          mode: 'cors',
           body: JSON.stringify({ ticket_ids: ticketIds }),
         });
 
