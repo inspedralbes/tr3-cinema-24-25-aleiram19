@@ -21,8 +21,6 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
       
       try {
-        // URL base fija para la API
-        
         let response;
         try {
           response = await fetch(`http://localhost:8000/api/login`, {
@@ -79,8 +77,6 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         console.log('Iniciando registro con datos:', userData);
-        
-        // URL base fija para la API
         console.log('URL de la API:', `http://localhost:8000/api/register`);
         
         // Validar datos requeridos
@@ -166,18 +162,17 @@ export const useAuthStore = defineStore('auth', {
       } finally {
         this.loading = false;
       }
-    },    
+    },
 
     async fetchUser() {
+      // Verificar si existe un token
+      const storedToken = this.token || localStorage.getItem('token');
+      if (!storedToken) {
+        return null;
+      }
+
       this.loading = true;
-      
       try {
-        const storedToken = this.token || localStorage.getItem('token');
-        
-        if (!storedToken) {
-          throw new Error('No hay token disponible');
-        }
-        
         const response = await fetch(`http://localhost:8000/api/user`, {
           method: 'GET',
           headers: {
@@ -187,7 +182,8 @@ export const useAuthStore = defineStore('auth', {
         });
 
         if (!response.ok) {
-          throw new Error('Error al obtener datos del usuario');
+          // Manejo silencioso en caso de error para evitar 401
+          return null;
         }
         
         const userData = await response.json();
@@ -196,6 +192,7 @@ export const useAuthStore = defineStore('auth', {
         return userData;
       } catch (error) {
         console.error('Error al obtener el usuario:', error);
+        // En caso de error, se realiza logout para limpiar el estado
         this.logout();
         return null;
       } finally {
@@ -204,20 +201,21 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async logout() {
-      this.loading = true;
+      // Verificar si existe un token antes de intentar cerrar sesión
+      const storedToken = this.token || localStorage.getItem('token');
+      if (!storedToken) {
+        return;
+      }
       
+      this.loading = true;
       try {
-        const storedToken = this.token || localStorage.getItem('token');
-        
-        if (storedToken) {
-          await fetch(`http://localhost:8000/api/logout`, {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${storedToken}`,
-              'Accept': 'application/json',
-            },
-          });
-        }
+        await fetch(`http://localhost:8000/api/logout`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${storedToken}`,
+            'Accept': 'application/json',
+          },
+        });
       } catch (error) {
         console.error('Error durante el cierre de sesión:', error);
       } finally {
