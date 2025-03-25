@@ -165,12 +165,11 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async fetchUser() {
-      // Verificar si existe un token
       const storedToken = this.token || localStorage.getItem('token');
-      if (!storedToken) {
-        return null;
+      if (!storedToken || storedToken === 'null' || storedToken === 'undefined') {
+        return;
       }
-
+    
       this.loading = true;
       try {
         const response = await fetch(`http://localhost:8000/api/user`, {
@@ -180,25 +179,25 @@ export const useAuthStore = defineStore('auth', {
             'Accept': 'application/json',
           },
         });
-
+    
         if (!response.ok) {
-          // Manejo silencioso en caso de error para evitar 401
+          if (response.status === 401) {
+            console.warn('Token inválido o expirado, limpiando sesión.');
+            this.logout(); // Borra el token inválido
+          }
           return null;
         }
-        
+    
         const userData = await response.json();
         this.user = userData;
         this.isAuthenticated = true;
         return userData;
       } catch (error) {
         console.error('Error al obtener el usuario:', error);
-        // En caso de error, se realiza logout para limpiar el estado
-        this.logout();
-        return null;
       } finally {
         this.loading = false;
       }
-    },
+    },    
 
     async logout() {
       // Verificar si existe un token antes de intentar cerrar sesión
