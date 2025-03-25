@@ -10,9 +10,30 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use App\Services\PdfService;
+use App\Services\MailService;
 
 class TicketController extends Controller
 {
+    /**
+     * @var PdfService
+     */
+    protected $pdfService;
+    
+    /**
+     * @var MailService
+     */
+    protected $mailService;
+    
+    /**
+     * Constructor
+     */
+    public function __construct(PdfService $pdfService, MailService $mailService)
+    {
+        $this->pdfService = $pdfService;
+        $this->mailService = $mailService;
+    }
+    
     /**
      * Reserva asientos para una sesión
      */
@@ -359,48 +380,19 @@ class TicketController extends Controller
             })
             ->firstOrFail();
         
-        // En este punto se podría generar un PDF real, pero para este proyecto
-        // simplemente devolveremos los datos formateados para que el frontend
-        // pueda mostrarlos en formato de ticket
-        
-        $ticketData = [
-            'ticket_id' => $ticket->id,
-            'purchase_date' => $ticket->purchase_date,
-            'movie' => [
-                'title' => $ticket->screening->movie->title,
-                'duration' => $ticket->screening->movie->duration,
-                'classification' => $ticket->screening->movie->classification
-            ],
-            'screening' => [
-                'date_time' => $ticket->screening->date_time,
-                'auditorium' => $ticket->screening->auditorium->name
-            ],
-            'seat' => [
-                'number' => $ticket->seat->number,
-                'is_vip' => $ticket->seat->isVip()
-            ],
-            'user' => [
-                'name' => $ticket->user->name,
-                'email' => $ticket->user->email
-            ],
-            'snack' => $ticket->snack ? [
-                'name' => $ticket->snack->name,
-                'quantity' => $ticket->snack_quantity,
-                'price' => $ticket->snack->price * $ticket->snack_quantity
-            ] : null,
-            'total_price' => $ticket->total_pay
-        ];
+        // Usar PdfService para generar el PDF
+        $pdfPath = $this->pdfService->generateTicketPdf($ticket);
         
         // Si la solicitud es de API o comienza con /api/, devolver JSON
         if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
             return response()->json([
                 'message' => 'Ticket generado con éxito',
-                'ticket_data' => $ticketData
+                'pdf_url' => url('storage/tickets/ticket_' . $ticket->id . '.pdf')
             ]);
         }
         
-        // Si es una solicitud web, devolver vista para impresión
-        return view('tickets.print', compact('ticketData'));
+        // Si es una solicitud web, devolver el PDF directamente
+        return response()->file($pdfPath);
     }
     
     /**
@@ -547,6 +539,22 @@ class TicketController extends Controller
                 $ticket->save();
                 
                 $tickets[] = $ticket;
+                
+                // Generar PDF para este ticket y enviar correo electrónico
+                try {
+                    // Generar el PDF
+                    $pdfPath = $this->pdfService->generateTicketPdf($ticket);
+                    
+                    // Enviar correo electrónico con el PDF adjunto
+                    $emailSent = $this->mailService->sendTicketEmail($ticket, $pdfPath);
+                    
+                    if (!$emailSent) {
+                        \Log::warning('No se pudo enviar el correo para el ticket ID: ' . $ticket->id);
+                    }
+                } catch (\Exception $emailException) {
+                    // No fallamos la compra si el correo falla, solo registramos el error
+                    \Log::error('Error al enviar correo o generar PDF: ' . $emailException->getMessage());
+                }
             }
             
             DB::commit();
@@ -554,8 +562,8 @@ class TicketController extends Controller
             return response()->json([
                 'message' => 'Compra procesada con éxito',
                 'tickets' => $tickets,
-                'total_amount' => $totalAmount
-                // Eliminamos el confirmation_code de la respuesta
+                'total_amount' => $totalAmount,
+                'email_sent' => true
             ], 201);
             
         } catch (\Exception $e) {

@@ -56,13 +56,6 @@
         <template v-else>
           <UserMenu :user="authStore.user" />
         </template>
-        
-        <NuxtLink 
-          to="/cartelera"
-          class="ml-2 bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2 rounded-full transition-all duration-300 ease-in-out hover:shadow-lg hover:shadow-blue-500/30 transform hover:-translate-y-0.5"
-        >
-          COMPRAR ENTRADAS
-        </NuxtLink>
       </div>
     </div>
     
@@ -106,13 +99,6 @@
             <UserMenu :user="authStore.user" />
           </div>
         </template>
-        
-        <NuxtLink 
-          to="/cartelera"
-          class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg text-center transition-colors"
-        >
-          COMPRAR ENTRADAS
-        </NuxtLink>
       </div>
     </div>
 
