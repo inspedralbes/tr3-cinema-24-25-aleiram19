@@ -5,8 +5,9 @@ namespace App\Services;
 use App\Models\Ticket;
 use Barryvdh\DomPDF\Facade\Pdf;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Illuminate\Support\Facades\Storage;
 
-class PdfService
+class PdfServiceAlternative
 {
     /**
      * Genera un PDF para un ticket
@@ -58,22 +59,28 @@ class PdfService
             'purchase_date' => $ticket->purchase_date
         ]);
         
-        // Generar el código QR como PNG para mejor compatibilidad con DomPDF
-        $qrCode = QrCode::format('png')
-                       ->size(180)
-                       ->backgroundColor(245, 245, 245)
-                       ->color(29, 53, 87)
-                       ->margin(1)
-                       ->errorCorrection('H')
-                       ->generate($qrCodeData);
+        // Nombre del archivo QR
+        $qrFileName = 'qr_' . $ticket->id . '.png';
+        $qrPath = 'qrcodes/' . $qrFileName;
+        $qrFullPath = storage_path('app/public/' . $qrPath);
         
-        // Convertir a base64 para incluirlo en el HTML
-        $qrCodeBase64 = base64_encode($qrCode);
+        // Generar el código QR como PNG y guardarlo como archivo
+        QrCode::format('png')
+             ->size(180)
+             ->backgroundColor(245, 245, 245)
+             ->color(29, 53, 87)
+             ->margin(1)
+             ->errorCorrection('H')
+             ->generate($qrCodeData, $qrFullPath);
         
-        // Generar PDF incluyendo el código QR como imagen base64
-        $pdf = PDF::loadView('pdfs.ticket', [
+        // URL completa para acceder a la imagen
+        $qrUrl = asset('storage/' . $qrPath);
+        
+        // Generar PDF incluyendo la URL del código QR
+        $pdf = PDF::loadView('pdfs.ticket_alt', [
             'ticketData' => $ticketData,
-            'qrCode' => $qrCodeBase64
+            'qrUrl' => $qrUrl,
+            'qrPath' => storage_path('app/public/' . $qrPath)
         ]);
         
         // Guardar PDF en storage

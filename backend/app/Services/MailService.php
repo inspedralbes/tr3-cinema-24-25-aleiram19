@@ -5,6 +5,7 @@ namespace App\Services;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use App\Models\Ticket;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class MailService
 {
@@ -20,6 +21,28 @@ class MailService
         try {
             // Cargar el ticket con todas sus relaciones
             $ticket->load(['screening.movie', 'screening.auditorium', 'seat', 'user', 'snack']);
+            
+            // Generar QR para incluir en el correo
+            $qrCodeData = json_encode([
+                'ticket_id' => $ticket->id,
+                'movie' => $ticket->screening->movie->title,
+                'date_time' => $ticket->screening->date_time,
+                'auditorium' => $ticket->screening->auditorium->name,
+                'seat' => $ticket->seat->number,
+                'purchase_date' => $ticket->purchase_date
+            ]);
+            
+            // Generar el código QR como PNG para el correo
+            $qrCode = \SimpleSoftwareIO\QrCode\Facades\QrCode::format('png')
+                       ->size(180)
+                       ->backgroundColor(245, 245, 245)
+                       ->color(29, 53, 87)
+                       ->margin(1)
+                       ->errorCorrection('H')
+                       ->generate($qrCodeData);
+                       
+            // Convertir a base64 para incluirlo en el HTML
+            $qrCodeBase64 = base64_encode($qrCode);
             
             // Crear instancia de PHPMailer
             $mail = new PHPMailer(true);
@@ -99,7 +122,13 @@ class MailService
             $messageBody .= '
                     </div>
                     
-                    <p>Adjuntamos tu entrada en formato PDF. Te recomendamos guardarla o imprimirla para presentarla en el cine.</p>
+                    <div style="text-align: center; margin: 20px 0; padding: 10px; background: #f5f5f5;">
+                        <p style="font-weight: bold; margin-bottom: 10px;">Código QR de tu entrada</p>
+                        <img src="data:image/png;base64,' . $qrCodeBase64 . '" alt="Código QR de la entrada" style="max-width: 180px;">
+                        <p style="font-family: monospace; margin-top: 10px;">TICKET-' . $ticket->id . '</p>
+                    </div>
+                    
+                    <p>Adjuntamos también tu entrada en formato PDF. Te recomendamos guardarla o imprimirla para presentarla en el cine.</p>
                     
                     <p>¡Esperamos que disfrutes de la película!</p>
                     
