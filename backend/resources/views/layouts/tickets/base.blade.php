@@ -69,6 +69,7 @@
             letter-spacing: 1px;
         }
     </style>
+    @yield('additional_styles')
 </head>
 <body>
     <div class="ticket-container">
@@ -76,74 +77,55 @@
             <h1>CineXperience</h1>
         </div>
         
-        <div class="ticket-body">
-            <div class="movie-title">
-                {{ $ticketData['movie']['title'] }}
-            </div>
-            
-            <div class="ticket-details">
-                <div class="detail-row">
-                    <div class="detail-label">ID de Entrada:</div>
-                    <div>{{ $ticketData['ticket_id'] }}</div>
-                </div>
-                
+        <div class="ticket-body">   
+            <div class="ticket-details">                
                 <div class="detail-row">
                     <div class="detail-label">Fecha de Compra:</div>
-                    <div>{{ $ticketData['purchase_date'] }}</div>
+                    <div>{{ $ticketData['purchase_date'] ?? 'N/A' }}</div>
                 </div>
                 
                 <div class="detail-row">
                     <div class="detail-label">Película:</div>
-                    <div>{{ $ticketData['movie']['title'] }}</div>
+                    <div>{{ $ticketData['movie']['title'] ?? 'N/A' }}</div>
                 </div>
                 
                 <div class="detail-row">
                     <div class="detail-label">Duración:</div>
-                    <div>{{ $ticketData['movie']['duration'] }} min</div>
+                    <div>{{ $ticketData['movie']['duration'] ?? 'N/A' }} min</div>
                 </div>
                 
                 <div class="detail-row">
                     <div class="detail-label">Clasificación:</div>
-                    <div>{{ $ticketData['movie']['classification'] }}</div>
+                    <div>{{ $ticketData['movie']['classification'] ?? 'N/A' }}</div>
                 </div>
                 
                 <div class="detail-row">
                     <div class="detail-label">Fecha y Hora:</div>
-                    <div>{{ $ticketData['screening']['date_time'] }}</div>
+                    <div>{{ $ticketData['screening']['date_time'] ?? 'N/A' }}</div>
                 </div>
                 
                 <div class="detail-row">
                     <div class="detail-label">Sala:</div>
-                    <div>{{ $ticketData['screening']['auditorium'] }}</div>
+                    <div>{{ $ticketData['screening']['auditorium'] ?? 'N/A' }}</div>
                 </div>
                 
                 <div class="detail-row">
                     <div class="detail-label">Asiento:</div>
-                    <div>{{ $ticketData['seat']['number'] }} {{ $ticketData['seat']['is_vip'] ? '(VIP)' : '' }}</div>
+                    <div>{{ $ticketData['seat']['number'] ?? 'N/A' }} {{ isset($ticketData['seat']['is_vip']) && $ticketData['seat']['is_vip'] ? '(VIP)' : '' }}</div>
                 </div>
                 
                 <div class="detail-row">
                     <div class="detail-label">Cliente:</div>
-                    <div>{{ $ticketData['user']['name'] }}</div>
+                    <div>{{ $ticketData['user']['name'] ?? 'N/A' }}</div>
                 </div>
-                
-                @if($ticketData['snack'])
-                <div class="detail-row">
-                    <div class="detail-label">Snack:</div>
-                    <div>{{ $ticketData['snack']['name'] }} (x{{ $ticketData['snack']['quantity'] }}) - {{ $ticketData['snack']['price'] }}€</div>
-                </div>
-                @endif
                 
                 <div class="detail-row">
                     <div class="detail-label">Precio Total:</div>
-                    <div><strong>{{ $ticketData['total_price'] }}€</strong></div>
+                    <div><strong>{{ $ticketData['total_price'] ?? 'N/A' }}€</strong></div>
                 </div>
             </div>
             
-            <div class="qrcode">
-                <img src="{{ $qrPath }}" alt="Código QR de la entrada">
-                <div class="qrcode-text">TICKET-{{ $ticketData['ticket_id'] }}</div>
-            </div>
+            @yield('qrcode_section')
         </div>
         
         <div class="ticket-footer">

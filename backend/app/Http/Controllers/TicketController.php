@@ -541,19 +541,36 @@ class TicketController extends Controller
                 $tickets[] = $ticket;
                 
                 // Generar PDF para este ticket y enviar correo electrónico
+                // Separamos la generación del PDF y el envío de correo para mejor manejo de errores
+                
+                // Paso 1: Generar el PDF
                 try {
-                    // Generar el PDF
+                    // Cargamos completamente el ticket con todas sus relaciones para evitar problemas
+                    $ticket->load(['screening.movie', 'screening.auditorium', 'seat', 'user', 'snack']);
+                    
+                    // Paso 1: Generar el PDF
                     $pdfPath = $this->pdfService->generateTicketPdf($ticket);
+                    \Log::info('PDF generado correctamente para el ticket ID: ' . $ticket->id);
+                    \Log::info('Ruta del PDF: ' . $pdfPath);
                     
-                    // Enviar correo electrónico con el PDF adjunto
-                    $emailSent = $this->mailService->sendTicketEmail($ticket, $pdfPath);
-                    
-                    if (!$emailSent) {
-                        \Log::warning('No se pudo enviar el correo para el ticket ID: ' . $ticket->id);
+                    // Verificar que el PDF realmente existe
+                    if (file_exists($pdfPath)) {
+                        \Log::info('El archivo PDF existe en la ruta esperada: ' . $pdfPath);
+                        
+                        // Paso 2: Enviar el correo
+                        $emailSent = $this->mailService->sendTicketEmail($ticket, $pdfPath);
+                        
+                        if ($emailSent) {
+                            \Log::info('Correo enviado correctamente para el ticket ID: ' . $ticket->id);
+                        } else {
+                            \Log::warning('No se pudo enviar el correo para el ticket ID: ' . $ticket->id);
+                        }
+                    } else {
+                        \Log::error('El archivo PDF NO existe en la ruta: ' . $pdfPath);
                     }
-                } catch (\Exception $emailException) {
-                    // No fallamos la compra si el correo falla, solo registramos el error
-                    \Log::error('Error al enviar correo o generar PDF: ' . $emailException->getMessage());
+                } catch (\Exception $e) {
+                    \Log::error('Error al enviar correo o generar PDF: ' . $e->getMessage());
+                    \Log::error('Stack trace: ' . $e->getTraceAsString());
                 }
             }
             

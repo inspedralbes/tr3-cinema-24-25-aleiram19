@@ -16,12 +16,6 @@
       <div class="bg-blue-800 bg-opacity-50 rounded-lg p-6">
         <h3 class="text-xl font-semibold mb-4 border-b border-blue-700 pb-2">Detalles de la Confirmación</h3>
         
-        <!-- Código de confirmación -->
-        <div class="bg-blue-700 bg-opacity-50 rounded-lg p-4 text-center mb-6">
-          <p class="text-sm text-gray-300">Código de confirmación</p>
-          <p class="text-2xl font-mono font-bold tracking-wider">{{ confirmationCode }}</p>
-        </div>
-        
         <div class="space-y-4">
           <!-- Película -->
           <div>
@@ -68,17 +62,7 @@
       </div>
 
       <!-- Botones de acción -->
-      <div class="flex flex-col space-y-3">
-        <button 
-          @click="downloadTicket" 
-          class="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-white font-medium bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-        >
-          <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-            <i class="fas fa-download group-hover:text-blue-400 text-blue-500 transition-colors"></i>
-          </span>
-          Descargar Boletos
-        </button>
-        
+      <div class="flex flex-col space-y-3">        
         <button 
           @click="goToHome" 
           class="group relative w-full flex justify-center py-3 px-4 border border-gray-700 rounded-lg text-white font-medium bg-transparent hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
