@@ -3,12 +3,12 @@
 @section('content')
 <style>
     :root {
-        --color-dark-blue: #0A2B4F;    /* Fondo principal */
-        --color-mid-blue: #102C54;     /* Para degradados */
-        --color-light-blue: #1C3A66;   /* Opcional en secciones */
-        --color-accent: #00BCD4;       /* Celeste */
-        --color-secondary: #FFB300;    /* Color secundario amarillo */
-        --color-tertiary: #F46D75;     /* Color terciario rosa/rojo */
+        --color-dark-blue: #051D40;    /* Fondo principal - navy-900 */
+        --color-mid-blue: #0078C8;     /* Para degradados - navy-600 */
+        --color-light-blue: #00A0E4;   /* Opcional en secciones - blue-400 */
+        --color-accent: #00A0E4;       /* Celeste - blue-400 */
+        --color-secondary: #0078C8;    /* Color secundario - navy-600 */
+        --color-tertiary: #051D40;     /* Color terciario - blue-900 */
         --color-text: #FFFFFF;         /* Texto claro */
         
         --transition-speed: 0.3s;
@@ -147,11 +147,13 @@
         background-color: var(--color-light-blue);
         padding: 12px 15px;
         border: none;
-        color: var(--color-accent);
+        color: #FFFFFF; /* Texto en blanco */
         font-weight: 600;
         text-transform: uppercase;
         font-size: 0.85rem;
     }
+
+
     
     .movie-detail-card table.table thead th:first-child {
         border-radius: 8px 0 0 8px;
