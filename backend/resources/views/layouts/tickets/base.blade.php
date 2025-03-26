@@ -52,21 +52,30 @@
         }
         .qrcode {
             text-align: center;
-            margin: 20px 0;
-            padding: 10px;
-            background: #f5f5f5;
+            margin: 20px auto;
+            padding: 15px;
+            background: #fff;
             display: flex;
             flex-direction: column;
             align-items: center;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            width: 230px;
+            border-radius: 10px;
         }
         .qrcode img {
-            max-width: 180px;
+            max-width: 200px;
             margin-bottom: 10px;
         }
         .qrcode-text {
-            font-family: 'Courier New', monospace;
+            font-family: 'Arial', sans-serif;
             font-size: 14px;
+            font-weight: bold;
             letter-spacing: 1px;
+            color: #000;
+            background: #f9f9f9;
+            padding: 4px 12px;
+            border-radius: 4px;
         }
     </style>
     @yield('additional_styles')
