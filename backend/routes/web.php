@@ -17,16 +17,24 @@ use App\Http\Controllers\ScreeningController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Rutas de autenticación
+Route::get('/', [App\Http\Controllers\AuthWebController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [App\Http\Controllers\AuthWebController::class, 'login'])->name('admin.login');
+Route::post('/logout', [App\Http\Controllers\AuthWebController::class, 'logout'])->name('admin.logout');
+
+// Redirigir cualquier intento de acceder a /welcome a la página de login
+Route::get('/welcome', function() {
+    return redirect()->route('login');
 });
 
-Route::get('/admin', function () {
-    return view('admin.dashboard');
-})->name('admin.dashboard');
-
-// Rutas CRUD para Usuarios
-Route::prefix('admin/users')->group(function () {
+// Rutas protegidas por middleware de autenticación
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+    
+    // Rutas CRUD para Usuarios
+    Route::prefix('admin/users')->group(function () {
     Route::get('/', [UserController::class, 'index'])->name('users.index');
     Route::get('/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/', [UserController::class, 'store'])->name('users.store');
@@ -66,4 +74,5 @@ Route::prefix('admin/screening')->group(function () {
     Route::get('/{id}/edit', [ScreeningController::class, 'edit'])->name('screenings.edit');
     Route::put('/{id}', [ScreeningController::class, 'update'])->name('screenings.update');
     Route::delete('/{id}', [ScreeningController::class, 'destroy'])->name('screenings.destroy');
+  });
 });

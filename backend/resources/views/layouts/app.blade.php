@@ -555,6 +555,12 @@
                 <a href="{{ route('seats.index') }}" class="{{ request()->routeIs('seats.*') ? 'active' : '' }}">
                     <i class="fas fa-chair me-1"></i> Asientos
                 </a>
+                <form action="{{ route('admin.logout') }}" method="POST" style="display: inline;">
+                    @csrf
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
+                    </button>
+                </form>
             </div>
         </nav>
     </header>
