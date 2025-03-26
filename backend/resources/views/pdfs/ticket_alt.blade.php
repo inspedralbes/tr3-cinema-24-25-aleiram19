@@ -141,7 +141,7 @@
             </div>
             
             <div class="qrcode">
-                <img src="data:image/png;base64,{{ $qrCode }}" alt="Código QR de la entrada">
+                <img src="{{ $qrPath }}" alt="Código QR de la entrada">
                 <div class="qrcode-text">TICKET-{{ $ticketData['ticket_id'] }}</div>
             </div>
         </div>
