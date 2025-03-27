@@ -23,10 +23,10 @@ class Seat extends Model
         return $this->belongsTo(Auditorium::class);
     }
 
-    // Relación con reservas
-    public function bookings()
+    // Relación con tickets
+    public function tickets()
     {
-        return $this->hasMany(Booking::class);
+        return $this->hasMany(Ticket::class);
     }
     
     // Atributos computados para mostrar si un asiento es VIP

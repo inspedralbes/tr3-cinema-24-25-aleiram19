@@ -21,7 +21,9 @@ class AuditoriumController extends Controller
         
         // Si la solicitud es de API o comienza con /api/, devolver JSON
         if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
-            return response()->json($auditoriums);
+            return response()->json([
+                'data' => $auditoriums
+            ]);
         }
         
         // Si es una solicitud web, devolver vista
@@ -40,10 +42,23 @@ class AuditoriumController extends Controller
             return substr($seat->number, 0, 1); // Primer carácter del número de asiento (la fila)
         });
         
+        // Preparar los asientos con información de fila para los tests
+        $seatsWithRowInfo = $auditorium->seats->map(function($seat) {
+            $seatData = $seat->toArray();
+            $seatData['row'] = substr($seat->number, 0, 1); // Extraer la fila del número de asiento
+            $seatData['seat_number'] = substr($seat->number, 1); // Extraer el número del asiento
+            return $seatData;
+        });
+        
         // Si la solicitud es de API o comienza con /api/, devolver JSON
         if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
             return response()->json([
-                'auditorium' => $auditorium,
+                'data' => [
+                    'id' => $auditorium->id,
+                    'name' => $auditorium->name,
+                    'capacity' => $auditorium->capacity,
+                    'seats' => $seatsWithRowInfo
+                ],
                 'seats_by_row' => $seatsByRow
             ]);
         }
@@ -59,9 +74,7 @@ class AuditoriumController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'capacity' => 'required|integer|min:1',
-            'rows' => 'required|array',
-            'rows.*' => 'required|string|size:1',
+            'rows' => 'required|integer|min:1',
             'seats_per_row' => 'required|integer|min:1'
         ]);
 
@@ -76,15 +89,20 @@ class AuditoriumController extends Controller
         DB::beginTransaction();
         
         try {
+            // Calcular la capacidad
+            $capacity = $request->rows * $request->seats_per_row;
+            
             // Crear el auditorio
             $auditorium = Auditorium::create([
                 'name' => $request->name,
-                'capacity' => $request->capacity
+                'capacity' => $capacity
             ]);
             
             // Crear los asientos
             $seats = [];
-            foreach ($request->rows as $row) {
+            $rowLetters = range('A', chr(ord('A') + $request->rows - 1));
+            
+            foreach ($rowLetters as $row) {
                 for ($i = 1; $i <= $request->seats_per_row; $i++) {
                     $seatNumber = $row . $i;
                     $seats[] = [
@@ -103,8 +121,8 @@ class AuditoriumController extends Controller
             
             if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
                 return response()->json([
-                    'message' => 'Auditorio creado correctamente',
-                    'auditorium' => $auditorium
+                    'message' => 'Auditorium created successfully',
+                    'data' => $auditorium
                 ], 201);
             } else {
                 return redirect()->route('auditoriums.index')
@@ -116,7 +134,7 @@ class AuditoriumController extends Controller
             
             if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
                 return response()->json([
-                    'message' => 'Error al crear el auditorio',
+                    'message' => 'Error creating auditorium',
                     'error' => $e->getMessage()
                 ], 500);
             } else {
@@ -161,8 +179,8 @@ class AuditoriumController extends Controller
         
         if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
             return response()->json([
-                'message' => 'Auditorio actualizado correctamente',
-                'auditorium' => $auditorium
+                'message' => 'Auditorium updated successfully',
+                'data' => $auditorium
             ]);
         } else {
             return redirect()->route('auditoriums.index')
@@ -202,7 +220,7 @@ class AuditoriumController extends Controller
             
             if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
                 return response()->json([
-                    'message' => 'Auditorio eliminado correctamente'
+                    'message' => 'Auditorium deleted successfully'
                 ]);
             } else {
                 return redirect()->route('auditoriums.index')

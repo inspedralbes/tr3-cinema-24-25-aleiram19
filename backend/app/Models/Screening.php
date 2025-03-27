@@ -31,12 +31,6 @@ class Screening extends Model
         return $this->belongsTo(Auditorium::class);
     }
 
-    // Relación con reservas
-    public function bookings()
-    {
-        return $this->hasMany(Booking::class);
-    }
-
     // Relación con tickets
     public function tickets()
     {
@@ -94,9 +88,8 @@ class Screening extends Model
     // Verificar disponibilidad de asientos reservados por usuario
     public function countUserSeats($userId)
     {
-        return $this->bookings()
+        return $this->tickets()
             ->where('user_id', $userId)
-            ->where('status', 'reserved')
             ->count();
     }
     

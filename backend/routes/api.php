@@ -94,21 +94,10 @@ Route::prefix('auditorium')->group(function() {
     Route::get('/{id}', [AuditoriumController::class, 'show']);
 });
 
-// Rutas alternativas para asientos (singular)
-Route::prefix('seat')->group(function() {
-    Route::get('/', [SeatController::class, 'index']);
-    Route::put('/{id}/status', [SeatController::class, 'updateStatus']);
-    Route::post('/reset', [SeatController::class, 'resetSeats']);
-    Route::get('/{id}', [SeatController::class, 'show']);
-});
+// Las rutas para el recurso "seat" se han eliminado para evitar duplicidad 
+// Se mantiene solo la versión plural "seats" que sigue la convención RESTful
 
-// Ruta específica que garantiza JSON para los asientos
-Route::get('/seats-json', function() {
-    $seats = App\Models\Seat::with('auditorium')->get();
-    return response()->json($seats, 200, [
-        'Content-Type' => 'application/json'
-    ]);
-});
+// La ruta '/seats-json' ha sido eliminada por ser redundante con '/api/seats'
 
 // Rutas para invitados
 Route::prefix('guest')->group(function() {
@@ -121,10 +110,7 @@ Route::prefix('guest')->group(function() {
 
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth:sanctum')->group(function() {
-    // Perfil de usuario
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+    // Ya existe una ruta para /user en las rutas de autenticación
     
     // Rutas para gestión de tickets y asientos
     Route::prefix('tickets')->group(function() {
@@ -133,9 +119,7 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::post('/confirm', [TicketController::class, 'confirmTickets']);
         Route::post('/cancel', [TicketController::class, 'cancelTickets']);
         
-        // Gestión de snack para tickets
-        Route::post('/add-snack', [SnackController::class, 'addSnackToTicket']);
-        Route::post('/remove-snack', [SnackController::class, 'removeSnackFromTicket']);
+        // Gestión de snack para tickets - se excluye según indicación
         
         // Consulta de tickets del usuario
         Route::get('/', [TicketController::class, 'getUserTickets']);
@@ -160,11 +144,9 @@ Route::middleware('auth:sanctum')->group(function() {
         Route::delete('/genre/{id}', [MovieGenreController::class, 'destroy']);
         
         // Gestión de auditorios
-        Route::get('/auditoriums', [AuditoriumController::class, 'index']);
-        Route::get('/auditoriums/{id}', [AuditoriumController::class, 'show']);
-        Route::post('/auditoriums', [AuditoriumController::class, 'store']);
-        Route::put('/auditoriums/{id}', [AuditoriumController::class, 'update']);
-        Route::delete('/auditoriums/{id}', [AuditoriumController::class, 'destroy']);
+        Route::post('/auditorium', [AuditoriumController::class, 'store']);
+        Route::put('/auditorium/{id}', [AuditoriumController::class, 'update']);
+        Route::delete('/auditorium/{id}', [AuditoriumController::class, 'destroy']);
         
         // Gestión de asientos (movida a rutas públicas)
     });

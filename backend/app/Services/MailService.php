@@ -70,7 +70,7 @@ class MailService
                 <style>
                     body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
                     .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-                    h1 { color: #e63946; }
+                    h1 { color: #00A0E4; }
                     .footer { margin-top: 30px; font-size: 12px; color: #666; text-align: center; }
                 </style>
             </head>

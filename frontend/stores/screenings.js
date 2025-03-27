@@ -50,8 +50,8 @@ export const useScreeningsStore = defineStore('screenings', {
       this.error = null;
       
       try {
-        const data = await this.apiCall('GET', 'auditorium');
-        return data;
+        const response = await this.apiCall('GET', 'auditorium');
+        return response.data; // Devolver solo el array de auditorios
       } catch (error) {
         this.error = error.message;
         console.error('Error al obtener los auditorios:', error);

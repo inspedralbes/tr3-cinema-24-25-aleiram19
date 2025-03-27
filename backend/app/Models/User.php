@@ -61,14 +61,6 @@ class User extends Authenticatable
     }
     
     /**
-     * Relación con reservas - Comentada temporalmente hasta crear el modelo Booking
-     */
-    /*public function bookings()
-    {
-        return $this->hasMany(Booking::class);
-    }*/
-    
-    /**
      * Relación con tickets
      */
     public function tickets()
