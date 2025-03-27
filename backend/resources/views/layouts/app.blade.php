@@ -8,17 +8,17 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     :root {
-      /* Paleta de colores mejorada */
-      --navy-600: #0078C8;  /* Inicio del gradiente navy */
-      --navy-900: #051D40;  /* Fin del gradiente navy */
-      --blue-400: #00A0E4;  /* Inicio del gradiente blue */
-      --blue-900: #051D40;  /* Fin del gradiente blue */
+      /* Paleta de colores */
+      --navy-900: #051D40;  /* Color primario */
+      --blue-400: #00A0E4;  /* Se conserva para detalles si se desea */
       --color-text: #FFFFFF;
       --color-secondary: #00A0E4;
       --color-tertiary: #0078C8;
-      --color-light-text: #F0F8FF;  /* Texto claro con mejor contraste */
-      --color-dark-blue: #051D40;  /* Azul oscuro para contrastar */
+      --color-light-text: #F0F8FF;
+      --color-dark-blue: #051D40;
       --transition-speed: 0.3s;
+      --button-logout: #0078C8; 
+
     }
 
     /* Reset y estilos base */
@@ -27,7 +27,7 @@
       margin: 0;
       padding: 0;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(60deg, var(--navy-600), var(--navy-900));
+      background: var(--navy-900);
       color: var(--color-light-text);
       font-size: 16px;
       letter-spacing: 0.3px;
@@ -43,7 +43,7 @@
     /* Sidebar lateral */
     .sidebar {
       width: 250px;
-      background: linear-gradient(180deg, var(--blue-400), var(--blue-900));
+      background: var(--navy-900);
       padding: 20px;
       box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
       display: flex;
@@ -56,7 +56,7 @@
       z-index: 1000;
     }
     .sidebar .brand a {
-      color: var(--color-accent);
+      color: var(--color-text);
       text-decoration: none;
       font-size: 1.8rem;
       font-weight: bold;
@@ -88,7 +88,7 @@
       background-color: var(--blue-400);
       color: var(--color-dark-blue);
       font-weight: 600;
-      border-left-color: var(--color-accent);
+      border-left-color: var(--blue-400);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
     }
     .sidebar nav a i {
@@ -158,7 +158,7 @@
       gap: 10px;
     }
     .table-header h2 i {
-      color: var(--color-accent);
+      color: var(--blue-400);
     }
     .table-content {
       padding: 20px;
@@ -170,7 +170,7 @@
     }
     .table thead th {
       background-color: rgba(0, 120, 200, 0.3);
-      border-bottom: 2px solid var(--color-accent);
+      border-bottom: 2px solid var(--blue-400);
       font-weight: 600;
       padding: 12px 15px;
       color: var(--color-light-text);
@@ -235,7 +235,6 @@
       font-size: 2.5rem;
       margin-bottom: 15px;
     }
-    /* Si se desea diferenciar, se puede conservar la misma paleta en todas las secciones */
     .content-link.user,
     .content-link.movie,
     .content-link.seat {
@@ -254,22 +253,32 @@
       gap: 5px;
     }
     .btn-primary {
-      background: linear-gradient(45deg, var(--blue-400), var(--navy-600));
+      background: var(--navy-900);
       border: none;
     }
     .btn-danger {
-      background: linear-gradient(45deg, #e74c3c, #c0392b);
+      background: #e74c3c;
       border: none;
     }
     .btn-info {
-      background: linear-gradient(45deg, #3498db, #2980b9);
+      background: #3498db;
       border: none;
     }
     .btn-sm {
       padding: 5px 10px;
       font-size: 0.85rem;
     }
-    
+    .logout-btn {
+        width: 100%;
+        border: none;
+        background:  #0078C8; /* Color deseado */
+        color: var(--color-text);
+        padding: 10px 15px;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: all var(--transition-speed);
+    }
+
     /* Alertas */
     .alert {
       border-radius: 8px;
@@ -399,8 +408,8 @@
       </nav>
       <form action="{{ route('admin.logout') }}" method="POST">
         @csrf
-        <button type="submit">
-          <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
+        <button type="submit" class="logout-btn">
+            <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
         </button>
       </form>
     </div>
