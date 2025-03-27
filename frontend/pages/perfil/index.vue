@@ -170,12 +170,40 @@
             
             <!-- Vista de tickets/entradas -->
             <div v-else-if="activeTab === 'tickets'">
-              <h2 class="text-2xl font-bold text-white mb-6 flex items-center">
-                <i class="fas fa-ticket-alt mr-3 text-blue-500"></i> 
-                Mis Entradas
-              </h2>
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-white flex items-center">
+                  <i class="fas fa-ticket-alt mr-3 text-blue-500"></i> 
+                  Mis Entradas
+                </h2>
+                <button 
+                  @click="refreshTickets" 
+                  class="bg-blue-700 hover:bg-blue-600 text-white text-sm font-medium py-2 px-4 rounded-lg transition-colors flex items-center"
+                  :disabled="ticketsStore.loading"
+                >
+                  <i class="fas fa-sync-alt mr-2" :class="{'animate-spin': ticketsStore.loading}"></i> 
+                  Actualizar
+                </button>
+              </div>
               
-              <div v-if="ticketsStore.userTickets.length === 0" class="text-center py-12">
+              <div v-if="ticketsStore.loading" class="flex justify-center py-8">
+                <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+              </div>
+              
+              <div v-else-if="ticketsStore.error" class="text-center py-8">
+                <div class="text-4xl text-red-500 mb-4">
+                  <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white mb-2">Error al cargar entradas</h3>
+                <p class="text-gray-400 mb-6">{{ ticketsStore.error }}</p>
+                <button 
+                  @click="ticketsStore.fetchUserTickets()" 
+                  class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center"
+                >
+                  <i class="fas fa-sync-alt mr-2"></i> Reintentar
+                </button>
+              </div>
+              
+              <div v-else-if="ticketsStore.userTickets.length === 0" class="text-center py-12">
                 <div class="text-5xl text-gray-600 mb-4">
                   <i class="fas fa-ticket-alt"></i>
                 </div>
@@ -190,26 +218,47 @@
               </div>
               
               <div v-else class="space-y-4">
+                <!-- Tickets/Entradas -->
                 <div 
                   v-for="ticket in ticketsStore.userTickets" 
                   :key="ticket.id" 
-                  class="bg-navy-900/80 border border-gray-800 rounded-lg overflow-hidden"
+                  class="bg-navy-900/80 border border-gray-800 rounded-lg overflow-hidden hover:border-blue-700 transition-all duration-300"
                 >
                   <div class="p-5">
                     <div class="flex flex-col md:flex-row md:items-center justify-between">
                       <div class="mb-4 md:mb-0">
-                        <h3 class="text-xl font-bold text-white mb-1">{{ ticket.movie_title }}</h3>
-                        <div class="flex items-center text-gray-400 text-sm">
+                        <!-- Título de la película con mejor visualización -->
+                        <h3 class="text-xl font-bold text-white mb-2 flex items-center">
+                          <i class="fas fa-film text-blue-500 mr-2"></i>
+                          {{ ticket.movie_title || ticket.movie?.title || ticket.screening?.movie?.title || 'Película' }}
+                        </h3>
+                        
+                        <!-- Información de fecha y hora -->
+                        <div class="flex items-center text-gray-400 text-sm mb-2">
                           <i class="fas fa-calendar-alt mr-2"></i>
-                          <span>{{ formatDate(ticket.screening_date) }} | {{ ticket.screening_time }}</span>
+                          <span>{{ formatDate(ticket.screening_date || ticket.screening?.date || ticket.date) }}</span>
+                        </div>
+                        
+                        <!-- Hora de la proyección -->
+                        <div class="flex items-center text-gray-400 text-sm mb-2">
+                          <i class="fas fa-clock mr-2"></i>
+                          <span>{{ ticket.screening_time || ticket.screening?.time || ticket.time }}</span>
+                        </div>
+                        
+                        <!-- Sala -->
+                        <div class="flex items-center text-gray-400 text-sm">
+                          <i class="fas fa-map-marker-alt mr-2"></i>
+                          <span>{{ ticket.hall_name || ticket.screening?.hall_name || ticket.screening?.auditorium?.name || 'Sala' }}</span>
                         </div>
                       </div>
                       
                       <div class="flex flex-col md:flex-row items-start md:items-center md:space-x-4">
+                        <!-- Número de asientos -->
                         <div class="bg-blue-900 py-1 px-3 rounded-full text-sm text-blue-300 flex items-center mb-3 md:mb-0">
-                          <i class="fas fa-couch mr-1"></i> {{ ticket.seat_count }} asientos
+                          <i class="fas fa-couch mr-1"></i> {{ ticket.seat_count || (ticket.seats ? ticket.seats.length : 1) }} asientos
                         </div>
                         
+                        <!-- Botón para ver detalles -->
                         <button 
                           @click="viewTicketDetails(ticket.id)"
                           class="bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium py-2 px-4 rounded-full transition-colors flex items-center"
@@ -220,10 +269,11 @@
                     </div>
                   </div>
                   
+                  <!-- Pie con código y estado -->
                   <div class="bg-navy-950 px-5 py-3 flex flex-col sm:flex-row sm:items-center justify-between">
                     <div class="text-gray-400 text-sm mb-2 sm:mb-0">
                       <span class="text-gray-500">Código:</span> 
-                      <span class="font-mono font-medium text-white">{{ ticket.ticket_code }}</span>
+                      <span class="font-mono font-medium text-white">{{ ticket.ticket_code || ticket.code || ticket.confirmation_code }}</span>
                     </div>
                     
                     <div class="text-gray-400 text-sm flex items-center">
@@ -231,11 +281,116 @@
                       <span 
                         :class="[
                           'px-2 py-1 rounded text-xs font-medium',
-                          ticket.status === 'active' ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'
+                          (ticket.status === 'active' || ticket.status === 'activo') ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'
                         ]"
                       >
-                        {{ ticket.status === 'active' ? 'Activo' : 'Usado' }}
+                        {{ (ticket.status === 'active' || ticket.status === 'activo') ? 'Activo' : (ticket.status === 'used' || ticket.status === 'usado' ? 'Usado' : ticket.status) }}
                       </span>
+                    </div>
+                  </div>
+                  
+                  <!-- Sección expandible con detalles del ticket -->
+                  <div v-if="expandedTicketId === ticket.id" class="border-t border-gray-800 bg-navy-950/50 p-5">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <!-- Columna izquierda: Información de la película -->
+                      <div>
+                        <h4 class="text-lg font-bold text-white mb-3">Detalles de la película</h4>
+                        
+                        <!-- Póster de la película si existe -->
+                        <div v-if="ticket.movie?.poster || ticket.screening?.movie?.poster" class="mb-4">
+                          <img 
+                            :src="ticket.movie?.poster || ticket.screening?.movie?.poster" 
+                            :alt="ticket.movie_title || ticket.movie?.title || ticket.screening?.movie?.title" 
+                            class="rounded-lg w-full max-w-xs mx-auto md:mx-0"
+                          />
+                        </div>
+                        
+                        <!-- Sinopsis -->
+                        <div v-if="ticket.movie?.description || ticket.screening?.movie?.description" class="mb-4">
+                          <h5 class="text-sm font-bold text-gray-300 mb-1">Sinopsis:</h5>
+                          <p class="text-gray-400 text-sm">
+                            {{ ticket.movie?.description || ticket.screening?.movie?.description }}
+                          </p>
+                        </div>
+                        
+                        <!-- Director -->
+                        <div v-if="ticket.movie?.director || ticket.screening?.movie?.director" class="mb-2">
+                          <h5 class="text-sm font-bold text-gray-300 mb-1">Director:</h5>
+                          <p class="text-gray-400 text-sm">
+                            {{ ticket.movie?.director || ticket.screening?.movie?.director }}
+                          </p>
+                        </div>
+                        
+                        <!-- Duración -->
+                        <div v-if="ticket.movie?.duration || ticket.screening?.movie?.duration" class="mb-2">
+                          <h5 class="text-sm font-bold text-gray-300 mb-1">Duración:</h5>
+                          <p class="text-gray-400 text-sm">
+                            {{ ticket.movie?.duration || ticket.screening?.movie?.duration }} minutos
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <!-- Columna derecha: Detalles de la entrada -->
+                      <div>
+                        <h4 class="text-lg font-bold text-white mb-3">Detalles de la entrada</h4>
+                        
+                        <!-- Asientos -->
+                        <div class="mb-3">
+                          <h5 class="text-sm font-bold text-gray-300 mb-2">Asientos:</h5>
+                          <div class="flex flex-wrap gap-2">
+                            <span 
+                              v-for="(seat, index) in ticket.seats" 
+                              :key="index" 
+                              class="bg-blue-900/60 text-blue-300 px-3 py-1 rounded-lg text-sm"
+                            >
+                              {{ seat.row }}{{ seat.column || seat.number }}
+                            </span>
+                            <!-- Si no hay asientos específicos, mostrar cantidad -->
+                            <span v-if="!ticket.seats || ticket.seats.length === 0" class="text-gray-400 text-sm">
+                              {{ ticket.seat_count || 1 }} asientos
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <!-- Precio total -->
+                        <div class="mb-3">
+                          <h5 class="text-sm font-bold text-gray-300 mb-1">Precio total:</h5>
+                          <p class="text-green-400 text-lg font-bold">
+                            {{ ticket.total_pay ? `$${ticket.total_pay}` : (ticket.price ? `$${ticket.price}` : 'No disponible') }}
+                          </p>
+                        </div>
+                        
+                        <!-- Fecha de compra -->
+                        <div class="mb-3" v-if="ticket.purchase_date || ticket.created_at">
+                          <h5 class="text-sm font-bold text-gray-300 mb-1">Fecha de compra:</h5>
+                          <p class="text-gray-400 text-sm">
+                            {{ formatDate(ticket.purchase_date || ticket.created_at) }}
+                          </p>
+                        </div>
+                        
+                        <!-- Código QR (simulado) -->
+                        <div class="mt-4 text-center md:text-left">
+                          <h5 class="text-sm font-bold text-gray-300 mb-2">Código QR:</h5>
+                          <div class="bg-white inline-block p-4 rounded-lg">
+                            <div class="w-32 h-32 mx-auto md:mx-0 flex items-center justify-center">
+                              <i class="fas fa-qrcode text-6xl text-navy-900"></i>
+                            </div>
+                          </div>
+                          <p class="text-gray-400 text-xs mt-2">
+                            Presenta este código en la entrada del cine
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Botón para cerrar detalles -->
+                    <div class="mt-5 text-center">
+                      <button 
+                        @click="expandedTicketId = null" 
+                        class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-medium py-2 px-4 rounded-lg transition-colors inline-flex items-center"
+                      >
+                        <i class="fas fa-chevron-up mr-2"></i> Cerrar detalles
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -284,10 +439,10 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
     
     <LandingPageFooter />
-  </div>
 </template>
 
 <script setup>
@@ -304,6 +459,9 @@ const { $toast } = useNuxtApp();
 
 // Pestaña activa - por defecto 'perfil', pero puede ser cambiada por parámetros de URL
 const activeTab = ref('perfil');
+
+// Variable para controlar qué ticket está expandido
+const expandedTicketId = ref(null);
 
 // Datos del formulario de perfil
 const profileData = ref({
@@ -371,7 +529,12 @@ onMounted(async () => {
   };
   
   // Cargar tickets del usuario
-  await ticketsStore.fetchUserTickets();
+  try {
+    await ticketsStore.fetchUserTickets();
+    console.log('Tickets cargados en onMounted:', ticketsStore.userTickets);
+  } catch (error) {
+    console.error('Error al cargar tickets en onMounted:', error);
+  }
   
   // Si hay un parámetro 'tab' en la URL, activamos esa pestaña
   if (route.query.tab && ['perfil', 'tickets', 'promociones'].includes(route.query.tab)) {
@@ -400,9 +563,43 @@ const updateProfile = async () => {
   }, 1000);
 };
 
+const refreshTickets = async () => {
+  try {
+    await ticketsStore.fetchUserTickets();
+    $toast.success('Entradas actualizadas correctamente');
+    
+    // Depuración: Imprime la estructura de los tickets en la consola
+    console.log('Tickets cargados:', JSON.stringify(ticketsStore.userTickets, null, 2));
+  } catch (error) {
+    $toast.error('Error al actualizar entradas');
+    console.error('Error al actualizar entradas:', error);
+  }
+};
+
 const viewTicketDetails = (ticketId) => {
-  // Aquí iría la lógica para ver los detalles del ticket
-  $toast.info(`Viendo detalles del ticket #${ticketId}`);
+  // Si ya está expandido, colapsarlo
+  if (expandedTicketId.value === ticketId) {
+    expandedTicketId.value = null;
+    return;
+  }
+  
+  // Expandir el ticket y mostrar mensaje de carga
+  expandedTicketId.value = ticketId;
+  $toast.info(`Cargando detalles del ticket #${ticketId}...`);
+  
+  // Si el store tiene una función para obtener detalles de tickets, la usamos
+  if (ticketId && typeof ticketsStore.fetchTicketDetails === 'function') {
+    ticketsStore.fetchTicketDetails(ticketId)
+      .then(ticketDetails => {
+        console.log('Detalles del ticket:', ticketDetails);
+        // El ticket ya se actualizará automáticamente en el store
+        $toast.success('Detalles cargados correctamente');
+      })
+      .catch(error => {
+        console.error('Error al obtener detalles del ticket:', error);
+        $toast.error('Error al cargar los detalles del ticket');
+      });
+  }
 };
 
 const handleLogout = async () => {
@@ -413,8 +610,21 @@ const handleLogout = async () => {
 
 // Formatea la fecha para mostrarla de forma amigable
 const formatDate = (dateString) => {
-  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-  return new Date(dateString).toLocaleDateString('es-ES', options);
+  if (!dateString) return 'Fecha no disponible';
+  
+  try {
+    const date = new Date(dateString);
+    // Verificar si la fecha es válida
+    if (isNaN(date.getTime())) {
+      return 'Fecha inválida';
+    }
+    
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('es-ES', options);
+  } catch (error) {
+    console.error('Error al formatear fecha:', error);
+    return 'Error en fecha';
+  }
 };
 
 // Define el middleware de autenticación

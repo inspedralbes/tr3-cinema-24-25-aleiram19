@@ -447,7 +447,6 @@ definePageMeta({
 </script>
 
 <style scoped>
-/* Animación para el efecto hover en las tarjetas de ticket */
 .bg-navy-800:hover {
   transform: translateY(-2px);
 }
