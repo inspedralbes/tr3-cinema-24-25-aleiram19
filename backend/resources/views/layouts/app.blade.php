@@ -42,30 +42,60 @@
 
     /* Sidebar lateral */
     .sidebar {
-      width: 250px;
-      background: var(--navy-900);
-      padding: 20px;
-      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.3);
+      width: 260px;
+      background: linear-gradient(135deg, var(--navy-900) 0%, rgba(7, 38, 80, 1) 100%);
+      padding: 25px 20px;
+      box-shadow: 3px 0 15px rgba(0, 0, 0, 0.4);
       display: flex;
       flex-direction: column;
-      gap: 20px;
+      gap: 25px;
       position: fixed;
       top: 0;
       bottom: 0;
       left: 0;
       z-index: 1000;
+      border-right: 1px solid rgba(255, 255, 255, 0.07);
+      transition: all 0.3s ease;
     }
     .sidebar .brand a {
       color: var(--color-text);
       text-decoration: none;
-      font-size: 1.8rem;
+      font-size: 1.4rem;
       font-weight: bold;
       letter-spacing: 0.5px;
       display: flex;
-      align-items: center;
-      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
       transition: all var(--transition-speed);
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      margin-bottom: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 100%;
+      text-align: center;
+    }
+    .sidebar .brand a i {
+      font-size: 2rem;
+      min-width: 35px;
+      text-align: center;
+      display: block;
+      margin: 0 auto 8px;
+      color: #00A0E4;
+      background-color: rgba(255, 255, 255, 0.1);
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      border-radius: 50%;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .sidebar .brand .brand-text {
+      display: inline-block;
+      width: 100%;
+      white-space: normal;
+      word-wrap: break-word;
+      line-height: 1.2;
     }
     .sidebar nav {
       display: flex;
@@ -77,24 +107,47 @@
       text-decoration: none;
       font-size: 1.1rem;
       font-weight: 500;
-      padding: 10px 15px;
-      border-radius: 8px;
+      padding: 12px 18px;
+      border-radius: 10px;
       transition: all var(--transition-speed);
       border-left: 3px solid transparent;
       display: flex;
       align-items: center;
+      margin-bottom: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+    .sidebar nav a::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0;
+      background: rgba(0, 160, 228, 0.1);
+      z-index: -1;
+      transition: width 0.3s ease;
+    }
+    .sidebar nav a:hover::before {
+      width: 100%;
     }
     .sidebar nav a.active {
-      background-color: var(--blue-400);
-      color: var(--color-dark-blue);
+      background: linear-gradient(90deg, rgba(0, 160, 228, 0.9) 0%, rgba(0, 120, 200, 0.9) 100%);
+      color: white;
       font-weight: 600;
-      border-left-color: var(--blue-400);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      border-left-color: white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      transform: translateX(5px);
     }
     .sidebar nav a i {
-      margin-right: 10px;
-      width: 20px;
+      margin-right: 12px;
+      width: 22px;
       text-align: center;
+      font-size: 1.2rem;
+      transition: transform 0.3s ease;
+    }
+    .sidebar nav a:hover i {
+      transform: scale(1.2);
     }
     .sidebar form button {
       width: 100%;
@@ -109,7 +162,7 @@
 
     /* Contenido principal */
     .content {
-      margin-left: 250px; /* igual al ancho del sidebar */
+      margin-left: 260px; /* igual al ancho del sidebar */
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -206,39 +259,113 @@
     /* Estilos para cards, tablas y formularios */
     .cards-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 30px;
-      padding: 20px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 40px;
+      padding: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    @media (max-width: 992px) {
+      .cards-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      .cards-container {
+        grid-template-columns: 1fr;
+      }
     }
     .content-link {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background-color: var(--navy-900);
-      padding: 30px;
-      border-radius: 10px;
+      background-color: rgba(5, 29, 64, 0.7);
+      padding: 40px 30px;
+      border-radius: 15px;
       text-decoration: none;
       color: var(--color-text);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-      transition: transform var(--transition-speed), box-shadow var(--transition-speed);
-      border-left: 5px solid var(--blue-400);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+      transition: all var(--transition-speed);
       text-align: center;
-      font-size: 1.3rem;
+      font-size: 1.4rem;
       font-weight: bold;
+      height: 220px;
+      position: relative;
+      overflow: hidden;
     }
+    
     .content-link:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      transform: translateY(-5px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
     }
+    
+    .content-link::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: var(--blue-400);
+      transition: height 0.3s ease;
+    }
+    
+    .content-link:hover::after {
+      height: 8px;
+    }
+    
     .content-link i {
-      font-size: 2.5rem;
-      margin-bottom: 15px;
+      font-size: 3.5rem;
+      margin-bottom: 20px;
+      color: var(--blue-400);
+      transition: transform 0.3s ease;
     }
-    .content-link.user,
-    .content-link.movie,
-    .content-link.seat {
-      border-left-color: var(--blue-400);
+    
+    .content-link:hover i {
+      transform: scale(1.2);
+    }
+    
+    .content-link.user::after {
+      background: #3498db;
+    }
+    
+    .content-link.movie::after {
+      background: #e74c3c;
+    }
+    
+    .content-link.seat::after {
+      background: #2ecc71;
+    }
+    
+    .content-link.screening::after {
+      background: #f39c12;
+    }
+    
+    .content-link.report::after {
+      background: #9b59b6;
+    }
+    
+    .content-link.user i {
+      color: #3498db;
+    }
+    
+    .content-link.movie i {
+      color: #e74c3c;
+    }
+    
+    .content-link.seat i {
+      color: #2ecc71;
+    }
+    
+    .content-link.screening i {
+      color: #f39c12;
+    }
+    
+    .content-link.report i {
+      color: #9b59b6;
     }
 
     /* Botones y formularios */
@@ -271,12 +398,20 @@
     .logout-btn {
         width: 100%;
         border: none;
-        background:  #0078C8; /* Color deseado */
+        background: #e74c3c; /* Color rojo más llamativo */
         color: var(--color-text);
-        padding: 10px 15px;
+        padding: 12px 15px;
         border-radius: 8px;
         font-size: 1rem;
+        font-weight: 600;
         transition: all var(--transition-speed);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    
+    .logout-btn:hover {
+        background: #c0392b; /* Color más oscuro al pasar el mouse */
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
 
     /* Alertas */
@@ -351,34 +486,103 @@
       .table tbody td:last-child {
         border-bottom: none;
       }
+      
+      .sidebar .brand a {
+        font-size: 1.4rem;
+      }
+      
+      .sidebar nav a {
+        font-size: 0.95rem;
+        padding: 10px 15px;
+      }
     }
     
     @media (max-width: 576px) {
       .sidebar {
         width: 70px;
         padding: 10px;
+        overflow: hidden;
+      }
+      .sidebar:hover {
+        width: 200px;
+        box-shadow: 5px 0 25px rgba(0, 0, 0, 0.5);
       }
       .sidebar .brand a {
         font-size: 1.2rem;
         justify-content: center;
         padding: 5px;
       }
-      .sidebar .brand a span {
-        display: none;
+      .sidebar .brand a i {
+        font-size: 1.5rem;
+      }
+      
+      .sidebar .brand a .brand-text {
+        display: block;
+        width: 100%;
+        text-align: center;
+        font-size: 1rem;
+      }
+      .sidebar:hover .brand a .brand-text {
+        display: block;
+        font-size: 1.2rem;
       }
       .sidebar nav a {
-        padding: 10px 0;
+        padding: 12px 0;
         justify-content: center;
       }
       .sidebar nav a span {
         display: none;
+        opacity: 0;
+        transform: translateX(-10px);
+        transition: all 0.3s ease;
+      }
+      .sidebar:hover nav a {
+        justify-content: flex-start;
+        padding: 12px 15px;
+      }
+      .sidebar:hover nav a span {
+        display: inline;
+        opacity: 1;
+        transform: translateX(0);
       }
       .sidebar nav a i {
         margin-right: 0;
         font-size: 1.2rem;
       }
+      .sidebar:hover nav a i {
+        margin-right: 12px;
+      }
       .content {
         margin-left: 70px;
+      }
+      
+      .sidebar form button {
+        overflow: hidden;
+        white-space: nowrap;
+        display: flex;
+        justify-content: center;
+        padding: 10px 0;
+      }
+      
+      .sidebar form button i {
+        margin-right: 0;
+      }
+      
+      .sidebar:hover form button {
+        justify-content: flex-start;
+        padding: 10px 15px;
+      }
+      
+      .sidebar:hover form button i {
+        margin-right: 10px;
+      }
+      
+      .sidebar .logout-btn span {
+        display: none;
+      }
+      
+      .sidebar:hover .logout-btn span {
+        display: inline;
       }
     }
   </style>
@@ -388,28 +592,32 @@
     <!-- Sidebar lateral -->
     <div class="sidebar">
       <div class="brand">
-        <a href="{{ route('admin.dashboard') }}">
-          <span>Cinema Management</span>
+        <a href="{{ route('admin.dashboard') }}" title="Cinema Management">
+          <i class="fas fa-ticket-alt"></i>
+          <span class="brand-text">Cinema Management</span>
         </a>
       </div>
       <nav>
         <a href="{{ route('movies.index') }}" class="{{ request()->routeIs('movies.*') ? 'active' : '' }}">
-          <i class="fas fa-film me-1"></i> Películas
+          <i class="fas fa-film me-1"></i> <span>Películas</span>
         </a>
         <a href="{{ route('screenings.index') }}" class="{{ request()->routeIs('screenings.*') ? 'active' : '' }}">
-          <i class="fas fa-video me-1"></i> Sesiones
+          <i class="fas fa-video me-1"></i> <span>Sesiones</span>
         </a>
         <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
-          <i class="fas fa-users me-1"></i> Usuarios
+          <i class="fas fa-users me-1"></i> <span>Usuarios</span>
         </a>
         <a href="{{ route('seats.index') }}" class="{{ request()->routeIs('seats.*') ? 'active' : '' }}">
-          <i class="fas fa-chair me-1"></i> Asientos
+          <i class="fas fa-chair me-1"></i> <span>Asientos</span>
+        </a>
+        <a href="{{ route('admin.reports.index') }}" class="{{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+          <i class="fas fa-chart-line me-1"></i> <span>Informes</span>
         </a>
       </nav>
       <form action="{{ route('admin.logout') }}" method="POST">
         @csrf
-        <button type="submit" class="logout-btn">
-            <i class="fas fa-sign-out-alt me-1"></i> Cerrar Sesión
+        <button type="submit" class="logout-btn" style="background-color: #e74c3c;">
+            <i class="fas fa-sign-out-alt me-1"></i> <span>Cerrar Sesión</span>
         </button>
       </form>
     </div>
