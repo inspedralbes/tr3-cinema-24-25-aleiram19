@@ -54,7 +54,7 @@
             <div class="border-t border-blue-700 pt-3 mt-3">
               <div class="flex justify-between items-center">
                 <span class="text-gray-300">Precio por entrada:</span>
-                <span class="text-white font-medium">{{ formatCurrency(ticketsStore.currentTicket.screening.price || 100) }}</span>
+                <span class="text-white font-medium">{{ formatCurrency(ticketsStore.currentTicket.screening.price) }}</span>
               </div>
               <div class="flex justify-between items-center mt-1">
                 <span class="text-gray-300">Cantidad de entradas:</span>
@@ -197,8 +197,20 @@ const calculateTotal = () => {
   if (!ticketsStore.currentTicket || !ticketsStore.currentTicket.screening || ticketsStore.selectedSeats.length === 0) {
     return 0;
   }
-  const price = ticketsStore.currentTicket.screening.price || 100;
-  return price * ticketsStore.selectedSeats.length;
+  
+  // Verificar si el precio está definido en la proyección
+  if (ticketsStore.currentTicket.screening.price !== undefined && ticketsStore.currentTicket.screening.price !== null) {
+    const price = ticketsStore.currentTicket.screening.price;
+    return price * ticketsStore.selectedSeats.length;
+  } else {
+    // Si no está definido, verificamos si los asientos tienen un precio
+    if (ticketsStore.selectedSeats.length > 0 && ticketsStore.selectedSeats[0].price) {
+      return ticketsStore.selectedSeats.reduce((total, seat) => total + seat.price, 0);
+    } else {
+      // Precio por defecto si no hay información de precio
+      return ticketsStore.selectedSeats.length * 8.5; // Precio predeterminado de 8.50€
+    }
+  }
 };
 
 const continueToConfirmation = async () => {

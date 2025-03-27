@@ -346,15 +346,21 @@ const confirmSelection = () => {
     });
   });
   
-  // Guardamos el screening_id en el store
+  // Guardamos el screening_id en el store con toda la información necesaria
   ticketStore.currentTicket = {
     screening_id: screeningId.value,
     screening: {
       id: screeningId.value,
       movie: {
         id: movieInfo.id,
-        title: movieInfo.title
-      }
+        title: movieInfo.title,
+        poster_path: seatsStore.screening?.movie?.poster_path || null
+      },
+      room_id: seatsStore.auditorium?.number || seatsStore.auditorium?.id,
+      date: movieInfo.date,
+      time: movieInfo.time,
+      price: selectedSeats.value.length > 0 ? selectedSeats.value[0].price : 
+            (seatsStore.screening?.price || 8.5) // Utilizamos el precio de la proyección o un valor predeterminado
     }
   };
 
