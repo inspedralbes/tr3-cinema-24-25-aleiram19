@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 
+const API_URL = 'cinema.a23aleminram.daw.inspedralbes.cat/api';
+
 export const useScreeningsStore = defineStore('screenings', {
   state: () => ({
     screenings: [],
@@ -32,7 +34,7 @@ export const useScreeningsStore = defineStore('screenings', {
       }
       
       try {
-        const response = await fetch(`http://localhost:8000/api/${endpoint}`, options);
+        const response = await fetch(`${API_URL}/${endpoint}`, options);
         
         if (!response.ok) {
           throw new Error(`Error API: ${response.status} ${response.statusText}`);

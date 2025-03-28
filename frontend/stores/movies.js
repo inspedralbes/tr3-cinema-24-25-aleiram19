@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { useNuxtApp } from 'nuxt/app';
 
+const API_URL = 'cinema.a23aleminram.daw.inspedralbes.cat/api';
+
 // Definición del store para películas
 export const useMoviesStore = defineStore('movies', {
   // Estado del store
@@ -37,7 +39,7 @@ export const useMoviesStore = defineStore('movies', {
         this.error = null;
         
         // Hacer la petición con el header Accept: application/json
-        const response = await fetch('http://localhost:8000/api/movie', {
+        const response = await fetch(`${API_URL}/movie`, {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
@@ -82,7 +84,7 @@ export const useMoviesStore = defineStore('movies', {
         this.error = null;
         
         // Hacer la petición con el header Accept: application/json
-        const response = await fetch('http://localhost:8000/api/movie/current', {
+        const response = await fetch(`${API_URL}/movie/current`, {
           headers: {
             'Accept': 'application/json'
           }
@@ -126,7 +128,7 @@ export const useMoviesStore = defineStore('movies', {
         this.error = null;
         
         // Hacer la petición con el header Accept: application/json
-        const response = await fetch(`http://localhost:8000/api/movie/${id}`, {
+        const response = await fetch(`${API_URL}/movie/${id}`, {
           headers: {
             'Accept': 'application/json'
           }
