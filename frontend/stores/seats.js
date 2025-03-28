@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-const API_URL = 'http://cinema.a23aleminram.daw.inspedralbes.cat/api/';
+const API_URL = 'http://localhost:8000/api/';
 
 // Definición del store para asientos
 export const useSeatsStore = defineStore('seats', {

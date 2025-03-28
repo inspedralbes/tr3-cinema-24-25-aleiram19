@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-const API_URL = 'http://cinema.a23aleminram.daw.inspedralbes.cat/api/';
+const API_URL = 'http://localhost:8000/api/';
 
 export const useScreeningsStore = defineStore('screenings', {
   state: () => ({

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { useAuthStore } from './auth';
 
-const API_URL = 'http://cinema.a23aleminram.daw.inspedralbes.cat/api/';
+const API_URL = 'http://localhost:8000/api/';
 
 export const useTicketsStore = defineStore('tickets', {
   state: () => ({

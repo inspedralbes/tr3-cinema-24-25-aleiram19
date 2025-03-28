@@ -1,7 +1,7 @@
 // api.js - Servicio para comunicarse con la API del backend
 
 // Obtener la URL base de la API del archivo de configuración
-const API_URL = 'http://cinema.a23aleminram.daw.inspedralbes.cat/api/';
+const API_URL = 'http://localhost:8000/api/';
 
 // Configuración común para las peticiones fetch
 const defaultHeaders = {

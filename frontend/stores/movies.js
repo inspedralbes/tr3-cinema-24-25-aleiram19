@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { useNuxtApp } from 'nuxt/app';
 
-const API_URL = 'http://cinema.a23aleminram.daw.inspedralbes.cat/api/';
+const API_URL = 'http://localhost:8000/api/';
 
 // Definición del store para películas
 export const useMoviesStore = defineStore('movies', {
