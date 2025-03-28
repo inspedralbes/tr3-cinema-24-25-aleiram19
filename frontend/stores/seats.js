@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-const API_URL = 'cinema.a23aleminram.daw.inspedralbes.cat/api';
+const API_URL = 'http://cinema.a23aleminram.daw.inspedralbes.cat/api/';
 
 // Definición del store para asientos
 export const useSeatsStore = defineStore('seats', {
@@ -58,7 +58,7 @@ export const useSeatsStore = defineStore('seats', {
         this.currentScreeningId = screeningId;
         
         // Hacer la petición con el header Accept: application/json
-        const response = await fetch(`${API_URL}/screening/${screeningId}/seats`, {
+        const response = await fetch(`${API_URL}screening/${screeningId}/seats`, {
           headers: {
             'Accept': 'application/json'
           }
@@ -100,7 +100,7 @@ export const useSeatsStore = defineStore('seats', {
         this.error = null;
         
         // Hacer la petición con el header Accept: application/json
-        const response = await fetch(`${API_URL}/seats/${seatId}/status`, {
+        const response = await fetch(`${API_URL}seats/${seatId}/status`, {
           method: 'PUT',
           headers: {
             'Accept': 'application/json',

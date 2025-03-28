@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia';
 import { useNuxtApp } from 'nuxt/app';
 
-const API_URL = 'cinema.a23aleminram.daw.inspedralbes.cat/api';
+const API_URL = 'http://cinema.a23aleminram.daw.inspedralbes.cat/api/';
 
 // Definición del store para géneros
 export const useGenresStore = defineStore('genres', {
@@ -35,7 +35,7 @@ export const useGenresStore = defineStore('genres', {
         this.error = null;
         
         // Hacer la petición con el header Accept: application/json
-        const response = await fetch(`${API_URL}/genre`, {
+        const response = await fetch(`${API_URL}genre`, {
           headers: {
             'Accept': 'application/json'
           }
@@ -78,7 +78,7 @@ export const useGenresStore = defineStore('genres', {
         this.error = null;
         
         // Hacer la petición con el header Accept: application/json
-        const response = await fetch(`${API_URL}/genre/${genreId}/movies`, {
+        const response = await fetch(`${API_URL}genre/${genreId}/movies`, {
           headers: {
             'Accept': 'application/json'
           }

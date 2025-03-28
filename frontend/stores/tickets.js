@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { useAuthStore } from './auth';
 
-const API_URL = 'cinema.a23aleminram.daw.inspedralbes.cat/api';
+const API_URL = 'http://cinema.a23aleminram.daw.inspedralbes.cat/api/';
 
 export const useTicketsStore = defineStore('tickets', {
   state: () => ({
@@ -34,7 +34,7 @@ export const useTicketsStore = defineStore('tickets', {
           throw new Error('Autenticación requerida');
         }
         
-        const response = await fetch(`http://${API_URL}/tickets`, {
+        const response = await fetch(`${API_URL}tickets`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -72,7 +72,7 @@ export const useTicketsStore = defineStore('tickets', {
           throw new Error('Autenticación requerida');
         }
         
-        const response = await fetch(`http://${API_URL}/tickets/${id}`, {
+        const response = await fetch(`${API_URL}tickets/${id}`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -112,7 +112,7 @@ export const useTicketsStore = defineStore('tickets', {
           return false;
         }
         
-        const response = await fetch(`http://${API_URL}/tickets/screening/${screeningId}/can-buy`, {
+        const response = await fetch(`${API_URL}tickets/screening/${screeningId}/can-buy`, {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
@@ -185,7 +185,7 @@ export const useTicketsStore = defineStore('tickets', {
           }))
         };
         
-        const response = await fetch(`http://${API_URL}/tickets/reserve`, {
+        const response = await fetch(`${API_URL}tickets/reserve`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -237,10 +237,10 @@ export const useTicketsStore = defineStore('tickets', {
           total_pay: reservationData.total_pay || this.selectedSeats.length * 100 // Usar el valor proporcionado o calcular un valor por defecto
         };
         
-        console.log(`Realizando solicitud a: http://${API_URL}/tickets/purchase`);
+        console.log(`Realizando solicitud a: ${API_URL}tickets/purchase`);
         console.log('Con datos:', requestBody);
         
-        const response = await fetch(`http://${API_URL}/tickets/purchase`, {
+        const response = await fetch(`${API_URL}tickets/purchase`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -297,7 +297,7 @@ export const useTicketsStore = defineStore('tickets', {
           throw new Error('Autenticación requerida');
         }
         
-        const response = await fetch(`${API_URL}/tickets/cancel`, {
+        const response = await fetch(`${API_URL}tickets/cancel`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

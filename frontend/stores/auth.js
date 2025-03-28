@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 
-const API_URL = 'cinema.a23aleminram.daw.inspedralbes.cat/api';
+const API_URL = 'http://cinema.a23aleminram.daw.inspedralbes.cat/api/';
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -25,7 +25,7 @@ export const useAuthStore = defineStore('auth', {
       try {
         let response;
         try {
-          response = await fetch(`${API_URL}/login`, {
+          response = await fetch(`${API_URL}login`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -79,7 +79,7 @@ export const useAuthStore = defineStore('auth', {
       
       try {
         console.log('Iniciando registro con datos:', userData);
-        console.log('URL de la API:', `${API_URL}/register`);
+        console.log('URL de la API:', `${API_URL}register`);
         
         // Validar datos requeridos
         if (!userData.name || !userData.email || !userData.password || !userData.password_confirmation) {
@@ -115,7 +115,7 @@ export const useAuthStore = defineStore('auth', {
         
         let response;
         try {
-          response = await fetch(`${API_URL}/register`, {
+          response = await fetch(`${API_URL}register`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ export const useAuthStore = defineStore('auth', {
     
       this.loading = true;
       try {
-        const response = await fetch(`${API_URL}/user`, {
+        const response = await fetch(`${API_URL}user`, {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${storedToken}`,
@@ -210,7 +210,7 @@ export const useAuthStore = defineStore('auth', {
       
       this.loading = true;
       try {
-        await fetch(`${API_URL}/logout`, {
+        await fetch(`${API_URL}logout`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${storedToken}`,

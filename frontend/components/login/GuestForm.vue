@@ -216,11 +216,11 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { useTicketStore } from '~/stores/ticket';
+import { useTicketsStore } from '~/stores/tickets';
 import NavBar from '~/components/LandingPage/NavBar.vue';
 
 const router = useRouter();
-const ticketStore = useTicketStore();
+const ticketStore = useTicketsStore();
 const { $toast } = useNuxtApp();
 
 const loading = ref(false);
