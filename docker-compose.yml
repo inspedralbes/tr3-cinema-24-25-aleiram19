@@ -1,0 +1,73 @@
+services:
+  frontend:
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: vue
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NODE_ENV=development
+    restart: unless-stopped
+    command: sh -c "npm install && npm run dev -- --host"
+
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+    environment:
+      - ADMINER_DEFAULT_SERVER=mysql
+
+  mysql:
+    image: mysql:8.2.0
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cinema
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+    networks:
+      - app-network
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "user", "-puser"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: laravel
+    ports:
+      - "8000:8000" 
+    volumes:
+      - ./backend:/var/www/
+    working_dir: /var/www/
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: cinema
+      DB_USERNAME: user
+      DB_PASSWORD: user
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+    command: bash -c "chmod +x entrypoint.sh && ./entrypoint.sh"
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
