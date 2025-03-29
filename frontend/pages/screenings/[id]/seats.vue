@@ -56,27 +56,31 @@
                 </div>
                 
                 <!-- Grid de asientos (simplificado) -->
-                <div class="seat-grid overflow-x-auto pb-4">
+                <div class="seat-grid overflow-x-auto pb-4 -mx-2 px-2">
                   <div class="min-w-fit mx-auto">
                     <!-- Filas de ejemplo (A-F) -->
                     <div v-for="row in ['A', 'B', 'C', 'D', 'E', 'F']" :key="row" 
-                         :class="['seat-row', row === 'E' ? 'mb-10' : 'mb-2']">
+                         :class="['seat-row', row === 'E' ? 'mb-10' : 'mb-1 sm:mb-2']">
                       <!-- Etiqueta de fila (izquierda) -->
-                      <div class="row-label me-1 me-sm-2">{{ row }}</div>
+                      <div class="row-label me-1">{{ row }}</div>
                       
-                      <!-- 10 asientos por fila -->
+                      <!-- 10 asientos por fila - más compactos en móvil -->
                       <div 
                         v-for="seat in 10" 
                         :key="`${row}-${seat}`" 
                         class="seat"
-                        :class="{ 'seat-occupied': isOccupied(row, seat), 'seat-selected': isSelected(row, seat) }"
+                        :class="{ 
+                          'seat-occupied': isOccupied(row, seat), 
+                          'seat-selected': isSelected(row, seat),
+                          'seat-vip': row === 'F' 
+                        }"
                         @click="toggleSeat(row, seat)"
                       >
                         {{ seat }}
                       </div>
                       
                       <!-- Etiqueta de fila (derecha) -->
-                      <div class="row-label ms-1 ms-sm-2">{{ row }}</div>
+                      <div class="row-label ms-1">{{ row }}</div>
                     </div>
                   </div>
                 </div>
@@ -437,6 +441,16 @@ export default {
   background-color: #007bff;
   color: white;
   border-color: #0056b3;
+}
+
+.seat-vip {
+  background-color: #6f42c1;
+  color: white;
+  border-color: #5a32ab;
+}
+
+.seat-vip:hover:not(.seat-occupied) {
+  background-color: #7e57c2;
 }
 
 .seat-sample {
