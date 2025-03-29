@@ -1,16 +1,16 @@
 <template>
-  <div class="container py-5">
-    <div class="mb-4">
-      <NuxtLink :to="`/movies/${screening.movie_id || ''}`" class="btn btn-outline-primary">
-        <i class="bi bi-arrow-left me-2"></i> Volver a la película
+  <div class="container-fluid px-2 py-3 container-md py-md-5">
+    <div class="mb-3 mb-md-4">
+      <NuxtLink :to="`/movies/${screening.movie_id || ''}`" class="btn btn-outline-primary btn-sm btn-md-lg">
+        <i class="bi bi-arrow-left me-1 me-md-2"></i> Volver a la película
       </NuxtLink>
     </div>
     
     <div class="row">
-      <div class="col-lg-8 mx-auto">
+      <div class="col-12 col-md-10 col-lg-8 mx-auto">
         <div class="card shadow-sm mb-4">
-          <div class="card-header bg-primary text-white">
-            <h3 class="mb-0">Seleccionar Asientos</h3>
+          <div class="card-header bg-primary text-white py-2 py-md-3">
+            <h3 class="mb-0 fs-5 fs-md-4">Seleccionar Asientos</h3>
           </div>
           
           <div class="card-body">
@@ -56,19 +56,27 @@
                 </div>
                 
                 <!-- Grid de asientos (simplificado) -->
-                <div class="seat-grid">
-                  <!-- Filas de ejemplo (A-E) -->
-                  <div v-for="row in ['A', 'B', 'C', 'D', 'E']" :key="row" class="seat-row mb-2">
-                    <div class="row-label me-2">{{ row }}</div>
-                    <!-- 10 asientos por fila -->
-                    <div 
-                      v-for="seat in 10" 
-                      :key="`${row}-${seat}`" 
-                      class="seat"
-                      :class="{ 'seat-occupied': isOccupied(row, seat), 'seat-selected': isSelected(row, seat) }"
-                      @click="toggleSeat(row, seat)"
-                    >
-                      {{ seat }}
+                <div class="seat-grid overflow-x-auto pb-4">
+                  <div class="min-w-fit mx-auto">
+                    <!-- Filas de ejemplo (A-F) -->
+                    <div v-for="row in ['A', 'B', 'C', 'D', 'E', 'F']" :key="row" 
+                         :class="['seat-row', row === 'E' ? 'mb-10' : 'mb-2']">
+                      <!-- Etiqueta de fila (izquierda) -->
+                      <div class="row-label me-1 me-sm-2">{{ row }}</div>
+                      
+                      <!-- 10 asientos por fila -->
+                      <div 
+                        v-for="seat in 10" 
+                        :key="`${row}-${seat}`" 
+                        class="seat"
+                        :class="{ 'seat-occupied': isOccupied(row, seat), 'seat-selected': isSelected(row, seat) }"
+                        @click="toggleSeat(row, seat)"
+                      >
+                        {{ seat }}
+                      </div>
+                      
+                      <!-- Etiqueta de fila (derecha) -->
+                      <div class="row-label ms-1 ms-sm-2">{{ row }}</div>
                     </div>
                   </div>
                 </div>
@@ -315,20 +323,28 @@ export default {
 
 .screen {
   width: 100%;
-  max-width: 400px;
+  max-width: 360px;
   height: 20px;
   background: #d1d1d1;
   margin: 0 auto;
   border-radius: 50%;
-  padding: 10px;
+  padding: 8px;
   text-align: center;
-  font-size: 12px;
+  font-size: 11px;
   line-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
   position: relative;
+}
+
+@media (min-width: 768px) {
+  .screen {
+    max-width: 400px;
+    padding: 10px;
+    font-size: 12px;
+  }
 }
 
 .screen:before {
@@ -351,25 +367,59 @@ export default {
 }
 
 .row-label {
-  width: 25px;
+  width: 15px;
   text-align: center;
   font-weight: bold;
   color: #777;
+  flex-shrink: 0;
+  font-size: 0.8em;
+}
+
+@media (min-width: 576px) {
+  .row-label {
+    width: 20px;
+    font-size: 0.9em;
+  }
+}
+
+@media (min-width: 768px) {
+  .row-label {
+    width: 25px;
+    font-size: 1em;
+  }
 }
 
 .seat {
-  width: 35px;
-  height: 35px;
-  margin: 3px;
+  width: 25px;
+  height: 25px;
+  margin: 2px;
   background-color: #e6e6e6;
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 5px;
   cursor: pointer;
-  font-size: 0.8em;
+  font-size: 0.7em;
   transition: all 0.2s ease;
   border: 1px solid #ccc;
+}
+
+@media (min-width: 576px) {
+  .seat {
+    width: 30px;
+    height: 30px;
+    margin: 2px;
+    font-size: 0.75em;
+  }
+}
+
+@media (min-width: 768px) {
+  .seat {
+    width: 35px;
+    height: 35px;
+    margin: 3px;
+    font-size: 0.8em;
+  }
 }
 
 .seat:hover:not(.seat-occupied) {

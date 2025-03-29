@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-[#051D40] py-8">
     <LandingPageNavBar />
-    <div class="container mx-auto px-4 pt-24">
+    <div class="container mx-auto px-2 sm:px-3 md:px-4 pt-16 sm:pt-20 md:pt-24">
       <div class="max-w-4xl mx-auto">
         <div class="mb-6 flex items-center justify-between">
           <h1 class="text-3xl font-bold text-white">Seleccionar Asientos</h1>
@@ -52,60 +52,63 @@
           </div>
         </div>
 
-        <div class="bg-blue-900/50 backdrop-blur-sm rounded-xl p-8">
-          <!-- Pantalla -->
-          <div class="relative mb-16">
-            <div class="w-full h-8 bg-gray-700 rounded-lg mb-4 flex items-center justify-center">
-              <span class="text-gray-400 text-sm font-medium">PANTALLA</span>
+        <div class="bg-blue-900/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 md:p-8">
+          <!-- Pantalla - con diseño responsive -->
+          <div class="relative mb-12 md:mb-16">
+            <div class="w-full h-6 md:h-8 bg-gray-700 rounded-lg mb-3 md:mb-4 flex items-center justify-center">
+              <span class="text-gray-400 text-xs md:text-sm font-medium">PANTALLA</span>
             </div>
             <!-- Efecto de brillo de la pantalla -->
-            <div class="absolute -bottom-8 left-1/2 transform -translate-x-1/2 w-3/4 h-8 bg-blue-500/20 blur-xl"></div>
+            <div class="absolute -bottom-6 md:-bottom-8 left-1/2 transform -translate-x-1/2 w-3/4 h-6 md:h-8 bg-blue-500/20 blur-xl"></div>
           </div>
 
-          <!-- Asientos organizados por filas -->
+          <!-- Asientos organizados por filas - con diseño responsive -->
           <div v-if="seatsStore.loading" class="flex justify-center items-center py-16">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
           </div>
           
-          <div v-else-if="Object.keys(rows).length > 0" class="mb-12">
-            <!-- Etiquetas de columnas -->
-            <div class="flex justify-center mb-4 text-gray-400">
-              <div class="w-12 text-center"></div> <!-- Espacio para la etiqueta de fila -->
-              <div v-for="i in 10" :key="'col-'+i" class="w-12 text-center text-sm">{{ i }}</div>
-            </div>
-            
-            <!-- Filas de asientos -->
-            <div v-for="(seats, rowKey) in rows" :key="rowKey" class="flex justify-center mb-3">
-              <!-- Etiqueta de fila -->
-              <div class="w-12 flex items-center justify-center text-gray-400 text-sm font-medium">{{ rowKey }}</div>
-              
-              <!-- Asientos de la fila -->
-              <div v-for="(seat, idx) in seats" :key="seat.id" class="px-1">
-                <button
-                  @click="toggleSeat(rowKey, idx)"
-                  :class="[
-                    'relative w-10 h-10 rounded-t-lg transition-all duration-300 flex items-center justify-center',
-                    isSeatSelected(seat.id) 
-                      ? 'bg-blue-500 text-white transform scale-110 shadow-lg' 
-                      : seat.status === 'available'
-                        ? (seat.is_vip 
-                           ? 'bg-purple-900/60 text-white hover:bg-purple-700'
-                           : 'bg-blue-900/60 text-gray-300 hover:bg-blue-800')
-                        : 'bg-red-900/60 text-gray-500 cursor-not-allowed'
-                  ]"
-                  :disabled="seat.status !== 'available'"
-                  :title="seat.status !== 'available' ? 'Asiento no disponible' : ''"
-                >
-                  <span class="text-sm">{{ seat.column }}</span>
-                  <!-- Efecto de "pata" del asiento -->
-                  <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-6 h-2 bg-gray-700 rounded-b"></div>
-                  
-                  <!-- Indicador de precio (opcional) -->
-                  <div v-if="seat.is_vip && seat.status === 'available'" 
-                    class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs text-purple-300 bg-purple-900/70 px-2 py-1 rounded-t-lg">
-                    VIP
-                  </div>
-                </button>
+          <div v-else-if="Object.keys(rows).length > 0" class="mb-12 overflow-x-auto pb-4">
+            <div class="min-w-fit max-w-full mx-auto touch-pan-x">
+              <!-- Filas de asientos - con clases responsive -->
+              <div v-for="(seats, rowKey) in rows" :key="rowKey" 
+                   :class="[
+                      'flex justify-center',
+                      rowKey === 'E' ? 'mb-12' : 'mb-3' // Separación moderada después de la fila E
+                   ]">
+                <!-- Etiqueta de fila (izquierda) -->
+                <div class="w-8 md:w-12 flex items-center justify-center text-gray-400 text-xs md:text-sm font-medium">{{ rowKey }}</div>
+                
+                <!-- Asientos de la fila - con tamaños responsive -->
+                <div v-for="(seat, idx) in seats" :key="seat.id" class="px-0.5 md:px-1">
+                  <button
+                    @click="toggleSeat(rowKey, idx)"
+                    :class="[
+                      'relative w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-t-lg transition-all duration-300 flex items-center justify-center',
+                      isSeatSelected(seat.id) 
+                        ? 'bg-blue-500 text-white transform scale-110 shadow-lg' 
+                        : seat.status === 'available'
+                          ? (seat.is_vip 
+                             ? 'bg-purple-900/60 text-white hover:bg-purple-700'
+                             : 'bg-blue-900/60 text-gray-300 hover:bg-blue-800')
+                          : 'bg-red-900/60 text-gray-500 cursor-not-allowed'
+                    ]"
+                    :disabled="seat.status !== 'available'"
+                    :title="seat.status !== 'available' ? 'Asiento no disponible' : ''"
+                  >
+                    <span class="text-xs md:text-sm">{{ seat.column }}</span>
+                    <!-- Efecto de "pata" del asiento -->
+                    <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 sm:w-5 md:w-6 h-1 sm:h-1.5 md:h-2 bg-gray-700 rounded-b"></div>
+                    
+                    <!-- Indicador de precio (opcional) -->
+                    <div v-if="seat.is_vip && seat.status === 'available'" 
+                      class="absolute -top-4 md:-top-6 left-1/2 transform -translate-x-1/2 text-[10px] md:text-xs text-purple-300 bg-purple-900/70 px-1 md:px-2 py-0.5 md:py-1 rounded-t-lg">
+                      VIP
+                    </div>
+                  </button>
+                </div>
+                
+                <!-- Etiqueta de fila (derecha) -->
+                <div class="w-8 md:w-12 flex items-center justify-center text-gray-400 text-xs md:text-sm font-medium">{{ rowKey }}</div>
               </div>
             </div>
           </div>
@@ -114,49 +117,49 @@
             No hay asientos disponibles para esta proyección.
           </div>
 
-          <!-- Leyenda -->
-          <div class="flex justify-center space-x-8 mb-8 bg-blue-950/30 p-4 rounded-lg">
+          <!-- Leyenda - diseño responsive -->
+          <div class="flex flex-wrap justify-center gap-3 sm:gap-4 md:space-x-8 mb-8 bg-blue-950/30 p-3 md:p-4 rounded-lg text-xs sm:text-sm md:text-base">
             <div class="flex items-center">
-              <div class="w-6 h-6 bg-blue-900/60 rounded-t-lg relative mr-3">
-                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-700 rounded-b"></div>
+              <div class="w-5 h-5 md:w-6 md:h-6 bg-blue-900/60 rounded-t-lg relative mr-2 md:mr-3">
+                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 md:w-4 h-1.5 md:h-2 bg-gray-700 rounded-b"></div>
               </div>
               <span class="text-gray-300">Disponible</span>
             </div>
             <div class="flex items-center">
-              <div class="w-6 h-6 bg-purple-900/60 rounded-t-lg relative mr-3">
-                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-700 rounded-b"></div>
+              <div class="w-5 h-5 md:w-6 md:h-6 bg-purple-900/60 rounded-t-lg relative mr-2 md:mr-3">
+                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 md:w-4 h-1.5 md:h-2 bg-gray-700 rounded-b"></div>
               </div>
               <span class="text-gray-300">VIP</span>
             </div>
             <div class="flex items-center">
-              <div class="w-6 h-6 bg-blue-500 rounded-t-lg relative mr-3">
-                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-700 rounded-b"></div>
+              <div class="w-5 h-5 md:w-6 md:h-6 bg-blue-500 rounded-t-lg relative mr-2 md:mr-3">
+                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 md:w-4 h-1.5 md:h-2 bg-gray-700 rounded-b"></div>
               </div>
               <span class="text-gray-300">Seleccionado</span>
             </div>
             <div class="flex items-center">
-              <div class="w-6 h-6 bg-red-900/60 rounded-t-lg relative mr-3">
-                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-4 h-2 bg-gray-700 rounded-b"></div>
+              <div class="w-5 h-5 md:w-6 md:h-6 bg-red-900/60 rounded-t-lg relative mr-2 md:mr-3">
+                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 md:w-4 h-1.5 md:h-2 bg-gray-700 rounded-b"></div>
               </div>
               <span class="text-gray-300">Ocupado</span>
             </div>
           </div>
 
-          <!-- Resumen y botón de confirmación -->
-          <div class="bg-blue-950/30 rounded-lg p-6">
-            <div class="flex justify-between items-center mb-4">
-              <div class="text-gray-300">
-                <p>Asientos seleccionados: {{ selectedSeats.length }}</p>
-                <p class="text-sm">{{ selectedSeats.map(seat => seat.number).join(', ') || 'Ninguno' }}</p>
+          <!-- Resumen y botón de confirmación - con diseño responsive -->
+          <div class="bg-blue-950/30 rounded-lg p-4 md:p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-3 sm:gap-0">
+              <div class="text-gray-300 w-full sm:w-auto">
+                <p class="text-sm md:text-base">Asientos seleccionados: {{ selectedSeats.length }}</p>
+                <p class="text-xs md:text-sm">{{ selectedSeats.map(seat => seat.number).join(', ') || 'Ninguno' }}</p>
               </div>
-              <div class="text-right">
-                <p class="text-gray-300">Total:</p>
-                <p class="text-2xl font-bold text-white">{{ formatPrice(totalPrice) }}</p>
+              <div class="text-right w-full sm:w-auto">
+                <p class="text-gray-300 text-sm md:text-base">Total:</p>
+                <p class="text-xl md:text-2xl font-bold text-white">{{ formatPrice(totalPrice) }}</p>
               </div>
             </div>
             <button
               @click="confirmSelection"
-              class="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              class="w-full bg-blue-600 text-white py-2 md:py-3 rounded-lg text-sm md:text-base font-medium hover:bg-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               :disabled="selectedSeats.length === 0"
             >
               <i class="fas fa-ticket-alt"></i>
