@@ -1,6 +1,6 @@
 <template>
   <div class="container-fluid px-2 py-3 container-md py-md-5">
-    <div class="mb-3 mb-md-4">
+    <div class="mb-3 mb-md-4 text-center sm:text-left">
       <NuxtLink :to="`/movies/${screening.movie_id || ''}`" class="btn btn-outline-primary btn-sm btn-md-lg">
         <i class="bi bi-arrow-left me-1 me-md-2"></i> Volver a la película
       </NuxtLink>
