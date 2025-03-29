@@ -53,13 +53,17 @@
         </div>
 
         <div class="bg-blue-900/50 backdrop-blur-sm rounded-xl p-4 sm:p-6 md:p-8">
-          <!-- Pantalla - con diseño responsive -->
+          <!-- Pantalla - con diseño responsive mejorado -->
           <div class="relative mb-12 md:mb-16">
             <div class="w-full h-6 md:h-8 bg-gray-700 rounded-lg mb-3 md:mb-4 flex items-center justify-center">
               <span class="text-gray-400 text-xs md:text-sm font-medium">PANTALLA</span>
             </div>
             <!-- Efecto de brillo de la pantalla -->
             <div class="absolute -bottom-6 md:-bottom-8 left-1/2 transform -translate-x-1/2 w-3/4 h-6 md:h-8 bg-blue-500/20 blur-xl"></div>
+            <!-- Indicador para scroll horizontal en móviles -->
+            <div class="sm:hidden absolute -bottom-16 left-1/2 transform -translate-x-1/2 text-gray-400 text-xs flex items-center">
+              <i class="fas fa-arrows-left-right mr-1"></i> Desliza para ver más asientos
+            </div>
           </div>
 
           <!-- Asientos organizados por filas - con diseño responsive -->
