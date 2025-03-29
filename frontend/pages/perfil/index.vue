@@ -22,8 +22,8 @@
               <div class="w-24 h-24 mx-auto bg-blue-600 rounded-full flex items-center justify-center text-white text-3xl mb-4">
                 <i class="fas fa-user"></i>
               </div>
-              <h2 class="text-xl font-bold text-white mb-1">{{ authStore.user.name }} {{ authStore.user.last_name }}</h2>
-              <p class="text-gray-300 text-sm mb-3">{{ authStore.user.email }}</p>
+              <h2 class="text-xl font-bold text-white mb-1">{{ authStore.user?.name || 'Usuario' }} {{ authStore.user?.last_name || '' }}</h2>
+              <p class="text-gray-300 text-sm mb-3">{{ authStore.user?.email || 'usuario@ejemplo.com' }}</p>
               <div class="bg-blue-600/30 rounded-full py-1 px-3 text-blue-300 text-xs inline-flex items-center">
                 <i class="fas fa-ticket-alt mr-1"></i> 
                 <span>{{ ticketsStore.userTickets.length }} entradas compradas</span>
@@ -452,18 +452,37 @@ const userPromotions = ref([
 
 // Verifica si el usuario está autenticado, si no redirige al login
 onMounted(async () => {
-  if (!authStore.isAuthenticated) {
+  // Intentamos cargar el usuario si no está ya cargado
+  if (!authStore.user) {
+    try {
+      await authStore.fetchUser();
+    } catch (error) {
+      console.error('Error al cargar datos del usuario:', error);
+    }
+  }
+  
+  // Verificamos si está autenticado
+  if (!authStore.isAuthenticated || !authStore.user) {
     $toast.error('Debes iniciar sesión para acceder a esta página');
     router.push('/login');
     return;
   }
   
-  // Cargar datos del usuario al perfil
-  profileData.value = {
-    name: authStore.user.name,
-    last_name: authStore.user.last_name,
-    email: authStore.user.email
-  };
+  // Cargar datos del usuario al perfil si existe
+  if (authStore.user) {
+    profileData.value = {
+      name: authStore.user.name || '',
+      last_name: authStore.user.last_name || '',
+      email: authStore.user.email || ''
+    };
+  } else {
+    // Si el usuario no existe en el store, inicializamos con valores vacíos
+    profileData.value = {
+      name: '',
+      last_name: '',
+      email: ''
+    };
+  }
   
   // Cargar tickets del usuario
   try {

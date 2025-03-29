@@ -97,8 +97,8 @@ const ticketData = ref({
   showtime: 'Fecha no disponible',
   room: 'Sala no disponible',
   seats: 'Asientos no disponibles',
-  buyerName: 'Invitado',
-  buyerEmail: 'invitado@example.com'
+  buyerName: 'Usuario',
+  buyerEmail: ''
 });
 
 // Comprobar que hay datos válidos y generar confirmación

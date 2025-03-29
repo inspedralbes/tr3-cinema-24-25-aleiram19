@@ -78,9 +78,6 @@ export const useAuthStore = defineStore('auth', {
       this.error = null;
       
       try {
-        console.log('Iniciando registro con datos:', userData);
-        console.log('URL de la API:', `${API_URL}register`);
-        
         // Validar datos requeridos
         if (!userData.name || !userData.email || !userData.password || !userData.password_confirmation) {
           throw new Error('Todos los campos son obligatorios');
@@ -110,9 +107,7 @@ export const useAuthStore = defineStore('auth', {
           password: userData.password,
           password_confirmation: userData.password_confirmation
         };
-        
-        console.log('Datos a enviar:', registerData);
-        
+                
         let response;
         try {
           response = await fetch(`${API_URL}register`, {
@@ -128,9 +123,7 @@ export const useAuthStore = defineStore('auth', {
           throw new Error('Error de conexión con el servidor. Verifica tu conexión a internet.');
         }
         
-        console.log('Estado de la respuesta:', response.status);
         const data = await response.json();
-        console.log('Datos de respuesta:', data);
         
         if (!response.ok) {
           if (response.status === 500) {

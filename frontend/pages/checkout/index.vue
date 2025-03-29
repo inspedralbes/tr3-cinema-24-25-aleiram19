@@ -3,8 +3,11 @@
     <div v-if="loading" class="min-h-screen flex items-center justify-center py-12 px-4 bg-blue-900 bg-opacity-90">
       <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent"></div>
     </div>
-    <login-UserLoginOptions v-else-if="!isAuthenticated" />
-    <login-UserLoggedForm v-else-if="isAuthenticated && ticketsStore.selectedSeats.length > 0" />
+    <div v-else>
+      <NavBar />
+      <login-UserLoginOptions v-if="!isAuthenticated" />
+      <login-UserLoggedForm v-else-if="isAuthenticated && ticketsStore.selectedSeats.length > 0" />
+    </div>
   </div>
 </template>
 
@@ -13,6 +16,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '~/stores/auth';
 import { useTicketsStore } from '~/stores/tickets';
+import NavBar from '~/components/LandingPage/NavBar.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();

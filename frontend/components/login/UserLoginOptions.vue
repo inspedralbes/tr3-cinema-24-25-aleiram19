@@ -1,5 +1,4 @@
 <template>
-  <NavBar />
   <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-blue-900 bg-opacity-90">
     <div class="w-full max-w-md space-y-8 bg-blue-900 bg-opacity-80 rounded-xl shadow-xl p-8 sm:p-10 text-white">
       <!-- Header -->
@@ -36,18 +35,18 @@
           </div>
         </div>
 
-        <!-- Continuar como invitado -->
+        <!-- Registrarse -->
         <div>
           <button 
-            @click="goToGuest"
+            @click="goToRegister"
             class="group relative w-full flex justify-center py-3 px-4 border border-gray-700 rounded-lg text-white font-medium bg-transparent hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <span class="absolute left-0 inset-y-0 flex items-center pl-3">
-              <i class="fas fa-user group-hover:text-blue-400 text-gray-500 transition-colors"></i>
+              <i class="fas fa-user-plus group-hover:text-blue-400 text-gray-500 transition-colors"></i>
             </span>
-            Continuar como Invitado
+            Registrarse
           </button>
-          <p class="text-xs text-center mt-2 text-gray-400">Sin registro, solo necesitamos algunos datos básicos</p>
+          <p class="text-xs text-center mt-2 text-gray-400">Crea una cuenta para disfrutar de beneficios exclusivos</p>
         </div>
       </div>
 
@@ -68,6 +67,7 @@
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router';
+import { useTicketsStore } from '~/stores/tickets';
 
 const router = useRouter();
 const route = useRoute();
@@ -78,7 +78,18 @@ const goToLogin = () => {
   router.push(`/login?redirect=${encodeURIComponent(redirectPath)}`);
 };
 
-const goToGuest = () => {
-  router.push('/guest-checkout');
+const goToRegister = () => {
+  // Verificar si hay asientos seleccionados
+  const ticketsStore = useTicketsStore();
+  
+  if (!ticketsStore.selectedSeats || ticketsStore.selectedSeats.length === 0) {
+    // Si no hay asientos seleccionados, redirigir a la selección de película
+    router.push('/select-movie');
+    return;
+  }
+  
+  // Redirigir a la página de registro con parámetro de redirección a la página de checkout
+  const redirectPath = '/checkout';
+  router.push(`/register?redirect=${encodeURIComponent(redirectPath)}`);
 };
 </script>

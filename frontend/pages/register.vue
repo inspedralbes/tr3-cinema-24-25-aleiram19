@@ -4,6 +4,13 @@
   </div>
 </template>
 
+<script setup>
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+// El componente LoginForm ya maneja el parámetro redirect de la URL
+</script>
+
 <script>
 export default {
   name: 'RegisterPage',
