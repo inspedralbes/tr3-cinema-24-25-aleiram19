@@ -109,6 +109,9 @@ Route::prefix('guest')->group(function() {
     Route::get('/ticket/{id}/{token}', [TicketController::class, 'getGuestTicket']);
 });
 
+// Ruta para validar tickets mediante QR
+Route::get('/validate-ticket/{id}', [TicketController::class, 'validateTicket']);
+
 // Rutas protegidas (requieren autenticación)
 Route::middleware('auth:sanctum')->group(function() {
     // Ya existe una ruta para /user en las rutas de autenticación

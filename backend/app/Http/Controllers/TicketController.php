@@ -592,4 +592,79 @@ class TicketController extends Controller
             ], 500);
         }
     }
+    
+    /**
+     * Valida un ticket mediante su ID
+     * Este endpoint es útil para validar tickets mediante escaneo de QR
+     */
+    public function validateTicket(Request $request, $id)
+    {
+        try {
+            // Buscar el ticket con todas sus relaciones
+            $ticket = Ticket::with(['screening.movie', 'screening.auditorium', 'seat', 'user', 'snack'])
+                ->where('id', $id)
+                ->first();
+            
+            if (!$ticket) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Ticket no encontrado'
+                ], 404);
+            }
+            
+            // Verificar si el ticket es para una proyección futura (es válido)
+            $screening = $ticket->screening;
+            $now = Carbon::now();
+            $screeningTime = Carbon::parse($screening->date_time);
+            
+            // Margen de tiempo para permitir la entrada (15 minutos antes y hasta 30 minutos después)
+            $validFrom = $screeningTime->copy()->subMinutes(15);
+            $validUntil = $screeningTime->copy()->addMinutes(30);
+            
+            if ($now->between($validFrom, $validUntil)) {
+                $timeStatus = 'valid';
+                $timeMessage = 'El ticket es válido para la función actual';
+            } elseif ($now->lt($validFrom)) {
+                $timeStatus = 'early';
+                $timeMessage = 'Es demasiado pronto para este ticket. Válido a partir de ' . $validFrom->format('H:i');
+            } else {
+                $timeStatus = 'expired';
+                $timeMessage = 'Este ticket ha expirado. Era válido hasta ' . $validUntil->format('H:i');
+            }
+            
+            // Devolver información detallada del ticket
+            return response()->json([
+                'valid' => $timeStatus === 'valid',
+                'status' => $timeStatus,
+                'message' => $timeMessage,
+                'ticket' => [
+                    'id' => $ticket->id,
+                    'movie' => [
+                        'title' => $screening->movie->title,
+                        'duration' => $screening->movie->duration,
+                        'classification' => $screening->movie->classification
+                    ],
+                    'screening' => [
+                        'date_time' => $screening->date_time,
+                        'auditorium' => $screening->auditorium->name
+                    ],
+                    'seat' => [
+                        'number' => $ticket->seat->number,
+                        'is_vip' => $ticket->seat->isVip()
+                    ],
+                    'user' => [
+                        'name' => $ticket->user->name,
+                        'email' => $ticket->user->email
+                    ],
+                    'purchase_date' => $ticket->purchase_date,
+                ]
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'valid' => false,
+                'message' => 'Error al validar el ticket: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

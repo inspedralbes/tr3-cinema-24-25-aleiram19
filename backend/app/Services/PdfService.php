@@ -43,39 +43,39 @@ class PdfService
             'total_price' => $ticket->total_pay
         ];
 
-        // Verificar si existe el código QR genérico
-        $qrPath = storage_path('app/public/qrcodes/ticket_qr.png');
-        
-        // Si no existe, generarlo y guardarlo
-        if (!file_exists($qrPath)) {
-            // Crear el directorio si no existe
-            $qrDir = dirname($qrPath);
-            if (!is_dir($qrDir)) {
-                mkdir($qrDir, 0755, true);
-            }
-            
-            // Crear un código QR genérico con formato más moderno
-            $qrCodeData = json_encode([
-                'cinema' => 'CineXperience',
-                'app' => 'Ticket Validator',
-                'timestamp' => time()
-            ]);
-            
-            // Generar el código QR como PNG con diseño moderno en negro
-            $qrCode = QrCode::format('png')
-                           ->size(200)
-                           ->backgroundColor(255, 255, 255)
-                           ->color(0, 0, 0)
-                           ->margin(1)
-                           ->errorCorrection('H')
-                           ->generate($qrCodeData);
-            
-            // Guardar el archivo
-            file_put_contents($qrPath, $qrCode);
-        } else {
-            // Leer el código QR existente
-            $qrCode = file_get_contents($qrPath);
+        // Crear el directorio de QR codes si no existe
+        $qrDir = storage_path('app/public/qrcodes');
+        if (!is_dir($qrDir)) {
+            mkdir($qrDir, 0755, true);
         }
+        
+        // Ruta para un QR específico para este ticket
+        $qrPath = storage_path('app/public/qrcodes/ticket_qr_' . $ticket->id . '.png');
+        
+        // Crear un código QR con la información específica del ticket
+        $qrCodeData = json_encode([
+            'ticket_id' => $ticket->id,
+            'movie' => [
+                'title' => $ticket->screening->movie->title,
+                'time' => $ticket->screening->date_time,
+                'auditorium' => $ticket->screening->auditorium->name,
+            ],
+            'seat' => $ticket->seat->number,
+            'user' => $ticket->user->name,
+            'purchase_date' => $ticket->purchase_date
+        ]);
+        
+        // Generar el código QR como PNG con diseño moderno en negro
+        $qrCode = QrCode::format('png')
+                       ->size(200)
+                       ->backgroundColor(255, 255, 255)
+                       ->color(0, 0, 0)
+                       ->margin(1)
+                       ->errorCorrection('H')
+                       ->generate($qrCodeData);
+        
+        // Guardar el archivo
+        file_put_contents($qrPath, $qrCode);
         
         // Convertir a base64 para incluirlo en el HTML
         $qrCodeBase64 = base64_encode($qrCode);
@@ -157,50 +157,55 @@ class PdfService
             'total_price' => $ticket->total_pay
         ];
 
-        // Verificar si existe el código QR genérico
-        $qrPath = storage_path('app/public/qrcodes/ticket_qr.png');
-        
-        // Si no existe, generarlo ahora
-        if (!file_exists($qrPath)) {
-            // Crear el directorio si no existe
-            $qrDir = dirname($qrPath);
-            if (!is_dir($qrDir)) {
-                mkdir($qrDir, 0755, true);
-            }
-            
-            // Crear un código QR genérico con formato más moderno
-            $qrCodeData = json_encode([
-                'cinema' => 'CineXperience',
-                'app' => 'Ticket Validator',
-                'timestamp' => time()
-            ]);
-            
-            // Generar el código QR como PNG con diseño moderno en negro
-            $qrCode = QrCode::format('png')
-                           ->size(200)
-                           ->backgroundColor(255, 255, 255)
-                           ->color(0, 0, 0)
-                           ->margin(1)
-                           ->errorCorrection('H')
-                           ->generate($qrCodeData);
-            
-            // Guardar el archivo
-            file_put_contents($qrPath, $qrCode);
-        } else {
-            // Leer el código QR existente
-            $qrCode = file_get_contents($qrPath);
+        // Crear el directorio de QR codes si no existe
+        $qrDir = storage_path('app/public/qrcodes');
+        if (!is_dir($qrDir)) {
+            mkdir($qrDir, 0755, true);
         }
+        
+        // Ruta para un QR específico para este ticket
+        $qrPath = storage_path('app/public/qrcodes/ticket_qr_' . $ticket->id . '.png');
+        
+        // Crear un código QR con la información específica del ticket
+        $qrCodeData = json_encode([
+            'ticket_id' => $ticket->id,
+            'movie' => [
+                'title' => $ticket->screening->movie->title,
+                'time' => $ticket->screening->date_time,
+                'auditorium' => $ticket->screening->auditorium->name,
+            ],
+            'seat' => $ticket->seat->number,
+            'user' => $ticket->user->name,
+            'purchase_date' => $ticket->purchase_date,
+            'snack' => $ticket->snack ? [
+                'name' => $ticket->snack->name,
+                'quantity' => $ticket->snack_quantity
+            ] : null
+        ]);
+        
+        // Generar el código QR como PNG con diseño moderno en negro
+        $qrCode = QrCode::format('png')
+                       ->size(200)
+                       ->backgroundColor(255, 255, 255)
+                       ->color(0, 0, 0)
+                       ->margin(1)
+                       ->errorCorrection('H')
+                       ->generate($qrCodeData);
+        
+        // Guardar el archivo
+        file_put_contents($qrPath, $qrCode);
         
         // Convertir a base64 para incluirlo en el HTML
         $qrCodeBase64 = base64_encode($qrCode);
         
-        // Usar un identificador único para este ticket
+        // Guardar los datos reales que fueron codificados en el QR
         $qrCodeData = 'TICKET-' . $ticket->id;
         
         return [
             'ticketData' => $ticketData,
             'qrCodeBase64' => $qrCodeBase64,
-            'qrCodeData' => $qrCodeData
+            'qrCodeData' => $qrCodeData,
+            'qrCodeJsonData' => $qrCodeData // Enviamos el JSON que se usó para generar el QR
         ];
     }
 }
