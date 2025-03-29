@@ -38,9 +38,15 @@
                   <i class="far fa-clock mr-1 sm:mr-2"></i>
                   <span>{{ movieInfo.time }}</span>
                 </div>
-                <div class="bg-green-500/30 text-green-100 px-2 sm:px-3 py-1 rounded-md inline-flex items-center text-xs sm:text-sm">
+                <div :class="[
+                  'px-2 sm:px-3 py-1 rounded-md inline-flex items-center text-xs sm:text-sm',
+                  selectedSeats.length === 10 
+                    ? 'bg-red-500/40 text-red-100' 
+                    : 'bg-green-500/30 text-green-100'
+                ]">
                   <i class="fas fa-ticket-alt mr-1 sm:mr-2"></i>
                   <span>{{ selectedSeats.length }}/10 asientos</span>
+                  <i v-if="selectedSeats.length === 10" class="fas fa-exclamation-circle ml-1 sm:ml-2 text-red-300"></i>
                 </div>
               </div>
             </div>
@@ -94,14 +100,21 @@
                       'relative w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-t-lg transition-all duration-300 flex items-center justify-center',
                       isSeatSelected(seat.id) 
                         ? 'bg-blue-500 text-white transform scale-110 shadow-lg' 
-                        : seat.status === 'available'
+                        : seat.status === 'available' && selectedSeats.length < 10
                           ? (seat.is_vip 
                              ? 'bg-purple-900/60 text-white hover:bg-purple-700'
                              : 'bg-blue-900/60 text-gray-300 hover:bg-blue-800')
-                          : 'bg-red-900/60 text-gray-500 cursor-not-allowed'
+                          : seat.status === 'available' && selectedSeats.length >= 10
+                            ? 'bg-gray-700/60 text-gray-500 cursor-not-allowed'
+                            : 'bg-red-900/60 text-gray-500 cursor-not-allowed'
                     ]"
-                    :disabled="seat.status !== 'available'"
-                    :title="seat.status !== 'available' ? 'Asiento no disponible' : ''"
+                    :disabled="seat.status !== 'available' || (selectedSeats.length >= 10 && !isSeatSelected(seat.id))"
+                    :title="
+                      seat.status !== 'available' 
+                        ? 'Asiento no disponible' 
+                        : selectedSeats.length >= 10 && !isSeatSelected(seat.id)
+                          ? 'Ya has seleccionado el máximo de 10 asientos'
+                          : ''"
                   >
                     <span class="text-[10px] sm:text-xs md:text-sm">{{ seat.column }}</span>
                     <!-- Efecto de "pata" del asiento -->
@@ -111,6 +124,12 @@
                     <div v-if="seat.is_vip && seat.status === 'available'" 
                       class="absolute -top-3 sm:-top-4 md:-top-6 left-1/2 transform -translate-x-1/2 text-[8px] sm:text-[10px] md:text-xs text-purple-300 bg-purple-900/70 px-0.5 sm:px-1 md:px-2 py-0.5 rounded-t-lg">
                       VIP
+                    </div>
+                    
+                    <!-- Icono de límite alcanzado -->
+                    <div v-if="seat.status === 'available' && selectedSeats.length >= 10 && !isSeatSelected(seat.id)" 
+                      class="absolute inset-0 flex items-center justify-center bg-gray-800/70 rounded-t-lg">
+                      <i class="fas fa-ban text-red-500/90 text-xs sm:text-sm md:text-base"></i>
                     </div>
                   </button>
                 </div>
@@ -126,7 +145,7 @@
           </div>
 
           <!-- Leyenda - diseño responsive -->
-          <div class="flex flex-wrap justify-center gap-3 sm:gap-4 md:space-x-8 mb-8 bg-blue-950/30 p-3 md:p-4 rounded-lg text-xs sm:text-sm md:text-base">
+          <div class="flex flex-wrap justify-center gap-3 sm:gap-4 md:space-x-4 mb-8 bg-blue-950/30 p-3 md:p-4 rounded-lg text-xs sm:text-sm md:text-base">
             <div class="flex items-center">
               <div class="w-5 h-5 md:w-6 md:h-6 bg-blue-900/60 rounded-t-lg relative mr-2 md:mr-3">
                 <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 md:w-4 h-1.5 md:h-2 bg-gray-700 rounded-b"></div>
@@ -150,6 +169,15 @@
                 <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 md:w-4 h-1.5 md:h-2 bg-gray-700 rounded-b"></div>
               </div>
               <span class="text-gray-300">Ocupado</span>
+            </div>
+            <div class="flex items-center">
+              <div class="w-5 h-5 md:w-6 md:h-6 bg-gray-700/60 rounded-t-lg relative mr-2 md:mr-3">
+                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3 md:w-4 h-1.5 md:h-2 bg-gray-700 rounded-b"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <i class="fas fa-ban text-red-500/90 text-xs"></i>
+                </div>
+              </div>
+              <span class="text-gray-300">Límite alcanzado</span>
             </div>
           </div>
 
@@ -259,13 +287,8 @@ const toggleSeat = (rowKey, columnIdx) => {
   const index = selectedSeats.value.findIndex(s => s.id === seatId);
   
   if (index === -1) {
-    // Si ya hay 10 asientos seleccionados, mostrar error y no permitir seleccionar más
+    // Si ya hay 10 asientos seleccionados, no permitir seleccionar más
     if (selectedSeats.value.length >= 10) {
-      // Podríamos mostrar un toast o alerta aquí
-      error.value = 'No puedes seleccionar más de 10 asientos por sesión';
-      setTimeout(() => {
-        error.value = null;
-      }, 5000); // Ocultar el mensaje después de 5 segundos
       return;
     }
     
@@ -279,10 +302,6 @@ const toggleSeat = (rowKey, columnIdx) => {
   } else {
     // Remover de la selección
     selectedSeats.value.splice(index, 1);
-    // Si estábamos mostrando el error de límite de asientos, quitarlo
-    if (error.value && error.value.includes('10 asientos')) {
-      error.value = null;
-    }
   }
 };
 
