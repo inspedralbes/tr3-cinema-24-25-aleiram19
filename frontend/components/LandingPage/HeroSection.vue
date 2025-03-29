@@ -116,7 +116,7 @@ export default {
           id: 1, 
           title: "EL CABALLERO OSCURO", 
           genre: "Acción", 
-          image: "/img/img6.jpeg",
+          image: "/img/batman_peli.jpg",
           badge: "¡EN CINE!",
           duration: "152 min",
           rating: "9.0/10",
@@ -126,7 +126,7 @@ export default {
           id: 2, 
           title: "INTERSTELLAR", 
           genre: "Ciencia Ficción", 
-          image: "/img/img7.jpg",
+          image: "/img/interestelar_peli.jpg",
           badge: "ESTRENO",
           duration: "169 min",
           rating: "8.7/10",
@@ -136,7 +136,7 @@ export default {
           id: 3, 
           title: "GLADIATOR", 
           genre: "Acción/Historia", 
-          image: "/img/img8.jpg",
+          image: "/img/gladiator_peli.jpg",
           badge: "CLÁSICO",
           duration: "155 min",
           rating: "8.5/10",
@@ -146,54 +146,12 @@ export default {
           id: 4, 
           title: "BEAUTY AND THE BEAST", 
           genre: "Fantasía/Romance", 
-          image: "/img/img9.jpeg",
+          image: "/img/bellaybestia_peli.jpg",
           badge: "PRÓXIMAMENTE",
           duration: "129 min",
           rating: "7.9/10",
           comingSoon: true
         },
-        { 
-          id: 5, 
-          title: "MICKEY 17", 
-          genre: "Ciencia Ficción", 
-          image: "/img/img5.jpeg",
-          badge: "ESTRENO",
-          duration: "166 min",
-          rating: "8.5/10",
-          comingSoon: false
-        },
-        { 
-          id: 6, 
-          title: "WOLFGANG", 
-          subtitle: "(EXTRAORDINARIO)",
-          genre: "Drama/Música", 
-          image: "/img/img10.jpg",
-          badge: "¡EN CINE!",
-          duration: "132 min",
-          rating: "9.0/10",
-          comingSoon: false
-        },
-        { 
-          id: 7, 
-          title: "ANORA", 
-          genre: "Drama", 
-          image: "/img/img11.jpeg",
-          badge: "PREMIO DE CANNES",
-          duration: "125 min",
-          rating: "8.8/10",
-          comingSoon: false
-        },
-        { 
-          id: 8, 
-          title: "PADDINGTON:", 
-          subtitle: "AVENTURA EN LA SELVA",
-          genre: "Familiar/Aventura", 
-          image: "/img/img12.jpg",
-          badge: "PRÓXIMAMENTE",
-          duration: "95 min",
-          rating: "7.9/10",
-          comingSoon: true
-        }
       ]
     };
   },
