@@ -468,7 +468,6 @@ onMounted(async () => {
   // Cargar tickets del usuario
   try {
     await ticketsStore.fetchUserTickets();
-    console.log('Tickets cargados en onMounted:', ticketsStore.userTickets);
   } catch (error) {
     console.error('Error al cargar tickets en onMounted:', error);
   }
@@ -528,7 +527,6 @@ const viewTicketDetails = (ticketId) => {
   if (ticketId && typeof ticketsStore.fetchTicketDetails === 'function') {
     ticketsStore.fetchTicketDetails(ticketId)
       .then(ticketDetails => {
-        console.log('Detalles del ticket:', ticketDetails);
         // El ticket ya se actualizará automáticamente en el store
         $toast.success('Detalles cargados correctamente');
       })

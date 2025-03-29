@@ -103,10 +103,6 @@ const ticketData = ref({
 
 // Comprobar que hay datos válidos y generar confirmación
 onMounted(() => {
-  console.log('Datos en confirmación:', {
-    currentTicket: ticketsStore.currentTicket,
-    selectedSeats: ticketsStore.selectedSeats
-  });
   
   // Verificar si hay asientos seleccionados y una sesión seleccionada
   if (!ticketsStore.currentTicket || !ticketsStore.selectedSeats || ticketsStore.selectedSeats.length === 0) {
@@ -206,8 +202,6 @@ async function processDirectPurchase() {
       quantity: ticketsStore.selectedSeats.length,
       total_pay: totalPay
     };
-    
-    console.log('Datos de reserva:', reservationData);
     
     // Confirmar tickets
     const result = await ticketsStore.confirmTickets(reservationData);

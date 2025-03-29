@@ -86,8 +86,6 @@ const handleImageError = (e) => {
 // Cargar datos
 const cargarDatos = async () => {
   try {
-    console.log('Iniciando carga de datos de cartelera...');
-    
     // Primero cargar géneros para asegurar que estén disponibles
     await genresStore.fetchGenres();
     
@@ -110,7 +108,6 @@ const cargarDatos = async () => {
     console.error('Error al cargar datos de cartelera:', error);
     // Intentar reintentar la carga una vez
     if (!error.message.includes('reintentar')) {
-      console.log('Reintentando carga de datos...');
       setTimeout(cargarDatos, 1000); // Esperar 1 segundo y reintentar
     }
   }

@@ -225,10 +225,7 @@ export const useTicketsStore = defineStore('tickets', {
         if (!token) {
           throw new Error('Autenticación requerida');
         }
-        
-        // Log para depuración
-        console.log('Datos de reservationData:', reservationData);
-        
+
         // Usar el mismo enfoque que las otras funciones
         const requestBody = {
           screening_id: reservationData.screening_id,
@@ -236,10 +233,7 @@ export const useTicketsStore = defineStore('tickets', {
           quantity: reservationData.quantity || 1,
           total_pay: reservationData.total_pay || this.selectedSeats.length * 100 // Usar el valor proporcionado o calcular un valor por defecto
         };
-        
-        console.log(`Realizando solicitud a: ${API_URL}tickets/purchase`);
-        console.log('Con datos:', requestBody);
-        
+                
         const response = await fetch(`${API_URL}tickets/purchase`, {
           method: 'POST',
           headers: {
@@ -258,7 +252,6 @@ export const useTicketsStore = defineStore('tickets', {
         }
         
         const data = await response.json();
-        console.log('Respuesta de confirmación:', data);
         
         // Verificar si se enviaron todos los correos electrónicos
         if (data.all_emails_sent === false) {
