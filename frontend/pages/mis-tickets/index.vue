@@ -252,11 +252,14 @@
             </div>
           </div>
           
-          <!-- QR Code (simulado) -->
+          <!-- QR Code real -->
           <div class="bg-white p-4 rounded-lg mb-6 w-52 h-52 flex items-center justify-center">
-            <div class="text-5xl text-gray-900">
-              <i class="fas fa-qrcode"></i>
-            </div>
+            <QRCode
+              :value="getTicketUrl(selectedTicket)"
+              :size="180"
+              level="H"
+              class="mx-auto"
+            />
           </div>
           
           <div class="text-center mb-2">
@@ -285,6 +288,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 import { useTicketsStore } from '~/stores/tickets';
 import { useRouter } from 'vue-router';
+import QRCode from 'qrcode.vue';
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -438,6 +442,17 @@ const formatPurchaseDate = (dateString) => {
   } catch (error) {
     return 'Fecha no disponible';
   }
+};
+
+// Genera una URL para el código QR que incluye la información del ticket
+const getTicketUrl = (ticket) => {
+  // URL base de la web - modificar según el dominio de producción
+  const baseUrl = window.location.origin;
+  
+  // Crear URL para ver detalles de ticket
+  const ticketUrl = `${baseUrl}/ticket/${ticket.id}?code=${ticket.ticket_code || 'TKT-' + ticket.id.toString().padStart(6, '0')}`;
+  
+  return ticketUrl;
 };
 
 // Define el middleware de autenticación

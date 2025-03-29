@@ -118,53 +118,6 @@
                     <p class="text-gray-400 text-xs mt-1">El email no puede ser modificado</p>
                   </div>
                 </div>
-                
-                <div class="border-t border-gray-700 pt-6">
-                  <h3 class="text-xl font-bold text-white mb-4">Cambiar contraseña</h3>
-                  
-                  <div class="space-y-4">
-                    <div>
-                      <label class="block text-gray-300 text-sm font-medium mb-2">Contraseña actual</label>
-                      <input 
-                        v-model="passwordData.current_password" 
-                        type="password" 
-                        class="w-full bg-navy-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
-                        placeholder="Ingresa tu contraseña actual"
-                      >
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label class="block text-gray-300 text-sm font-medium mb-2">Nueva contraseña</label>
-                        <input 
-                          v-model="passwordData.new_password" 
-                          type="password" 
-                          class="w-full bg-navy-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
-                          placeholder="Nueva contraseña"
-                        >
-                      </div>
-                      
-                      <div>
-                        <label class="block text-gray-300 text-sm font-medium mb-2">Confirmar nueva contraseña</label>
-                        <input 
-                          v-model="passwordData.new_password_confirmation" 
-                          type="password" 
-                          class="w-full bg-navy-900 border border-gray-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 focus:outline-none"
-                          placeholder="Confirma tu nueva contraseña"
-                        >
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div class="flex justify-end">
-                  <button 
-                    type="submit" 
-                    class="bg-blue-600 hover:bg-blue-500 text-white font-medium py-3 px-6 rounded-lg transition-colors flex items-center"
-                  >
-                    <i class="fas fa-save mr-2"></i> Guardar Cambios
-                  </button>
-                </div>
               </form>
             </div>
             
@@ -269,26 +222,6 @@
                     </div>
                   </div>
                   
-                  <!-- Pie con código y estado -->
-                  <div class="bg-navy-950 px-5 py-3 flex flex-col sm:flex-row sm:items-center justify-between">
-                    <div class="text-gray-400 text-sm mb-2 sm:mb-0">
-                      <span class="text-gray-500">Código:</span> 
-                      <span class="font-mono font-medium text-white">{{ ticket.ticket_code || ticket.code || ticket.confirmation_code }}</span>
-                    </div>
-                    
-                    <div class="text-gray-400 text-sm flex items-center">
-                      <span class="mr-2">Estado:</span>
-                      <span 
-                        :class="[
-                          'px-2 py-1 rounded text-xs font-medium',
-                          (ticket.status === 'active' || ticket.status === 'activo') ? 'bg-green-900/50 text-green-400' : 'bg-red-900/50 text-red-400'
-                        ]"
-                      >
-                        {{ (ticket.status === 'active' || ticket.status === 'activo') ? 'Activo' : (ticket.status === 'used' || ticket.status === 'usado' ? 'Usado' : ticket.status) }}
-                      </span>
-                    </div>
-                  </div>
-                  
                   <!-- Sección expandible con detalles del ticket -->
                   <div v-if="expandedTicketId === ticket.id" class="border-t border-gray-800 bg-navy-950/50 p-5">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -368,13 +301,16 @@
                           </p>
                         </div>
                         
-                        <!-- Código QR (simulado) -->
+                        <!-- Código QR real -->
                         <div class="mt-4 text-center md:text-left">
                           <h5 class="text-sm font-bold text-gray-300 mb-2">Código QR:</h5>
                           <div class="bg-white inline-block p-4 rounded-lg">
-                            <div class="w-32 h-32 mx-auto md:mx-0 flex items-center justify-center">
-                              <i class="fas fa-qrcode text-6xl text-navy-900"></i>
-                            </div>
+                            <QRCode
+                              :value="getTicketUrl(ticket)"
+                              :size="128"
+                              level="H"
+                              class="mx-auto md:mx-0"
+                            />
                           </div>
                           <p class="text-gray-400 text-xs mt-2">
                             Presenta este código en la entrada del cine
@@ -450,6 +386,7 @@ import { ref, onMounted, computed } from 'vue';
 import { useAuthStore } from '~/stores/auth';
 import { useTicketsStore } from '~/stores/tickets';
 import { useRouter, useRoute } from 'vue-router';
+import QRCode from 'qrcode.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -625,6 +562,17 @@ const formatDate = (dateString) => {
     console.error('Error al formatear fecha:', error);
     return 'Error en fecha';
   }
+};
+
+// Genera una URL para el código QR que incluye la información del ticket
+const getTicketUrl = (ticket) => {
+  // URL base de la web - modificar según el dominio de producción
+  const baseUrl = window.location.origin;
+  
+  // Crear URL para ver detalles de ticket
+  const ticketUrl = `${baseUrl}/ticket/${ticket.id}?code=${ticket.ticket_code || ticket.code || ticket.confirmation_code || 'TKT-' + ticket.id.toString().padStart(6, '0')}`;
+  
+  return ticketUrl;
 };
 
 // Define el middleware de autenticación
