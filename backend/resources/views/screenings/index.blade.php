@@ -35,6 +35,7 @@
                             <th scope="col">Fecha y Hora</th>
                             <th scope="col">Precio Base</th>
                             <th scope="col">Especial</th>
+                            <th scope="col">Estado</th>
                             <th scope="col" class="text-center">Acciones</th>
                         </tr>
                     </thead>
@@ -89,6 +90,17 @@
                                     <span class="badge bg-secondary">Normal</span>
                                 @endif
                             </td>
+                            <td data-label="Estado">
+                                @if($screening->active ?? true)
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle me-1"></i> Activa
+                                    </span>
+                                @else
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle me-1"></i> Inactiva
+                                    </span>
+                                @endif
+                            </td>
                             <td data-label="Acciones" class="text-center">
                                 <div class="btn-group" role="group">
                                     <a href="{{ route('screenings.show', $screening->id) }}" class="btn btn-info btn-sm" title="Ver detalles">
@@ -97,6 +109,13 @@
                                     <a href="{{ route('screenings.edit', $screening->id) }}" class="btn btn-primary btn-sm" title="Editar proyección">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    <form action="{{ route('screenings.toggle-active', $screening->id) }}" method="POST" style="display:inline">
+                                        @csrf
+                                        @method('PUT')
+                                        <button type="submit" class="btn btn-sm {{ ($screening->active ?? true) ? 'btn-warning' : 'btn-success' }}" title="{{ ($screening->active ?? true) ? 'Desactivar sesión' : 'Activar sesión' }}">
+                                            <i class="fas {{ ($screening->active ?? true) ? 'fa-toggle-on' : 'fa-toggle-off' }}"></i>
+                                        </button>
+                                    </form>
                                     <form action="{{ route('screenings.destroy', $screening->id) }}" method="POST" style="display:inline" onsubmit="return confirm('¿Estás seguro de querer eliminar esta proyección? Esta acción no se puede deshacer.');">
                                         @csrf
                                         @method('DELETE')

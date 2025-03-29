@@ -18,10 +18,17 @@ class ScreeningController extends Controller
      */
     public function index(Request $request)
     {
-        $screenings = Screening::with(['movie', 'auditorium'])
-            ->where('date_time', '>', Carbon::now())
-            ->orderBy('date_time')
-            ->get();
+        $query = Screening::with(['movie', 'auditorium']);
+        
+        // Para admins, mostrar todas las sesiones incluyendo inactivas y pasadas
+        $isAdmin = $request->user() && $request->user()->isAdmin();
+        
+        if (!$isAdmin) {
+            $query->where('date_time', '>', Carbon::now())
+                  ->where('active', true);
+        }
+        
+        $screenings = $query->orderBy('date_time')->get();
             
         // Si la solicitud es de API o comienza con /api/, devolver JSON
         if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
@@ -348,6 +355,31 @@ class ScreeningController extends Controller
         } else {
             return redirect()->route('screenings.index')
                 ->with('success', 'Sesión eliminada correctamente');
+        }
+    }
+    
+    /**
+     * Activa o desactiva una sesión
+     * Este método solo estaría disponible para administradores
+     */
+    public function toggleActive(Request $request, $id)
+    {
+        $screening = Screening::findOrFail($id);
+        
+        // Cambiar el estado de la sesión (activo/inactivo)
+        $screening->active = !$screening->active;
+        $screening->save();
+        
+        $statusText = $screening->active ? 'activada' : 'desactivada';
+        
+        if ($request->expectsJson() || strpos($request->path(), 'api/') === 0) {
+            return response()->json([
+                'message' => "Sesión {$statusText} correctamente",
+                'screening' => $screening
+            ]);
+        } else {
+            return redirect()->route('screenings.index')
+                ->with('success', "Sesión {$statusText} correctamente");
         }
     }
     

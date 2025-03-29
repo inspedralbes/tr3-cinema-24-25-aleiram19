@@ -224,7 +224,9 @@ export default {
         }
         
         const data = await response.json();
-        this.screenings = data;
+        
+        // Filtrar solo las sesiones activas
+        this.screenings = data.filter(screening => screening.active);
       } catch (error) {
         console.error('Error al cargar las sesiones:', error);
       } finally {

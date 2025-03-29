@@ -18,6 +18,7 @@ return new class extends Migration
             $table->dateTime('date_time');
             $table->decimal('price', 8, 2);
             $table->boolean('is_special')->default(false); // Marca de sesión especial
+            $table->boolean('active')->default(true); // Estado de la sesión (activa/inactiva)
             $table->timestamps();
         });
     }

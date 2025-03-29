@@ -256,11 +256,20 @@ class MovieController extends Controller
         try {
             $movie = Movie::findOrFail($id);
             
+            // Determinar si es una solicitud de administrador
+            $isAdmin = $request->user() && $request->user()->isAdmin();
+            
+            // Crear consulta base
+            $query = $movie->screenings()->with('auditorium');
+            
+            // Si no es admin, filtrar solo sesiones activas y futuras
+            if (!$isAdmin) {
+                $query->where('active', true)
+                      ->where('date_time', '>', now());
+            }
+            
             // Obtener las proyecciones con la información del auditorio
-            $screenings = $movie->screenings()
-                ->with('auditorium')
-                ->orderBy('date_time')
-                ->get();
+            $screenings = $query->orderBy('date_time')->get();
             
             return response()->json($screenings);
         } catch (\Exception $e) {

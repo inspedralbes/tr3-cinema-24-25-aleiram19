@@ -169,6 +169,25 @@ export const useScreeningsStore = defineStore('screenings', {
       } finally {
         this.loading = false;
       }
+    },
+    
+    // Solo para administradores - Activar/Desactivar sesión
+    async toggleScreeningActive(id) {
+      this.loading = true;
+      this.error = null;
+      
+      try {
+        const data = await this.apiCall('PUT', `screening/${id}/toggle-active`);
+        // Actualizar lista de proyecciones
+        await this.fetchScreenings();
+        return data;
+      } catch (error) {
+        this.error = error.message;
+        console.error('Error al cambiar el estado de la sesión:', error);
+        return null;
+      } finally {
+        this.loading = false;
+      }
     }
   }
 });

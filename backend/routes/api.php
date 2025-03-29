@@ -53,6 +53,7 @@ Route::prefix('screening')->group(function() {
     Route::post('/', [ScreeningController::class, 'store']);
     Route::put('/{id}', [ScreeningController::class, 'update']);
     Route::delete('/{id}', [ScreeningController::class, 'destroy']);
+    Route::put('/{id}/toggle-active', [ScreeningController::class, 'toggleActive']);
 });
 
 // Ruta para obtener screenings por fecha

@@ -132,5 +132,6 @@ Route::prefix('admin/screening')->group(function () {
     Route::get('/{id}/edit', [ScreeningController::class, 'edit'])->name('screenings.edit');
     Route::put('/{id}', [ScreeningController::class, 'update'])->name('screenings.update');
     Route::delete('/{id}', [ScreeningController::class, 'destroy'])->name('screenings.destroy');
+    Route::put('/{id}/toggle-active', [ScreeningController::class, 'toggleActive'])->name('screenings.toggle-active');
   });
 });

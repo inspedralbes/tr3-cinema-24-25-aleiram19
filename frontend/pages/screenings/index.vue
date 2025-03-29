@@ -150,10 +150,16 @@ export default {
       return this.moviesStore.movies;
     },
     
+    // Filtrar solo las sesiones activas
+    activeScreenings() {
+      return this.screenings.filter(screening => screening.active);
+    },
+    
     groupedScreenings() {
       const groups = {};
       
-      this.screenings.forEach(screening => {
+      // Usar activeScreenings en lugar de screenings
+      this.activeScreenings.forEach(screening => {
         const date = new Date(screening.date_time).toISOString().split('T')[0];
         if (!groups[date]) {
           groups[date] = [];

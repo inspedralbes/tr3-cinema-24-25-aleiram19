@@ -16,7 +16,8 @@ class Screening extends Model
         'auditorium_id',
         'date_time',
         'price',
-        'is_special'
+        'is_special',
+        'active'
     ];
 
     // Relación con película
