@@ -85,19 +85,23 @@
                   </div>
                 </div>
                 
-                <!-- Leyenda -->
-                <div class="seat-legend d-flex justify-content-center mt-4">
-                  <div class="me-4 d-flex align-items-center">
+                <!-- Leyenda mejorada con VIP -->
+                <div class="seat-legend d-flex flex-wrap justify-content-center gap-2 gap-md-3 mt-4">
+                  <div class="me-2 me-md-3 d-flex align-items-center">
                     <div class="seat-sample"></div>
-                    <span class="ms-2">Disponible</span>
+                    <span class="ms-2 small">Disponible</span>
                   </div>
-                  <div class="me-4 d-flex align-items-center">
+                  <div class="me-2 me-md-3 d-flex align-items-center">
+                    <div class="seat-sample seat-vip"></div>
+                    <span class="ms-2 small">VIP</span>
+                  </div>
+                  <div class="me-2 me-md-3 d-flex align-items-center">
                     <div class="seat-sample seat-occupied"></div>
-                    <span class="ms-2">Ocupado</span>
+                    <span class="ms-2 small">Ocupado</span>
                   </div>
                   <div class="d-flex align-items-center">
                     <div class="seat-sample seat-selected"></div>
-                    <span class="ms-2">Seleccionado</span>
+                    <span class="ms-2 small">Seleccionado</span>
                   </div>
                 </div>
               </div>
@@ -454,12 +458,20 @@ export default {
 }
 
 .seat-sample {
-  width: 20px;
-  height: 20px;
-  margin-right: 5px;
+  width: 16px;
+  height: 16px;
+  margin-right: 3px;
   border-radius: 3px;
   background-color: #e6e6e6;
   border: 1px solid #ccc;
+}
+
+@media (min-width: 576px) {
+  .seat-sample {
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+  }
 }
 
 .seat-legend {
