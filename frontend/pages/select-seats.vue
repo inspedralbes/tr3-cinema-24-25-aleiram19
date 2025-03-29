@@ -38,6 +38,10 @@
                   <i class="far fa-clock mr-1 sm:mr-2"></i>
                   <span>{{ movieInfo.time }}</span>
                 </div>
+                <div class="bg-green-500/30 text-green-100 px-2 sm:px-3 py-1 rounded-md inline-flex items-center text-xs sm:text-sm">
+                  <i class="fas fa-ticket-alt mr-1 sm:mr-2"></i>
+                  <span>{{ selectedSeats.length }}/10 asientos</span>
+                </div>
               </div>
             </div>
             <div class="text-right">
@@ -255,6 +259,16 @@ const toggleSeat = (rowKey, columnIdx) => {
   const index = selectedSeats.value.findIndex(s => s.id === seatId);
   
   if (index === -1) {
+    // Si ya hay 10 asientos seleccionados, mostrar error y no permitir seleccionar más
+    if (selectedSeats.value.length >= 10) {
+      // Podríamos mostrar un toast o alerta aquí
+      error.value = 'No puedes seleccionar más de 10 asientos por sesión';
+      setTimeout(() => {
+        error.value = null;
+      }, 5000); // Ocultar el mensaje después de 5 segundos
+      return;
+    }
+    
     // Añadir a la selección
     selectedSeats.value.push({
       id: seatId,
@@ -265,6 +279,10 @@ const toggleSeat = (rowKey, columnIdx) => {
   } else {
     // Remover de la selección
     selectedSeats.value.splice(index, 1);
+    // Si estábamos mostrando el error de límite de asientos, quitarlo
+    if (error.value && error.value.includes('10 asientos')) {
+      error.value = null;
+    }
   }
 };
 

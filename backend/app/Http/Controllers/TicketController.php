@@ -176,6 +176,21 @@ class TicketController extends Controller
     }
     
     /**
+     * Verifica si el usuario tiene entradas para otras sesiones futuras, excluyendo una sesión específica
+     */
+    private function userHasFutureTicketsExcept($userId, $currentScreeningId)
+    {
+        $futureTickets = Ticket::where('user_id', $userId)
+            ->where('screening_id', '!=', $currentScreeningId)
+            ->whereHas('screening', function($query) {
+                $query->where('date_time', '>', now());
+            })
+            ->count();
+            
+        return $futureTickets > 0;
+    }
+    
+    /**
      * Confirma el pago y finaliza la reserva
      */
     public function confirmTickets(Request $request)
@@ -488,6 +503,36 @@ class TicketController extends Controller
             
             // Obtener la sesión
             $screening = Screening::findOrFail($screeningId);
+            
+            // VALIDACIÓN 1: Verificar que el usuario no intente comprar más de 10 asientos en una sola operación
+            if (count($seats) > 10) {
+                return response()->json([
+                    'message' => 'No se pueden comprar más de 10 asientos por sesión'
+                ], 400);
+            }
+            
+            // VALIDACIÓN 2: Verificar que el usuario no exceda el límite de 10 entradas por sesión
+            $currentTicketCount = Ticket::where('user_id', $userId)
+                ->where('screening_id', $screeningId)
+                ->count();
+                
+            if ($currentTicketCount + count($seats) > 10) {
+                return response()->json([
+                    'message' => 'No se pueden tener más de 10 entradas por sesión. Ya tienes ' . $currentTicketCount . ' entradas.',
+                    'current_count' => $currentTicketCount,
+                    'attempted_purchase' => count($seats),
+                    'max_allowed' => 10,
+                    'remaining' => max(0, 10 - $currentTicketCount)
+                ], 400);
+            }
+            
+            // VALIDACIÓN 3: Verificar que el usuario no tenga entradas para otra sesión futura
+            $hasFutureTickets = $this->userHasFutureTicketsExcept($userId, $screeningId);
+            if ($hasFutureTickets) {
+                return response()->json([
+                    'message' => 'Ya tienes entradas para otra sesión futura. No puedes reservar entradas para múltiples sesiones futuras a la vez.'
+                ], 400);
+            }
             
             DB::beginTransaction();
             

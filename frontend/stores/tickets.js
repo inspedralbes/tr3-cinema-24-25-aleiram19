@@ -146,7 +146,13 @@ export const useTicketsStore = defineStore('tickets', {
       );
       
       if (index === -1) {
-        this.selectedSeats.push(seat);
+        // Verificar que no se exceda el límite de 10 asientos
+        if (this.selectedSeats.length < 10) {
+          this.selectedSeats.push(seat);
+        } else {
+          console.warn('No se pueden seleccionar más de 10 asientos por sesión');
+          // Aquí podríamos lanzar un error o utilizar una notificación
+        }
       }
     },
     
